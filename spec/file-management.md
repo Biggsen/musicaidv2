@@ -2,142 +2,191 @@
 
 ## Overview
 
-This document defines the file management system for the MusicAid application, focusing on audio files and images. The system uses S3-compatible storage for cost-effective file storage and management.
+This document defines the file management system for the MusicAid application, focusing on audio files and images. The system uses cloud object storage for cost-effective, scalable file storage and management.
 
 ## File Storage Architecture
 
-### S3-Compatible Storage
-- **Primary Storage**: S3-compatible storage for all file uploads (AWS S3, MinIO, Backblaze B2, etc.)
-- **CDN Integration**: CloudFront or similar for global distribution
-- **Cost Efficiency**: Pay-as-you-go pricing model
-- **Security**: Signed URLs for secure access
+### Cloud Object Storage
+- **Primary Storage**: S3-compatible object storage for all file uploads (AWS S3, Google Cloud Storage, Azure Blob Storage, MinIO, Backblaze B2, etc.)
+- **CDN Integration**: Content Delivery Network for global distribution and caching
+- **Cost Efficiency**: Pay-as-you-go pricing model with tiered storage options
+- **Security**: Signed URLs for secure access and time-limited downloads
+- **Redundancy**: Multi-zone replication for data durability
 
 ### File Organization Structure
 ```
 /audio/
-  /{artistId}/
-    /{trackId}/
+  /{artist_id}/
+    /{track_id}/
       /masters/
       /stems/
       /demos/
       /raw/
+      /archive/
 /images/
   /albums/
-    /{albumId}/
+    /{album_id}/
+      /artwork/
+      /thumbnails/
   /artists/
-    /{artistId}/
+    /{artist_id}/
+      /photos/
+      /logos/
   /avatars/
-    /{userId}/
+    /{user_id}/
+/temp/
+  /{upload_session_id}/
 ```
+
+### Storage Tiers
+- **Hot Storage**: Frequently accessed files (recent uploads, active projects)
+- **Cool Storage**: Infrequently accessed files (older projects, archived content)
+- **Archive Storage**: Long-term storage for completed projects (lowest cost)
 
 ## File Types and Limits
 
 ### Audio Files
 **Supported Formats**:
-- MP3 (up to 320kbps)
-- WAV (up to 96kHz/24-bit)
-- FLAC (lossless compression)
-- M4A/AAC (up to 320kbps)
+- **MP3**: Up to 320kbps CBR/VBR
+- **WAV**: Up to 192kHz/32-bit (48kHz/24-bit recommended)
+- **FLAC**: Lossless compression
+- **M4A/AAC**: Up to 320kbps
+- **OGG**: Vorbis and Opus codecs
+- **AIFF**: Apple's audio format
 
 **File Size Limits**:
-- **Maximum Size**: 100MB per file
-- **Recommended Size**: Under 50MB for optimal performance
-- **Total Storage**: Starts with 1GB free tier
+- **Maximum Size**: 500MB per file (configurable)
+- **Recommended Size**: Under 100MB for optimal performance
+- **Batch Upload**: Up to 2GB total per batch
+- **Total Storage**: Configurable per plan/user
 
 **Quality Guidelines**:
-- **Demo/Reference**: MP3 128-192kbps
-- **Working Files**: WAV 44.1kHz/16-bit
+- **Demo/Reference**: MP3 128-192kbps or AAC equivalent
+- **Working Files**: WAV 44.1kHz/16-bit minimum
 - **Master Files**: WAV 48kHz/24-bit or higher
+- **Archive Files**: FLAC for lossless compression
 
 ### Image Files
 **Supported Formats**:
-- JPEG (optimized for photos)
-- PNG (optimized for graphics with transparency)
-- WebP (modern format for web)
+- **JPEG**: Optimized for photographs and complex images
+- **PNG**: Optimized for graphics with transparency
+- **WebP**: Modern format with superior compression
+- **AVIF**: Next-generation format (where supported)
+- **SVG**: Vector graphics (with sanitization)
 
 **File Size Limits**:
-- **Maximum Size**: 10MB per file
-- **Recommended Size**: Under 2MB
-- **Dimensions**: Up to 4096x4096 pixels
+- **Maximum Size**: 25MB per file
+- **Recommended Size**: Under 5MB
+- **Dimensions**: Up to 8192x8192 pixels
+- **Thumbnail Generation**: Automatic for images > 1MB
 
 **Use Cases**:
-- Album artwork (1400x1400px recommended)
-- Artist photos
-- User avatars (400x400px recommended)
+- **Album Artwork**: 1400x1400px minimum, square aspect ratio
+- **Artist Photos**: Various aspect ratios, minimum 800px width
+- **User Avatars**: 400x400px recommended, square aspect ratio
+- **Thumbnails**: Auto-generated in multiple sizes (150px, 300px, 600px)
 
 ## File Upload System
 
+### Upload Architecture
+**Upload Methods**:
+- **Direct Upload**: Client uploads directly to object storage using signed URLs
+- **Chunked Upload**: Large files uploaded in chunks for reliability
+- **Resume Upload**: Interrupted uploads can be resumed
+- **Background Processing**: Post-upload processing for optimization
+
 ### Upload Flow
-1. **Client-side validation** of file type and size
-2. **Generate signed upload URL** from S3-compatible storage
-3. **Direct upload** to file storage
-4. **Create database record** with file metadata
-5. **Process file** (if needed) for optimization
-6. **Update UI** with upload status
+1. **Client Request**: Request upload permission with file metadata
+2. **Server Validation**: Validate file type, size, and user permissions
+3. **Signed URL Generation**: Generate time-limited upload URL
+4. **Direct Upload**: Client uploads directly to object storage
+5. **Upload Completion**: Notify server of successful upload
+6. **Database Record**: Create file record with metadata
+7. **Post-Processing**: Process file (if needed) for optimization
+8. **Notification**: Update client with final file information
 
 ### Upload API Endpoints
 
-#### POST /api/upload/audio
-Upload audio file for a track.
+#### POST /api/upload/initialize
+Initialize file upload and get signed URL.
 
 **Request**:
-```typescript
-interface AudioUploadRequest {
-  trackId: string;
-  name: string;
-  description?: string;
-  category: 'master' | 'stem' | 'demo' | 'raw';
-  file: File;
+```json
+{
+  "file_name": "final_mix_v2.wav",
+  "file_size": 45678900,
+  "content_type": "audio/wav",
+  "entity_type": "track",
+  "entity_id": "track_123",
+  "category": "master",
+  "description": "Final mix version 2"
 }
 ```
 
 **Response**:
-```typescript
-interface AudioUploadResponse {
-  success: true;
-  data: {
-    id: string;
-    name: string;
-    fileUrl: string;
-    downloadUrl: string;
-    size: number;
-    duration?: number; // in seconds
-    format: string;
-    category: string;
-  };
+```json
+{
+  "success": true,
+  "data": {
+    "upload_id": "upload_456",
+    "upload_url": "https://storage.example.com/...",
+    "upload_fields": {
+      "key": "audio/artist_123/track_123/masters/final_mix_v2.wav",
+      "policy": "...",
+      "signature": "..."
+    },
+    "expires_at": "2024-01-01T01:00:00Z"
+  }
 }
 ```
 
-#### POST /api/upload/image
-Upload image file (album artwork, artist photos).
+#### POST /api/upload/complete
+Complete file upload and create database record.
 
 **Request**:
-```typescript
-interface ImageUploadRequest {
-  entityType: 'album' | 'artist' | 'user';
-  entityId: string;
-  file: File;
-  cropData?: {
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-  };
+```json
+{
+  "upload_id": "upload_456",
+  "file_key": "audio/artist_123/track_123/masters/final_mix_v2.wav",
+  "file_size": 45678900,
+  "etag": "d41d8cd98f00b204e9800998ecf8427e"
 }
 ```
 
 **Response**:
-```typescript
-interface ImageUploadResponse {
-  success: true;
-  data: {
-    id: string;
-    fileUrl: string;
-    thumbnailUrl: string;
-    width: number;
-    height: number;
-    size: number;
-  };
+```json
+{
+  "success": true,
+  "data": {
+    "id": "audio_789",
+    "name": "Final Mix v2",
+    "file_url": "https://cdn.example.com/audio/...",
+    "download_url": "https://api.example.com/api/files/audio_789/download",
+    "metadata": {
+      "size": 45678900,
+      "duration": 187.5,
+      "format": "wav",
+      "bitrate": 1536,
+      "sample_rate": 48000,
+      "channels": 2
+    },
+    "created_at": "2024-01-01T00:00:00Z"
+  }
+}
+```
+
+#### POST /api/upload/multipart/initialize
+Initialize multipart upload for large files.
+
+**Request**:
+```json
+{
+  "file_name": "large_session.wav",
+  "file_size": 524288000,
+  "content_type": "audio/wav",
+  "entity_type": "track",
+  "entity_id": "track_123",
+  "part_size": 10485760
 }
 ```
 
@@ -148,502 +197,369 @@ interface ImageUploadResponse {
 interface AudioMetadata {
   duration: number; // seconds
   bitrate: number; // kbps
-  sampleRate: number; // Hz
+  sample_rate: number; // Hz
   channels: number; // 1 = mono, 2 = stereo
   format: string; // 'mp3', 'wav', 'flac'
   size: number; // bytes
+  codec?: string; // specific codec information
+  bit_depth?: number; // for uncompressed formats
 }
 ```
 
-**Processing Steps**:
-1. Extract metadata using Web Audio API or server-side tools
-2. Generate waveform visualization data
-3. Create compressed preview version (if needed)
-4. Store metadata in database
+**Processing Pipeline**:
+1. **Metadata Extraction**: Extract audio properties using audio processing libraries
+2. **Waveform Generation**: Generate visual waveform data for UI display
+3. **Thumbnail Creation**: Generate spectrogram images for audio visualization
+4. **Format Conversion**: Optional conversion to standardized formats
+5. **Compression**: Create compressed versions for streaming/previews
+6. **Validation**: Verify file integrity and format compliance
 
 #### Image Processing
 ```typescript
 interface ImageMetadata {
   width: number;
   height: number;
-  format: string;
-  size: number;
-  aspectRatio: number;
+  format: string; // 'jpeg', 'png', 'webp'
+  size: number; // bytes
+  aspect_ratio: number;
+  color_space?: string;
+  dpi?: number;
+  has_transparency?: boolean;
 }
 ```
 
-**Processing Steps**:
-1. Extract image metadata
-2. Generate thumbnails (multiple sizes)
-3. Optimize for web (compression, format conversion)
-4. Store metadata in database
+**Processing Pipeline**:
+1. **Metadata Extraction**: Extract image properties and EXIF data
+2. **Thumbnail Generation**: Create multiple sizes (150px, 300px, 600px, 1200px)
+3. **Format Optimization**: Convert to modern formats (WebP, AVIF) where supported
+4. **Compression**: Optimize file size while maintaining quality
+5. **Watermarking**: Optional watermarking for copyright protection
+6. **Validation**: Verify image integrity and scan for malicious content
 
 ## Database Schema
 
-### Audio Files
-```prisma
-model Audio {
-  id          String    @id @default(cuid())
-  name        String
-  slug        String    @unique
-  fileUrl     String    // S3-compatible storage URL
-  downloadUrl String?   // Signed download URL
-  track       Track     @relation(fields: [trackId], references: [id])
-  trackId     String
+### File Storage Models
+```typescript
+interface AudioFile {
+  id: string;
+  name: string;
+  slug: string;
+  track_id: string;
+  
+  // Storage information
+  file_key: string; // Object storage key
+  file_url: string; // CDN URL
+  download_url: string; // Signed download URL
   
   // File metadata
-  size        Int       // bytes
-  format      String    // 'mp3', 'wav', 'flac'
-  duration    Float?    // seconds
-  bitrate     Int?      // kbps
-  sampleRate  Int?      // Hz
-  channels    Int?      // 1 = mono, 2 = stereo
-  category    AudioCategory @default(DEMO)
+  size: number; // bytes
+  format: string; // 'mp3', 'wav', 'flac'
+  duration?: number; // seconds
+  bitrate?: number; // kbps
+  sample_rate?: number; // Hz
+  channels?: number; // 1 = mono, 2 = stereo
+  bit_depth?: number; // for uncompressed formats
+  
+  // Organization
+  category: 'master' | 'stem' | 'demo' | 'raw' | 'archive';
+  description?: string;
   
   // Processing status
-  status      ProcessingStatus @default(PENDING)
-  waveformData String?  // JSON array of waveform points
+  processing_status: 'pending' | 'processing' | 'completed' | 'failed';
+  processing_error?: string;
   
-  // Metadata
-  description String?
-  mixdownDate DateTime?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  createdBy   String?
-  updatedBy   String?
-
-  @@map("audios")
+  // Audit fields
+  created_at: Date;
+  updated_at: Date;
+  created_by: string;
+  updated_by?: string;
 }
 
-enum AudioCategory {
-  MASTER
-  STEM
-  DEMO
-  RAW
-}
-
-enum ProcessingStatus {
-  PENDING
-  PROCESSING
-  COMPLETED
-  FAILED
-}
-```
-
-### Image Files
-```prisma
-model Image {
-  id          String    @id @default(cuid())
-  fileUrl     String    // Original image URL
-  thumbnailUrl String?  // Thumbnail URL
+interface ImageFile {
+  id: string;
+  name: string;
+  entity_type: 'album' | 'artist' | 'user';
+  entity_id: string;
   
-  // Relationships (polymorphic)
-  entityType  String    // 'album', 'artist', 'user'
-  entityId    String    // ID of the related entity
+  // Storage information
+  file_key: string;
+  file_url: string;
+  thumbnail_urls: {
+    small: string;
+    medium: string;
+    large: string;
+  };
   
   // File metadata
-  filename    String
-  size        Int       // bytes
-  width       Int       // pixels
-  height      Int       // pixels
-  format      String    // 'jpeg', 'png', 'webp'
-  aspectRatio Float
+  size: number;
+  format: string;
+  width: number;
+  height: number;
+  aspect_ratio: number;
   
   // Processing status
-  status      ProcessingStatus @default(PENDING)
+  processing_status: 'pending' | 'processing' | 'completed' | 'failed';
+  processing_error?: string;
   
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  // Audit fields
+  created_at: Date;
+  updated_at: Date;
+  created_by: string;
+}
 
-  @@map("images")
-  @@index([entityType, entityId])
+interface FileUpload {
+  id: string;
+  upload_key: string;
+  file_name: string;
+  file_size: number;
+  content_type: string;
+  
+  // Upload status
+  status: 'initialized' | 'uploading' | 'completed' | 'failed' | 'expired';
+  upload_url?: string;
+  expires_at: Date;
+  
+  // Progress tracking
+  bytes_uploaded: number;
+  chunks_completed?: number;
+  total_chunks?: number;
+  
+  // Error information
+  error_message?: string;
+  error_code?: string;
+  
+  // Associated entity
+  entity_type: string;
+  entity_id: string;
+  
+  // Audit fields
+  created_at: Date;
+  updated_at: Date;
+  created_by: string;
 }
 ```
 
 ## File Access and Security
 
 ### Access Control
-- **Authentication Required**: All file access requires valid session
-- **Permission-Based**: Users can only access files for artists they have access to
-- **Signed URLs**: Time-limited URLs for secure access
-- **Rate Limiting**: Upload and download rate limits
+**Permission-Based Access**:
+- Files inherit permissions from parent entities (track, album, artist)
+- Users can only access files for artists they collaborate with
+- Role-based permissions for different file operations
 
-### URL Generation
-```typescript
-// lib/fileAccess.ts
-export async function generateSignedUrl(
-  fileId: string,
-  userId: string,
-  expiresIn: number = 3600 // 1 hour
-): Promise<string> {
-  // 1. Verify user has access to the file
-  const file = await verifyFileAccess(fileId, userId);
-  
-  // 2. Generate signed URL from S3-compatible storage
-  const signedUrl = await generateSignedUrl(file.fileUrl, expiresIn);
-  
-  return signedUrl;
-}
+**File Operations**:
+- **Read**: View file metadata and generate download URLs
+- **Upload**: Add new files to entities user has access to
+- **Delete**: Remove files (usually restricted to owners)
+- **Update**: Modify file metadata and descriptions
 
-export async function verifyFileAccess(
-  fileId: string,
-  userId: string
-): Promise<Audio | Image> {
-  // Check if user has access to the artist/track associated with the file
-  const file = await db.audio.findUnique({
-    where: { id: fileId },
-    include: {
-      track: {
-        include: {
-          artist: {
-            include: {
-              users: true
-            }
-          }
-        }
-      }
-    }
-  });
-  
-  if (!file) {
-    throw new Error('File not found');
-  }
-  
-  const hasAccess = file.track.artist.users.some(u => u.id === userId);
-  if (!hasAccess) {
-    throw new Error('Access denied');
-  }
-  
-  return file;
-}
-```
+### Signed URLs
+**Download URLs**:
+- Time-limited signed URLs for secure downloads
+- Configurable expiration (1 hour default, up to 7 days)
+- IP-based restrictions (optional)
+- Single-use URLs for sensitive content
 
-## Frontend Components
+**Upload URLs**:
+- Pre-signed URLs for direct-to-storage uploads
+- Short expiration (15 minutes default)
+- Size and content-type restrictions
+- Callback URL for completion notification
 
-### AudioUpload Component
-```tsx
-interface AudioUploadProps {
-  trackId: string;
-  category: AudioCategory;
-  onUpload: (audio: Audio) => void;
-  onError: (error: string) => void;
-  maxSize?: number; // MB
-  acceptedFormats?: string[];
-}
+### Security Measures
+**File Validation**:
+- Content-type verification
+- File signature validation
+- Malware scanning for uploaded files
+- Size and format restrictions
 
-export const AudioUpload: React.FC<AudioUploadProps> = ({
-  trackId,
-  category,
-  onUpload,
-  onError,
-  maxSize = 100,
-  acceptedFormats = ['audio/mp3', 'audio/wav', 'audio/flac', 'audio/m4a']
-}) => {
-  const [uploading, setUploading] = useState(false);
-  const [progress, setProgress] = useState(0);
-  
-  const handleFileSelect = async (file: File) => {
-    // Validate file
-    if (!acceptedFormats.includes(file.type)) {
-      onError('Unsupported file format');
-      return;
-    }
-    
-    if (file.size > maxSize * 1024 * 1024) {
-      onError(`File too large. Maximum size is ${maxSize}MB`);
-      return;
-    }
-    
-    // Upload file
-    setUploading(true);
-    try {
-      const result = await uploadAudioFile(file, trackId, category, setProgress);
-      onUpload(result);
-    } catch (error) {
-      onError(error.message);
-    } finally {
-      setUploading(false);
-      setProgress(0);
-    }
-  };
-  
-  return (
-    <div className="border-2 border-dashed border-gray-300 rounded-lg p-6">
-      {uploading ? (
-        <div className="text-center">
-          <div className="mb-2">Uploading...</div>
-          <div className="w-full bg-gray-200 rounded-full h-2">
-            <div 
-              className="bg-blue-600 h-2 rounded-full transition-all"
-              style={{ width: `${progress}%` }}
-            />
-          </div>
-        </div>
-      ) : (
-        <div className="text-center">
-          <input
-            type="file"
-            accept={acceptedFormats.join(',')}
-            onChange={(e) => e.target.files?.[0] && handleFileSelect(e.target.files[0])}
-            className="hidden"
-            id="audio-upload"
-          />
-          <label htmlFor="audio-upload" className="cursor-pointer">
-            <div className="text-gray-600 mb-2">
-              Click to upload or drag and drop
-            </div>
-            <div className="text-sm text-gray-500">
-              {acceptedFormats.map(f => f.split('/')[1]).join(', ')} up to {maxSize}MB
-            </div>
-          </label>
-        </div>
-      )}
-    </div>
-  );
-};
-```
-
-### AudioPlayer Component
-```tsx
-interface AudioPlayerProps {
-  audio: Audio;
-  autoPlay?: boolean;
-  showWaveform?: boolean;
-  onPlay?: () => void;
-  onPause?: () => void;
-  onEnded?: () => void;
-}
-
-export const AudioPlayer: React.FC<AudioPlayerProps> = ({
-  audio,
-  autoPlay = false,
-  showWaveform = true,
-  onPlay,
-  onPause,
-  onEnded
-}) => {
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(audio.duration || 0);
-  const audioRef = useRef<HTMLAudioElement>(null);
-  
-  // Audio player implementation
-  return (
-    <div className="bg-white rounded-lg shadow p-4">
-      <div className="flex items-center justify-between mb-4">
-        <div>
-          <h3 className="font-medium">{audio.name}</h3>
-          <div className="text-sm text-gray-500">
-            {audio.format.toUpperCase()} • {formatFileSize(audio.size)} • {formatDuration(duration)}
-          </div>
-        </div>
-        <div className="flex items-center space-x-2">
-          <button
-            onClick={isPlaying ? pause : play}
-            className="bg-blue-600 text-white rounded-full p-2 hover:bg-blue-700"
-          >
-            {isPlaying ? <PauseIcon /> : <PlayIcon />}
-          </button>
-          <a
-            href={audio.downloadUrl}
-            download={audio.name}
-            className="text-gray-600 hover:text-gray-800"
-          >
-            <DownloadIcon />
-          </a>
-        </div>
-      </div>
-      
-      {showWaveform && audio.waveformData && (
-        <Waveform
-          data={JSON.parse(audio.waveformData)}
-          currentTime={currentTime}
-          duration={duration}
-          onSeek={seekTo}
-        />
-      )}
-      
-      <audio
-        ref={audioRef}
-        src={audio.fileUrl}
-        onPlay={() => { setIsPlaying(true); onPlay?.(); }}
-        onPause={() => { setIsPlaying(false); onPause?.(); }}
-        onEnded={() => { setIsPlaying(false); onEnded?.(); }}
-        onTimeUpdate={(e) => setCurrentTime(e.currentTarget.currentTime)}
-        onLoadedMetadata={(e) => setDuration(e.currentTarget.duration)}
-      />
-    </div>
-  );
-};
-```
-
-### ImageUpload Component
-```tsx
-interface ImageUploadProps {
-  entityType: 'album' | 'artist' | 'user';
-  entityId: string;
-  currentImage?: string;
-  aspectRatio?: number; // width/height ratio
-  onUpload: (imageUrl: string) => void;
-  onError: (error: string) => void;
-}
-
-export const ImageUpload: React.FC<ImageUploadProps> = ({
-  entityType,
-  entityId,
-  currentImage,
-  aspectRatio,
-  onUpload,
-  onError
-}) => {
-  const [uploading, setUploading] = useState(false);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(currentImage || null);
-  
-  const handleFileSelect = async (file: File) => {
-    // Validate and upload image
-    // Implementation similar to AudioUpload
-  };
-  
-  return (
-    <div className="space-y-4">
-      {previewUrl && (
-        <div className="relative">
-          <img
-            src={previewUrl}
-            alt="Preview"
-            className="w-full h-48 object-cover rounded-lg"
-            style={{ aspectRatio }}
-          />
-          <button
-            onClick={() => setPreviewUrl(null)}
-            className="absolute top-2 right-2 bg-red-600 text-white rounded-full p-1"
-          >
-            <XIcon className="w-4 h-4" />
-          </button>
-        </div>
-      )}
-      
-      <input
-        type="file"
-        accept="image/jpeg,image/png,image/webp"
-        onChange={(e) => e.target.files?.[0] && handleFileSelect(e.target.files[0])}
-        className="hidden"
-        id="image-upload"
-      />
-      <label
-        htmlFor="image-upload"
-        className="block w-full text-center py-4 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-gray-400"
-      >
-        {uploading ? 'Uploading...' : 'Choose Image'}
-      </label>
-    </div>
-  );
-};
-```
-
-## File Management API
-
-### File Listing
-```typescript
-// GET /api/files/audio?trackId={trackId}
-export async function getTrackAudio(trackId: string, userId: string) {
-  // Verify access and return audio files
-  const files = await db.audio.findMany({
-    where: {
-      trackId,
-      track: {
-        artist: {
-          users: {
-            some: { id: userId }
-          }
-        }
-      }
-    },
-    orderBy: { createdAt: 'desc' }
-  });
-  
-  return files;
-}
-```
-
-### File Deletion
-```typescript
-// DELETE /api/files/audio/{id}
-export async function deleteAudioFile(fileId: string, userId: string) {
-  // 1. Verify access
-  const file = await verifyFileAccess(fileId, userId);
-  
-  // 2. Delete from file storage
-  await deleteFile(file.fileUrl);
-  
-  // 3. Delete from database
-  await db.audio.delete({
-    where: { id: fileId }
-  });
-}
-```
-
-## Error Handling
-
-### Upload Errors
-- **File too large**: Exceed size limits
-- **Unsupported format**: Invalid file type
-- **Upload failed**: Network or storage errors
-- **Processing failed**: Metadata extraction errors
-
-### Access Errors
-- **File not found**: Invalid file ID
-- **Access denied**: Insufficient permissions
-- **Expired URL**: Signed URL has expired
+**Access Logging**:
+- Log all file access and modifications
+- Track download patterns and unusual activity
+- Audit trail for file deletions
+- Integration with security monitoring systems
 
 ## Performance Optimization
 
 ### Caching Strategy
-- **CDN Caching**: CloudFront or similar CDN for global distribution
-- **Browser Caching**: Appropriate cache headers
-- **Metadata Caching**: Cache file metadata in database
+**CDN Caching**:
+- Static files cached at edge locations globally
+- Cache headers for optimal browser caching
+- Automatic cache invalidation on file updates
+- Separate cache policies for different file types
 
-### Lazy Loading
-- **Progressive Loading**: Load files as needed
-- **Thumbnail Generation**: Small previews for quick loading
-- **Streaming**: Stream large audio files
+**Application Caching**:
+- File metadata cached in application layer
+- Signed URL caching with automatic refresh
+- Thumbnail URLs cached for quick access
+- Search index caching for file discovery
 
-## Monitoring and Analytics
+### Optimization Techniques
+**Lazy Loading**:
+- Load audio/image files only when needed
+- Progressive loading for large files
+- Thumbnail previews before full resolution
+- Streaming for audio playback
 
-### File Usage Tracking
-- Upload/download statistics
-- Storage usage monitoring
-- Performance metrics
-- Error rate tracking
+**Compression**:
+- Automatic compression for supported formats
+- Multiple quality levels for different use cases
+- Modern format support (WebP, AVIF, Opus)
+- Lossless compression for archival storage
 
-### Cost Optimization
-- Regular cleanup of unused files
-- Compression optimization
-- Usage-based storage management
-- Cost alerts and limits
+## File Management API
 
-## Implementation Checklist
+### File Operations
 
-### Phase 1: Basic File Upload
-- [ ] Set up S3-compatible storage
-- [ ] Implement audio upload endpoint
-- [ ] Create file database schema
-- [ ] Build upload UI components
+#### GET /api/files/audio/{id}
+Get audio file metadata and download URL.
 
-### Phase 2: File Processing
-- [ ] Add metadata extraction
-- [ ] Implement image processing
-- [ ] Create thumbnail generation
-- [ ] Add waveform generation
+**Response**:
+```json
+{
+  "success": true,
+  "data": {
+    "id": "audio_123",
+    "name": "Final Mix",
+    "track": {
+      "id": "track_456",
+      "name": "Song Title"
+    },
+    "metadata": {
+      "size": 45678900,
+      "duration": 187.5,
+      "format": "wav",
+      "bitrate": 1536,
+      "sample_rate": 48000,
+      "channels": 2
+    },
+    "download_url": "https://storage.example.com/...",
+    "waveform_url": "https://cdn.example.com/waveforms/...",
+    "created_at": "2024-01-01T00:00:00Z"
+  }
+}
+```
 
-### Phase 3: Access Control
-- [ ] Implement permission checking
-- [ ] Add signed URL generation
-- [ ] Create file access API
-- [ ] Add download tracking
+#### DELETE /api/files/audio/{id}
+Delete audio file and remove from storage.
 
-### Phase 4: Optimization
-- [ ] Add file compression
-- [ ] Implement caching
-- [ ] Add monitoring
-- [ ] Optimize performance 
+#### PUT /api/files/audio/{id}
+Update audio file metadata.
+
+**Request**:
+```json
+{
+  "name": "Updated Mix Name",
+  "description": "Updated description",
+  "category": "master"
+}
+```
+
+#### GET /api/files/images/{id}
+Get image file metadata and URLs.
+
+#### POST /api/files/batch-delete
+Delete multiple files in a single operation.
+
+**Request**:
+```json
+{
+  "file_ids": ["audio_123", "audio_456", "image_789"],
+  "confirm": true
+}
+```
+
+### File Search and Discovery
+
+#### GET /api/files/search
+Search for files across all accessible entities.
+
+**Query Parameters**:
+- `q`: Search query (file names, descriptions)
+- `type`: File type filter ('audio', 'image')
+- `format`: File format filter ('mp3', 'wav', 'jpeg', etc.)
+- `entity_type`: Entity type filter ('track', 'album', 'artist')
+- `entity_id`: Specific entity ID
+- `date_from`: Files created after date
+- `date_to`: Files created before date
+- `size_min`: Minimum file size
+- `size_max`: Maximum file size
+- `page`: Page number
+- `limit`: Results per page
+
+## Storage Management
+
+### Cleanup and Maintenance
+**Automated Cleanup**:
+- Remove expired upload sessions
+- Clean up temporary files
+- Archive old files to cheaper storage tiers
+- Remove orphaned files without database records
+
+**Storage Monitoring**:
+- Track storage usage per user/artist
+- Monitor upload/download patterns
+- Alert on unusual storage consumption
+- Generate storage usage reports
+
+### Backup and Recovery
+**Backup Strategy**:
+- Cross-region replication for critical files
+- Regular backup verification
+- Point-in-time recovery capabilities
+- Automated backup testing
+
+**Disaster Recovery**:
+- Multi-region storage setup
+- Recovery time objectives (RTO) planning
+- Data integrity verification
+- Failover procedures documentation
+
+## Implementation Guidelines
+
+### Framework Considerations
+**Backend Implementation**:
+- Use cloud SDK for object storage operations
+- Implement async processing for file operations
+- Use job queues for background processing
+- Implement retry logic for failed operations
+
+**Frontend Implementation**:
+- Use direct-to-storage uploads to reduce server load
+- Implement progress indicators for uploads
+- Support drag-and-drop file uploads
+- Provide file preview capabilities
+
+### Error Handling
+**Upload Errors**:
+- Network interruption recovery
+- File size limit exceeded
+- Invalid file format
+- Permission denied
+
+**Processing Errors**:
+- Corrupted file handling
+- Unsupported format errors
+- Processing timeout
+- Insufficient storage space
+
+### Testing Strategy
+**Unit Tests**:
+- File validation functions
+- Metadata extraction
+- Permission checking
+- URL generation
+
+**Integration Tests**:
+- File upload workflows
+- Processing pipelines
+- Storage operations
+- API endpoints
+
+**Performance Tests**:
+- Large file uploads
+- Concurrent upload handling
+- CDN performance
+- Database query optimization
+
+This specification provides a comprehensive, technology-agnostic approach to file management that can be implemented using any cloud storage provider and backend framework while ensuring security, performance, and scalability. 

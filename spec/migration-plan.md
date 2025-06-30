@@ -2,14 +2,14 @@
 
 ## Overview
 
-This document outlines the complete migration plan for rebuilding the MusicAid application from the existing Keystone.js system to a modern Next.js application hosted on a cloud platform. The migration is designed to be systematic, testable, and minimize downtime.
+This document outlines the complete migration plan for rebuilding the MusicAid application from the existing Keystone.js system to a modern web application hosted on cloud platforms. The migration is designed to be systematic, testable, and minimize downtime.
 
 ## Migration Strategy
 
 ### Approach: Complete Rebuild with Data Migration
-- **New Application**: Build entirely new application using modern stack
+- **New Application**: Build entirely new application using modern web stack
 - **Data Export**: Extract data from existing Keystone.js/MongoDB system
-- **Data Import**: Import and transform data into new PostgreSQL schema
+- **Data Import**: Import and transform data into new relational database schema
 - **Parallel Development**: Build new features while maintaining old system
 - **Cutover**: Switch from old to new system when ready
 
@@ -23,62 +23,100 @@ This document outlines the complete migration plan for rebuilding the MusicAid a
 
 ## Phase 1: Foundation Setup (2-3 weeks)
 
-### Week 1: Project Setup and Infrastructure
+### Week 1: Technology Selection and Setup
 
-#### Day 1-2: Environment Setup
+#### Day 1-2: Technology Stack Decision
+**Frontend Framework Options**:
+- **React**: Mature ecosystem, extensive community, excellent tooling
+- **Vue.js**: Progressive framework, gentle learning curve, great documentation  
+- **Angular**: Full framework, TypeScript-first, enterprise-ready
+- **Svelte**: Compiled approach, small bundle sizes, modern design
+
+**Backend Framework Options**:
+- **Node.js**: Express, Fastify, Koa, or NestJS
+- **Python**: Django, FastAPI, or Flask
+- **TypeScript/Node**: Express with TypeScript, tRPC
+- **Go**: Gin, Echo, or Fiber
+- **C#**: ASP.NET Core
+- **Java**: Spring Boot
+- **Ruby**: Ruby on Rails
+
+**Database Selection**:
+- **PostgreSQL**: Recommended for relational data with JSON support
+- **MySQL**: Alternative relational database
+- **SQLite**: For development and small deployments
+
+#### Day 3-4: Project Initialization
 ```bash
-# 1. Create new Next.js project
-npx create-next-app@latest musicaid-v2 --typescript --tailwind --app
-
-# 2. Set up development environment
+# Example for a typical web application setup
+# Create project structure
+mkdir musicaid-v2
 cd musicaid-v2
-npm install @prisma/client prisma
-npm install next-auth
-npm install @aws-sdk/client-s3
-npm install zod
-npm install @radix-ui/react-dialog @radix-ui/react-dropdown-menu
-npm install lucide-react
+
+# Initialize version control
+git init
+git remote add origin <repository-url>
+
+# Set up development environment
+npm init -y  # or equivalent for chosen stack
+# OR
+pip install -r requirements.txt  # Python
+# OR  
+go mod init musicaid  # Go
 ```
 
-#### Day 3-4: Database Setup
-- [ ] Set up PostgreSQL database
-- [ ] Create Prisma schema based on specification
-- [ ] Run initial migration
+#### Day 5-7: Database and Environment Setup
+- [ ] Set up development database (PostgreSQL recommended)
+- [ ] Create database schema based on specification
+- [ ] Run initial migration scripts
 - [ ] Set up database seeding for development
+- [ ] Configure environment variables
 
 ```bash
-# Initialize Prisma
-npx prisma init
+# Database setup examples
+# PostgreSQL
+createdb musicaid_dev
+psql musicaid_dev < schema.sql
 
-# Create and run migrations
+# Or using migration tools
+# Prisma (Node.js)
 npx prisma migrate dev --name init
 
-# Generate Prisma client
-npx prisma generate
+# Django (Python)
+python manage.py migrate
+
+# Flyway (Java)
+flyway migrate
 ```
 
-#### Day 5-7: Authentication System
-- [ ] Configure NextAuth.js
+### Week 2: Core Architecture
+
+#### Day 8-10: Authentication System
+- [ ] Configure authentication framework
 - [ ] Implement user registration/login
 - [ ] Set up session management
 - [ ] Create authentication middleware
 - [ ] Build login/register pages
 
-### Week 2: Core Architecture
+**Framework-Specific Examples**:
+```bash
+# Express.js with Passport
+npm install passport passport-local express-session
 
-#### Day 8-10: API Foundation
+# Django with built-in auth
+# Already included in Django
+
+# ASP.NET Core Identity
+dotnet add package Microsoft.AspNetCore.Identity.EntityFrameworkCore
+```
+
+#### Day 11-14: API Foundation and Basic UI
 - [ ] Set up API route structure
 - [ ] Implement error handling middleware
-- [ ] Create validation schemas with Zod
+- [ ] Create validation schemas
 - [ ] Set up database connection utilities
 - [ ] Implement permission checking functions
-
-#### Day 11-14: Basic UI Components
-- [ ] Set up Tailwind CSS configuration
-- [ ] Install and configure Shadcn/ui
-- [ ] Create layout components (Header, Sidebar, etc.)
-- [ ] Build form components
-- [ ] Create loading and error states
+- [ ] Build basic UI components and layouts
 
 ## Phase 2: Core Features (3-4 weeks)
 
@@ -90,6 +128,21 @@ npx prisma generate
 - [ ] Build artist listing page
 - [ ] Create artist detail page
 - [ ] Add artist search and filtering
+
+**Implementation Examples**:
+```typescript
+// Express.js/Node.js example
+app.post('/api/artists', authenticateUser, async (req, res) => {
+  const { name, templateId } = req.body;
+  // Validation and creation logic
+});
+
+// Django example
+class ArtistViewSet(ModelViewSet):
+    queryset = Artist.objects.all()
+    serializer_class = ArtistSerializer
+    permission_classes = [IsAuthenticated]
+```
 
 #### Day 18-21: User-Artist Relationships
 - [ ] Implement user invitation system
@@ -135,11 +188,24 @@ npx prisma generate
 ### Week 6: File Management
 
 #### Day 36-38: File Upload System
-- [ ] Set up S3-compatible file storage
-- [ ] Implement audio file upload
+- [ ] Set up cloud object storage (AWS S3, Google Cloud, Azure, etc.)
+- [ ] Implement audio file upload API
 - [ ] Create image upload for albums/artists
 - [ ] Add file validation and processing
 - [ ] Build file management interface
+
+**Cloud Storage Setup Examples**:
+```bash
+# AWS S3
+aws configure
+aws s3 mb s3://musicaid-files
+
+# Google Cloud Storage
+gcloud storage buckets create gs://musicaid-files
+
+# Azure Blob Storage
+az storage account create --name musicaidfiles
+```
 
 #### Day 39-42: Audio Management
 - [ ] Create Audio model and API routes
@@ -185,257 +251,227 @@ npx prisma generate
 ### Week 9: Data Migration
 
 #### Day 57-59: Migration Scripts
-```typescript
-// Example migration script structure
-class DataMigrator {
-  async migrateUsers() {
-    const keystoneUsers = await this.getKeystoneUsers();
-    for (const user of keystoneUsers) {
-      await this.createNewUser({
-        name: user.name,
-        email: user.email,
-        // Hash existing passwords or force reset
-        password: await this.hashPassword(user.password)
-      });
-    }
-  }
-  
-  async migrateArtists() {
-    const keystoneArtists = await this.getKeystoneArtists();
-    for (const artist of keystoneArtists) {
-      await this.createNewArtist({
-        name: artist.name,
-        slug: this.generateSlug(artist.name),
-        // Map user relationships
-        users: await this.mapUserRelationships(artist.users)
-      });
-    }
-  }
-  
-  async migrateTracks() {
-    // Similar pattern for tracks, albums, etc.
-  }
-}
+**Generic Migration Script Structure**:
+```python
+# Example Python migration script
+class DataMigrator:
+    def __init__(self, old_db_connection, new_db_connection):
+        self.old_db = old_db_connection
+        self.new_db = new_db_connection
+    
+    def migrate_users(self):
+        """Migrate users from old system to new"""
+        old_users = self.old_db.query("SELECT * FROM users")
+        for user in old_users:
+            new_user = {
+                'name': user['name'],
+                'email': user['email'],
+                'password_hash': user['password'],  # Keep existing hash
+                'created_at': user['createdAt'],
+                'email_verified': True  # Assume existing users are verified
+            }
+            self.new_db.insert('users', new_user)
+    
+    def migrate_artists(self):
+        """Migrate artists and user associations"""
+        # Implementation for artist migration
+        pass
+    
+    def migrate_tracks(self):
+        """Migrate tracks with status mapping"""
+        # Implementation for track migration
+        pass
 ```
 
-#### Migration Tasks
-- [ ] Export data from existing Keystone.js system
-- [ ] Create data transformation scripts
-- [ ] Map old data structure to new schema
-- [ ] Handle data inconsistencies
-- [ ] Validate migrated data integrity
-
-#### Day 60-63: Testing and Validation
-- [ ] Run migration scripts on test data
-- [ ] Validate data accuracy
-- [ ] Test all application features
-- [ ] Performance testing
-- [ ] Security testing
-- [ ] User acceptance testing
+#### Day 60-63: Data Validation and Testing
+- [ ] Run data migration in staging environment
+- [ ] Validate data integrity and completeness
+- [ ] Test application functionality with migrated data
+- [ ] Fix any data inconsistencies
+- [ ] Create rollback procedures
 
 ## Phase 5: Deployment & Monitoring (1 week)
 
 ### Week 10: Production Deployment
 
-#### Day 64-66: Production Setup
-- [ ] Set up production hosting environment
-- [ ] Configure production database
-- [ ] Set up environment variables
-- [ ] Configure custom domain
-- [ ] Set up SSL certificates
+#### Day 64-66: Infrastructure Setup
+**Cloud Platform Options**:
+- **AWS**: EC2, RDS, S3, CloudFront
+- **Google Cloud**: Compute Engine, Cloud SQL, Cloud Storage
+- **Azure**: App Service, Azure SQL, Blob Storage
+- **Digital Ocean**: Droplets, Managed Databases, Spaces
+- **Railway**: Integrated platform for modern applications
+- **Render**: Simple deployment platform
 
-#### Day 67-70: Go-Live Process
-- [ ] Final data migration
-- [ ] DNS cutover
-- [ ] Monitor application performance
-- [ ] Handle any immediate issues
-- [ ] User training and documentation
+```bash
+# Example deployment with Docker
+# Create Dockerfile
+FROM node:18-alpine
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --only=production
+COPY . .
+EXPOSE 3000
+CMD ["npm", "start"]
 
-## Data Migration Details
+# Build and deploy
+docker build -t musicaid .
+docker run -p 3000:3000 musicaid
+```
 
-### Data Export Strategy
-```typescript
-// Export existing data from Keystone.js
-interface ExportedData {
-  users: KeystoneUser[];
-  artists: KeystoneArtist[];
-  tracks: KeystoneTrack[];
-  albums: KeystoneAlbum[];
-  templates: KeystoneTemplate[];
-  trackStatuses: KeystoneTrackStatus[];
-  steps: KeystoneStep[];
-  notes: KeystoneNote[];
-  audios: KeystoneAudio[];
-  // ... other entities
+#### Day 67-70: Production Cutover
+- [ ] Set up production database
+- [ ] Run production data migration
+- [ ] Configure SSL certificates
+- [ ] Set up monitoring and logging
+- [ ] Update DNS records
+- [ ] Monitor system performance
+
+## Technology-Specific Implementation Examples
+
+### Frontend Framework Setup
+
+#### React with TypeScript
+```bash
+npx create-react-app musicaid-frontend --template typescript
+cd musicaid-frontend
+npm install @reduxjs/toolkit react-redux
+npm install react-router-dom @types/react-router-dom
+npm install axios
+```
+
+#### Vue.js with TypeScript
+```bash
+npm create vue@latest musicaid-frontend
+cd musicaid-frontend
+npm install
+npm install @pinia/nuxt pinia
+npm install vue-router@4
+```
+
+#### Angular
+```bash
+ng new musicaid-frontend --routing --style=scss
+cd musicaid-frontend
+ng add @angular/material
+ng generate @angular/pwa
+```
+
+### Backend Framework Setup
+
+#### Express.js with TypeScript
+```bash
+mkdir musicaid-backend
+cd musicaid-backend
+npm init -y
+npm install express cors helmet morgan
+npm install -D typescript @types/node @types/express
+npm install prisma @prisma/client  # or preferred ORM
+```
+
+#### Django with DRF
+```bash
+django-admin startproject musicaid_backend
+cd musicaid_backend
+pip install djangorestframework
+pip install django-cors-headers
+pip install psycopg2-binary  # for PostgreSQL
+```
+
+#### FastAPI
+```bash
+mkdir musicaid-backend
+cd musicaid-backend
+pip install fastapi uvicorn
+pip install sqlalchemy psycopg2-binary
+pip install alembic  # for migrations
+```
+
+## Database Migration Considerations
+
+### Schema Mapping
+**Old MongoDB Schema → New PostgreSQL Schema**:
+```javascript
+// Old Keystone.js User model
+{
+  _id: ObjectId,
+  name: String,
+  email: String,
+  password: String,
+  createdAt: Date,
+  artists: [ObjectId]  // References to Artist documents
 }
 
-class KeystoneExporter {
-  async exportAllData(): Promise<ExportedData> {
-    return {
-      users: await keystone.list('User').model.find({}),
-      artists: await keystone.list('Artist').model.find({}).populate('users'),
-      tracks: await keystone.list('Track').model.find({}).populate('artist album template'),
-      // ... export all entities with relationships
-    };
-  }
-}
+// New PostgreSQL User table
+CREATE TABLE users (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name VARCHAR(100) NOT NULL,
+  email VARCHAR(255) UNIQUE NOT NULL,
+  password_hash VARCHAR(255) NOT NULL,
+  email_verified BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+// New user-artist relationship table
+CREATE TABLE user_artists (
+  user_id UUID REFERENCES users(id),
+  artist_id UUID REFERENCES artists(id),
+  role VARCHAR(20) NOT NULL,
+  created_at TIMESTAMP DEFAULT NOW(),
+  PRIMARY KEY (user_id, artist_id)
+);
 ```
 
 ### Data Transformation Rules
-```typescript
-interface TransformationRules {
-  // Field mappings
-  fieldMappings: {
-    'keystone_field': 'new_field';
-  };
-  
-  // Data type conversions
-  typeConversions: {
-    'ObjectId': 'string'; // MongoDB ObjectId to string
-    'Date': 'DateTime'; // Date handling
-  };
-  
-  // Relationship mappings
-  relationshipMappings: {
-    'user_artist': 'many_to_many';
-    'track_artist': 'many_to_one';
-  };
-}
-```
+1. **ID Mapping**: Convert MongoDB ObjectIds to UUIDs
+2. **Relationship Normalization**: Convert embedded documents to relational tables
+3. **Field Renaming**: Standardize field names (camelCase → snake_case)
+4. **Data Validation**: Apply new validation rules during migration
+5. **Default Values**: Set appropriate defaults for new fields
 
-### File Migration Strategy
-```typescript
-class FileMigrator {
-  async migrateAudioFiles() {
-    const audioFiles = await this.getKeystoneAudioFiles();
-    
-    for (const audio of audioFiles) {
-      if (audio.dropboxUrl) {
-        // Download from Dropbox
-        const fileBuffer = await this.downloadFromDropbox(audio.dropboxUrl);
-        
-            // Upload to S3-compatible storage
-    const fileUrl = await this.uploadToS3(fileBuffer, audio.name);
-        
-        // Update database record
-        await this.updateAudioRecord(audio.id, { blobUrl });
-      }
-    }
-  }
-}
-```
+## Testing Strategy
+
+### Migration Testing
+- [ ] **Unit Tests**: Test individual migration functions
+- [ ] **Integration Tests**: Test complete migration process
+- [ ] **Data Validation**: Verify data integrity after migration
+- [ ] **Performance Tests**: Ensure migration completes within time limits
+- [ ] **Rollback Tests**: Test ability to revert changes
+
+### Application Testing
+- [ ] **Functional Tests**: Test all core features work with migrated data
+- [ ] **User Acceptance Tests**: Test with real users on staging environment
+- [ ] **Performance Tests**: Verify application performance meets requirements
+- [ ] **Security Tests**: Ensure security measures are properly implemented
 
 ## Risk Mitigation
 
 ### Technical Risks
-1. **Data Loss During Migration**
-   - Mitigation: Multiple backups, staged migration, rollback plan
-   
-2. **Performance Issues**
-   - Mitigation: Load testing, performance monitoring, optimization
-   
-3. **Authentication Issues**
-   - Mitigation: Thorough testing, password reset mechanism
-   
-4. **File Migration Failures**
-   - Mitigation: Incremental migration, error handling, retry logic
+- **Data Loss**: Multiple backups, incremental migration, validation checks
+- **Downtime**: Blue-green deployment, feature flags, rollback procedures
+- **Performance Issues**: Load testing, monitoring, gradual traffic migration
+- **Integration Failures**: Thorough testing, staging environment validation
 
 ### Business Risks
-1. **User Adoption**
-   - Mitigation: User training, documentation, support
-   
-2. **Feature Parity**
-   - Mitigation: Comprehensive feature testing, user feedback
-   
-3. **Downtime**
-   - Mitigation: Planned maintenance windows, quick rollback
-
-## Rollback Plan
-
-### Rollback Triggers
-- Critical bugs affecting core functionality
-- Data corruption or loss
-- Performance degradation
-- Security vulnerabilities
-
-### Rollback Process
-1. **Immediate**: Switch DNS back to old system
-2. **Data**: Restore from backup if needed
-3. **Communication**: Notify users of rollback
-4. **Analysis**: Investigate and fix issues
-5. **Retry**: Plan next migration attempt
-
-## Testing Strategy
-
-### Test Types
-1. **Unit Tests**: Individual component testing
-2. **Integration Tests**: API and database testing
-3. **E2E Tests**: Full user workflow testing
-4. **Performance Tests**: Load and stress testing
-5. **Security Tests**: Authentication and authorization testing
-
-### Test Data
-```typescript
-// Create comprehensive test data
-const testData = {
-  users: [
-    { name: 'Test User 1', email: 'user1@test.com' },
-    { name: 'Test User 2', email: 'user2@test.com' }
-  ],
-  artists: [
-    { name: 'Test Artist', users: ['user1', 'user2'] }
-  ],
-  tracks: [
-    { name: 'Test Track', artist: 'test-artist', tempo: 120 }
-  ]
-};
-```
-
-## Monitoring and Observability
-
-### Metrics to Track
-- Application performance (response times, error rates)
-- Database performance (query times, connection pool)
-- File upload/download success rates
-- User engagement (active users, feature usage)
-- Error rates and types
-
-### Monitoring Tools
-- Platform analytics (if available)
-- Database monitoring (platform-specific or external)
-- Error tracking (consider Sentry)
-- Performance monitoring (Web Vitals)
+- **User Disruption**: Clear communication, training materials, support resources
+- **Feature Gaps**: Comprehensive feature comparison, user feedback loops
+- **Timeline Delays**: Buffer time, priority-based development, MVP approach
 
 ## Success Criteria
 
-### Technical Success
-- [ ] All existing features replicated
-- [ ] Performance equal or better than old system
-- [ ] Zero data loss during migration
-- [ ] Security standards maintained
-- [ ] Mobile responsiveness achieved
+### Technical Metrics
+- [ ] All existing data successfully migrated (100% data integrity)
+- [ ] Application response time < 200ms for API calls
+- [ ] Zero critical security vulnerabilities
+- [ ] 99.9% uptime after migration
+- [ ] All automated tests passing
 
-### Business Success
-- [ ] User adoption > 90% within 2 weeks
-- [ ] Support tickets < 10% of user base
-- [ ] User satisfaction score > 8/10
-- [ ] System uptime > 99.5%
-- [ ] Cost reduction achieved
+### Business Metrics
+- [ ] All existing features available in new system
+- [ ] User adoption rate > 90% within 30 days
+- [ ] Support ticket volume < 20% increase
+- [ ] Performance improvements measurable by users
+- [ ] Hosting costs reduced by target percentage
 
-## Post-Migration Tasks
-
-### Week 11-12: Optimization and Cleanup
-- [ ] Monitor system performance
-- [ ] Optimize slow queries
-- [ ] Gather user feedback
-- [ ] Fix any reported issues
-- [ ] Remove old system (after 30 days)
-
-### Ongoing Maintenance
-- [ ] Regular database backups
-- [ ] Security updates
-- [ ] Performance monitoring
-- [ ] Feature enhancements based on feedback
-- [ ] Documentation updates
-
-This migration plan provides a structured approach to rebuilding the MusicAid application while minimizing risks and ensuring a successful transition to the new system. 
+This migration plan provides a framework-agnostic approach that can be adapted to any modern web technology stack while ensuring a systematic, low-risk transition from the legacy system to the new application. 

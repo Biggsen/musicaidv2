@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document defines all frontend components, pages, and layouts for the MusicAid application. The frontend is built using Next.js 14 with App Router, React 18, TypeScript, Tailwind CSS, and Shadcn/ui components.
+This document defines all frontend components, pages, and layouts for the MusicAid application. The frontend should be built using modern component-based architecture with responsive design and accessibility features.
 
 ## Design System
 
@@ -16,621 +16,598 @@ This document defines all frontend components, pages, and layouts for the MusicA
 - **Text**: Gray (#374151) / Light Gray (#F9FAFB)
 
 ### Typography
-- **Headings**: Inter font family
-- **Body**: Inter font family
-- **Code**: JetBrains Mono
+- **Headings**: Clean, modern sans-serif font family
+- **Body**: Readable sans-serif font family
+- **Code**: Monospace font family
+- **Font Sizes**: Responsive scale (14px base, scaling to 12px on mobile)
 
-### Spacing
-- Based on Tailwind's 4px unit system
-- Consistent padding and margin throughout
+### Spacing System
+- **Base Unit**: 4px or 8px system
+- **Consistent Padding**: Use multiples of base unit
+- **Responsive Margins**: Adjust based on screen size
+
+### Component Architecture
+- **Atomic Design**: Atoms → Molecules → Organisms → Templates → Pages
+- **Reusable Components**: Consistent props interface across similar components
+- **State Management**: Clear separation between local and global state
+- **Accessibility**: WCAG 2.1 AA compliance with proper ARIA attributes
 
 ## Layout Components
 
 ### RootLayout
-Main application layout with navigation and authentication.
-
-**Location**: `app/layout.tsx`
+Main application shell that wraps all pages.
 
 **Features**:
 - Global navigation header
-- User authentication status
-- Theme provider (light/dark mode)
-- Toast notifications
-- Loading states
+- User authentication status display
+- Theme provider (light/dark mode support)
+- Toast notification system
+- Global loading states
+- Error boundary handling
 
-```tsx
+**Props Interface**:
+```typescript
 interface RootLayoutProps {
-  children: React.ReactNode;
+  children: ComponentChildren;
+  user?: User;
+  theme: 'light' | 'dark';
+  onThemeChange: (theme: 'light' | 'dark') => void;
 }
 ```
 
 ### AuthLayout
-Layout for authentication pages (login, register).
-
-**Location**: `app/(auth)/layout.tsx`
+Specialized layout for authentication pages (login, register, password reset).
 
 **Features**:
-- Centered form layout
-- Background pattern
-- Logo display
-- No navigation header
+- Centered form layout with responsive design
+- Background pattern or branding
+- Logo/brand display
+- No main navigation (clean, focused interface)
+- Form validation feedback display
+
+**Props Interface**:
+```typescript
+interface AuthLayoutProps {
+  children: ComponentChildren;
+  title: string;
+  subtitle?: string;
+  showLogo?: boolean;
+}
+```
 
 ### DashboardLayout
-Layout for authenticated user pages.
-
-**Location**: `app/(dashboard)/layout.tsx`
+Main layout for authenticated user interface.
 
 **Features**:
-- Sidebar navigation
-- Breadcrumb navigation
-- User profile dropdown
-- Quick actions menu
+- Collapsible sidebar navigation
+- Breadcrumb navigation system
+- User profile dropdown menu
+- Quick actions toolbar
+- Artist context switcher
+- Responsive mobile navigation
+
+**Props Interface**:
+```typescript
+interface DashboardLayoutProps {
+  children: ComponentChildren;
+  currentUser: User;
+  currentArtist?: Artist;
+  sidebarCollapsed: boolean;
+  onSidebarToggle: () => void;
+}
+```
 
 ## Navigation Components
 
 ### Header
-Global application header.
+Global application header component.
 
 **Features**:
-- Logo/brand
-- Main navigation menu
-- User profile dropdown
-- Search bar
-- Theme toggle
-- Notifications
+- Logo/brand with link to dashboard
+- Main navigation menu items
+- User profile dropdown with logout
+- Global search functionality
+- Theme toggle switch
+- Notification bell with count
 
-```tsx
+**Props Interface**:
+```typescript
 interface HeaderProps {
   user?: User;
+  currentArtist?: Artist;
+  notificationCount: number;
+  onSearch: (query: string) => void;
+  onProfileClick: () => void;
+  onLogout: () => void;
 }
 ```
 
 ### Sidebar
-Dashboard sidebar navigation.
+Dashboard sidebar navigation component.
 
 **Features**:
-- Collapsible sidebar
-- Navigation menu items
-- Active state indicators
-- Artist selector
-- Quick actions
+- Collapsible/expandable design
+- Navigation menu with active states
+- Artist selector dropdown
+- Quick action buttons
+- Progress indicators for active projects
 
-```tsx
+**Props Interface**:
+```typescript
 interface SidebarProps {
   isCollapsed: boolean;
   onToggle: () => void;
   currentArtist?: Artist;
+  userArtists: Artist[];
+  onArtistChange: (artistId: string) => void;
+  activeRoute: string;
 }
 ```
 
 ### Breadcrumb
-Navigation breadcrumb component.
+Navigation breadcrumb component for deep navigation.
 
-```tsx
+**Props Interface**:
+```typescript
 interface BreadcrumbProps {
   items: BreadcrumbItem[];
+  maxItems?: number;
+  showHome?: boolean;
 }
 
 interface BreadcrumbItem {
   label: string;
   href?: string;
+  icon?: string;
 }
 ```
 
 ## Page Components
 
 ### HomePage
-Landing page for unauthenticated users.
-
-**Location**: `app/page.tsx`
+Landing page for unauthenticated visitors.
 
 **Features**:
-- Hero section
-- Feature highlights
-- Call-to-action buttons
-- Footer
+- Hero section with value proposition
+- Feature highlights with screenshots
+- Call-to-action buttons (signup/login)
+- Testimonials or social proof
+- Footer with links and contact info
 
 ### LoginPage
-User login page.
-
-**Location**: `app/(auth)/login/page.tsx`
+User authentication page.
 
 **Features**:
-- Login form
-- Email/password fields
+- Email/password login form
 - Remember me checkbox
 - Forgot password link
-- Register link
+- Register account link
+- OAuth login buttons (if supported)
+- Form validation with error display
+
+**Form Fields**:
+- Email (required, email validation)
+- Password (required, minimum length)
+- Remember me (checkbox)
 
 ### RegisterPage
-User registration page.
-
-**Location**: `app/(auth)/register/page.tsx`
+New user registration page.
 
 **Features**:
-- Registration form
-- Name, email, password fields
-- Terms acceptance
-- Login link
+- Registration form with validation
+- Terms of service acceptance
+- Email verification notice
+- Login link for existing users
+- Progressive enhancement for password strength
+
+**Form Fields**:
+- Full name (required, 2-100 characters)
+- Email (required, unique, email validation)
+- Password (required, complexity validation)
+- Confirm password (required, must match)
+- Terms acceptance (required checkbox)
 
 ### DashboardPage
-Main dashboard overview.
-
-**Location**: `app/(dashboard)/page.tsx`
+Main dashboard overview for authenticated users.
 
 **Features**:
-- Statistics cards
-- Recent tracks
-- Quick actions
-- Activity feed
-- Charts and graphs
+- Statistics cards (tracks, albums, completed items)
+- Recent activity feed
+- Quick action buttons
+- Progress charts and visualizations
+- Upcoming deadlines or reminders
+
+**Data Requirements**:
+- Current user statistics
+- Recent tracks across all artists
+- Activity feed data
+- Chart data for progress visualization
 
 ### ArtistsPage
-Artists listing and management.
-
-**Location**: `app/(dashboard)/artists/page.tsx`
+Artist listing and management interface.
 
 **Features**:
-- Artists grid/list view
-- Search and filtering
+- Artist grid/list view toggle
+- Search and filtering capabilities
 - Create new artist button
-- Artist cards with stats
+- Artist cards with statistics
+- Bulk operations (if applicable)
+
+**Artist Card Components**:
+- Artist name and avatar/logo
+- Track count and completion stats
+- Last activity timestamp
+- Quick action buttons (view, edit)
 
 ### ArtistDetailPage
-Individual artist management.
-
-**Location**: `app/(dashboard)/artists/[id]/page.tsx`
+Individual artist management interface.
 
 **Features**:
-- Artist information
-- Tracks listing
-- Albums listing
-- Templates management
-- User collaboration
+- Artist information and settings
+- User collaboration management
+- Track listing with status indicators
+- Album listing and organization
+- Template management interface
+- Activity timeline
+
+**Sections**:
+- Artist header with edit capabilities
+- Collaborator management panel
+- Recent tracks table
+- Albums grid/list
+- Templates section
+- Settings and danger zone
 
 ### TracksPage
-Tracks listing and management.
-
-**Location**: `app/(dashboard)/tracks/page.tsx`
+Track listing and management interface.
 
 **Features**:
-- Tracks table/grid view
-- Advanced filtering
-- Bulk actions
-- Status indicators
-- Create track button
+- Data table with sorting and filtering
+- Status column with visual indicators
+- Bulk actions toolbar
+- Advanced search functionality
+- Export capabilities
+
+**Table Columns**:
+- Track name (with link to detail)
+- Artist name
+- Album (if assigned)
+- Current status
+- Last updated
+- Action buttons
+
+**Filtering Options**:
+- Artist selection
+- Status selection
+- Album selection
+- Date ranges
+- Search by name
 
 ### TrackDetailPage
-Individual track management.
-
-**Location**: `app/(dashboard)/tracks/[id]/page.tsx`
+Individual track management interface.
 
 **Features**:
-- Track information form
-- Audio files management
+- Track metadata editing
+- Workflow status progression
+- Audio file management
+- Notes and comments system
+- Recording session tracking
+- Collaboration history
+
+**Sections**:
+- Track header with basic info
+- Workflow progress visualization
+- Audio files section
 - Notes and comments
-- Recording records
-- Status workflow
-- Session management
+- Recording history
+- Metadata panel
 
 ### AlbumsPage
-Albums listing and management.
-
-**Location**: `app/(dashboard)/albums/page.tsx`
+Album listing and management interface.
 
 **Features**:
-- Albums grid view
-- Album artwork
-- Track count indicators
-- Release date info
+- Album grid view with artwork
+- Create new album functionality
+- Search and filtering
+- Release status indicators
+- Track count display
 
 ### AlbumDetailPage
-Individual album management.
-
-**Location**: `app/(dashboard)/albums/[id]/page.tsx`
+Individual album management interface.
 
 **Features**:
-- Album information
-- Track ordering
-- Artwork upload
-- Release management
+- Album artwork and metadata
+- Track listing with drag-and-drop reordering
+- Release planning tools
+- Artwork upload interface
+- Distribution preparation
 
 ### TemplatesPage
-Template management.
-
-**Location**: `app/(dashboard)/templates/page.tsx`
+Workflow template management interface.
 
 **Features**:
-- Templates listing
-- Create template
-- Template preview
-- Publishing controls
-
-### TemplateDetailPage
-Template editor.
-
-**Location**: `app/(dashboard)/templates/[id]/page.tsx`
-
-**Features**:
-- Template builder
-- Status workflow designer
-- Step management
-- Preview mode
+- Template library with preview
+- Create/edit template functionality
+- Template sharing and collaboration
+- Usage statistics
+- Template categorization
 
 ## Form Components
 
-### ArtistForm
-Create/edit artist form.
+### FormInput
+Reusable input component with validation.
 
-```tsx
-interface ArtistFormProps {
-  artist?: Artist;
-  onSubmit: (data: ArtistFormData) => void;
-  isLoading?: boolean;
-}
-
-interface ArtistFormData {
+**Props Interface**:
+```typescript
+interface FormInputProps {
+  type: 'text' | 'email' | 'password' | 'number' | 'tel';
   name: string;
-  templateId?: string;
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  error?: string;
+  required?: boolean;
+  placeholder?: string;
+  disabled?: boolean;
+  autoComplete?: string;
 }
 ```
 
-### TrackForm
-Create/edit track form.
+### FormSelect
+Dropdown selection component.
 
-```tsx
-interface TrackFormProps {
-  track?: Track;
-  artistId?: string;
-  onSubmit: (data: TrackFormData) => void;
-  isLoading?: boolean;
+**Props Interface**:
+```typescript
+interface FormSelectProps {
+  name: string;
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  options: SelectOption[];
+  error?: string;
+  required?: boolean;
+  placeholder?: string;
+  disabled?: boolean;
 }
 
-interface TrackFormData {
-  name: string;
-  artistId: string;
-  albumId?: string;
-  tempo?: number;
-  minutes?: number;
-  seconds?: number;
-  location: string;
-  isrcCode?: string;
-  liveReady: boolean;
+interface SelectOption {
+  value: string;
+  label: string;
+  disabled?: boolean;
 }
 ```
 
-### AlbumForm
-Create/edit album form.
+### FormTextArea
+Multi-line text input component.
 
-```tsx
-interface AlbumFormProps {
-  album?: Album;
-  artistId?: string;
-  onSubmit: (data: AlbumFormData) => void;
-  isLoading?: boolean;
-}
-
-interface AlbumFormData {
+**Props Interface**:
+```typescript
+interface FormTextAreaProps {
   name: string;
-  artistId: string;
-  releaseDate?: Date;
-  image?: File;
-}
-```
-
-### NoteForm
-Create/edit note form.
-
-```tsx
-interface NoteFormProps {
-  note?: Note;
-  trackId: string;
-  onSubmit: (data: NoteFormData) => void;
-  onCancel: () => void;
-}
-
-interface NoteFormData {
-  note: string;
-  stepId?: string;
-  trackStatusId?: string;
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  error?: string;
+  required?: boolean;
+  placeholder?: string;
+  rows?: number;
+  maxLength?: number;
+  disabled?: boolean;
 }
 ```
 
 ## Data Display Components
 
-### ArtistCard
-Artist display card.
+### DataTable
+Reusable table component with sorting, filtering, and pagination.
 
-```tsx
-interface ArtistCardProps {
-  artist: Artist;
-  onEdit?: () => void;
-  onDelete?: () => void;
-  showActions?: boolean;
-}
-```
+**Features**:
+- Column sorting (ascending/descending)
+- Row selection (single/multiple)
+- Pagination controls
+- Loading states
+- Empty state display
+- Responsive design (horizontal scroll on mobile)
 
-### TrackCard
-Track display card.
-
-```tsx
-interface TrackCardProps {
-  track: Track;
-  onEdit?: () => void;
-  onDelete?: () => void;
-  showStatus?: boolean;
-}
-```
-
-### AlbumCard
-Album display card.
-
-```tsx
-interface AlbumCardProps {
-  album: Album;
-  onEdit?: () => void;
-  onDelete?: () => void;
-}
-```
-
-### TrackTable
-Tracks data table.
-
-```tsx
-interface TrackTableProps {
-  tracks: Track[];
-  onSort?: (field: string, direction: 'asc' | 'desc') => void;
-  onFilter?: (filters: TrackFilters) => void;
-  onSelect?: (trackIds: string[]) => void;
+**Props Interface**:
+```typescript
+interface DataTableProps {
+  columns: TableColumn[];
+  data: TableRow[];
+  loading?: boolean;
+  pagination?: PaginationConfig;
+  onSort?: (column: string, direction: 'asc' | 'desc') => void;
+  onRowSelect?: (selectedRows: string[]) => void;
+  emptyMessage?: string;
 }
 ```
 
 ### StatusBadge
-Track status indicator.
+Visual indicator for track/album status.
 
-```tsx
+**Features**:
+- Color-coded status display
+- Icon support
+- Tooltip with additional info
+- Consistent sizing and styling
+
+**Props Interface**:
+```typescript
 interface StatusBadgeProps {
-  status: TrackStatus;
-  size?: 'sm' | 'md' | 'lg';
+  status: string;
+  variant: 'primary' | 'secondary' | 'success' | 'warning' | 'error';
+  icon?: string;
+  tooltip?: string;
+  size?: 'small' | 'medium' | 'large';
 }
 ```
 
 ### ProgressBar
-Workflow progress indicator.
+Visual progress indicator for workflows.
 
-```tsx
+**Props Interface**:
+```typescript
 interface ProgressBarProps {
   current: number;
   total: number;
   showLabel?: boolean;
+  variant?: 'default' | 'success' | 'warning' | 'error';
+  animated?: boolean;
 }
 ```
 
 ## Media Components
 
 ### AudioPlayer
-Audio file player.
+Audio playback component for track previews.
 
-```tsx
+**Features**:
+- Play/pause controls
+- Seek bar with time display
+- Volume control
+- Waveform visualization (optional)
+- Keyboard shortcuts
+
+**Props Interface**:
+```typescript
 interface AudioPlayerProps {
   src: string;
   title?: string;
+  artist?: string;
+  autoPlay?: boolean;
+  controls?: boolean;
   onPlay?: () => void;
   onPause?: () => void;
   onEnded?: () => void;
 }
 ```
 
-### AudioUpload
-Audio file upload component.
-
-```tsx
-interface AudioUploadProps {
-  trackId: string;
-  onUpload: (audio: Audio) => void;
-  maxSize?: number; // in MB
-  acceptedFormats?: string[];
-}
-```
-
 ### ImageUpload
-Image upload component.
+Drag-and-drop image upload component.
 
-```tsx
+**Features**:
+- Drag-and-drop interface
+- File type validation
+- Image preview
+- Progress indicator
+- Error handling
+
+**Props Interface**:
+```typescript
 interface ImageUploadProps {
-  onUpload: (url: string) => void;
-  currentImage?: string;
-  aspectRatio?: number;
+  onUpload: (file: File) => Promise<void>;
   maxSize?: number;
-}
-```
-
-## Workflow Components
-
-### WorkflowBuilder
-Template workflow builder.
-
-```tsx
-interface WorkflowBuilderProps {
-  template: Template;
-  onSave: (template: Template) => void;
-}
-```
-
-### StatusSelector
-Track status selection.
-
-```tsx
-interface StatusSelectorProps {
-  currentStatus?: TrackStatus;
-  availableStatuses: TrackStatus[];
-  onSelect: (status: TrackStatus) => void;
-}
-```
-
-### StepList
-Workflow steps display.
-
-```tsx
-interface StepListProps {
-  steps: Step[];
-  currentStep?: Step;
-  onStepClick?: (step: Step) => void;
+  acceptedTypes?: string[];
+  preview?: boolean;
+  error?: string;
+  loading?: boolean;
 }
 ```
 
 ## Utility Components
 
 ### LoadingSpinner
-Loading indicator.
+Reusable loading indicator.
 
-```tsx
+**Props Interface**:
+```typescript
 interface LoadingSpinnerProps {
-  size?: 'sm' | 'md' | 'lg';
+  size?: 'small' | 'medium' | 'large';
   color?: string;
+  message?: string;
 }
 ```
 
 ### EmptyState
-Empty state placeholder.
+Component for displaying empty data states.
 
-```tsx
+**Props Interface**:
+```typescript
 interface EmptyStateProps {
+  icon?: string;
   title: string;
   description?: string;
   action?: {
     label: string;
     onClick: () => void;
   };
-  icon?: React.ReactNode;
 }
 ```
 
-### ConfirmDialog
-Confirmation dialog.
+### ConfirmationModal
+Modal dialog for confirming destructive actions.
 
-```tsx
-interface ConfirmDialogProps {
+**Props Interface**:
+```typescript
+interface ConfirmationModalProps {
   isOpen: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
   title: string;
-  description?: string;
+  message: string;
   confirmLabel?: string;
   cancelLabel?: string;
-  onConfirm: () => void;
-  onCancel: () => void;
-  variant?: 'default' | 'destructive';
+  variant?: 'default' | 'danger';
 }
 ```
 
-### SearchInput
-Search input with debouncing.
-
-```tsx
-interface SearchInputProps {
-  placeholder?: string;
-  onSearch: (query: string) => void;
-  debounceMs?: number;
-}
-```
-
-### FilterPanel
-Advanced filtering panel.
-
-```tsx
-interface FilterPanelProps {
-  filters: FilterConfig[];
-  values: FilterValues;
-  onChange: (values: FilterValues) => void;
-  onReset: () => void;
-}
-```
-
-## Modal Components
-
-### CreateArtistModal
-Modal for creating new artist.
-
-### CreateTrackModal
-Modal for creating new track.
-
-### CreateAlbumModal
-Modal for creating new album.
-
-### EditProfileModal
-User profile editing modal.
-
-### FilePreviewModal
-File preview modal for audio/images.
-
-## Responsive Design
+## Responsive Design Requirements
 
 ### Breakpoints
-- **Mobile**: < 768px
-- **Tablet**: 768px - 1024px
-- **Desktop**: > 1024px
+- **Mobile**: 320px - 767px
+- **Tablet**: 768px - 1023px
+- **Desktop**: 1024px - 1439px
+- **Large Desktop**: 1440px+
 
 ### Mobile Considerations
+- Touch-friendly button sizes (minimum 44px)
 - Collapsible navigation
-- Touch-friendly buttons
 - Simplified layouts
-- Swipe gestures for cards
+- Thumb-friendly interface elements
 
-## Accessibility
+### Accessibility Requirements
+- **Keyboard Navigation**: All interactive elements accessible via keyboard
+- **Screen Reader Support**: Proper ARIA labels and descriptions
+- **Color Contrast**: WCAG AA compliance (4.5:1 ratio)
+- **Focus Indicators**: Clear visual focus states
+- **Alt Text**: Descriptive alternative text for images
+- **Form Labels**: Proper labeling and error associations
 
-### ARIA Labels
-- All interactive elements have proper ARIA labels
-- Form fields have associated labels
-- Navigation has proper landmarks
+## State Management
 
-### Keyboard Navigation
-- All functionality accessible via keyboard
-- Proper tab order
-- Focus indicators
+### Global State
+- Current user authentication state
+- Selected artist context
+- Theme preferences
+- Notification queue
 
-### Screen Reader Support
-- Semantic HTML structure
-- Alternative text for images
-- Status announcements
+### Component State
+- Form input values and validation
+- Modal open/closed states
+- Loading states
+- Local UI preferences
 
-## Performance Optimization
+### Data Fetching
+- Loading states for async operations
+- Error handling and retry mechanisms
+- Optimistic updates where appropriate
+- Cache invalidation strategies
+
+## Performance Considerations
 
 ### Code Splitting
 - Route-based code splitting
 - Component lazy loading
-- Dynamic imports for heavy components
+- Third-party library optimization
 
 ### Image Optimization
-- Next.js Image component
-- Responsive images
-- WebP format support
+- Responsive images with multiple sizes
+- Modern format support (WebP, AVIF)
+- Lazy loading for below-fold images
 
-### Caching
-- API response caching
-- Image caching
-- Static asset caching
+### Bundle Optimization
+- Tree shaking for unused code
+- Minimization and compression
+- CDN delivery for static assets
 
-## Testing Strategy
-
-### Unit Tests
-- Component rendering tests
-- User interaction tests
-- Form validation tests
-
-### Integration Tests
-- API integration tests
-- User flow tests
-- Authentication tests
-
-### E2E Tests
-- Critical user journeys
-- Cross-browser testing
-- Mobile testing
-
-## Implementation Notes
-
-1. **Consistent Styling**: Use Tailwind CSS classes consistently
-2. **Component Reusability**: Create reusable components for common patterns
-3. **Type Safety**: Full TypeScript coverage for all components
-4. **Error Boundaries**: Implement error boundaries for robust error handling
-5. **Loading States**: Provide loading states for all async operations
-6. **Optimistic Updates**: Implement optimistic UI updates where appropriate 
+This specification provides a framework-agnostic foundation that can be implemented using React, Vue, Angular, Svelte, or any other modern frontend framework while maintaining consistency and user experience quality. 
