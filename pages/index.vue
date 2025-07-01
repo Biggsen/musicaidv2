@@ -1,0 +1,121 @@
+<template>
+  <div>
+    <!-- Hero Section -->
+    <section class="bg-gradient-to-br from-blue-600 to-purple-700 text-white">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
+        <div class="text-center">
+          <h1 class="text-4xl md:text-6xl font-bold mb-6">
+            Welcome to MusicAid
+          </h1>
+          <p class="text-xl md:text-2xl mb-8 text-blue-100 max-w-3xl mx-auto">
+            Your collaborative music creation platform powered by modern web technologies
+          </p>
+          <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <button class="bg-white text-blue-600 hover:bg-gray-100 font-medium py-3 px-8 rounded-lg transition-colors">
+              Get Started
+            </button>
+            <button class="border-2 border-white text-white hover:bg-white hover:text-blue-600 font-medium py-3 px-8 rounded-lg transition-colors">
+              Learn More
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="py-16">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+          <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            Built with Modern Technology
+          </h2>
+          <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+            MusicAid is built with Nuxt 3, TypeScript, and modern web technologies for the best developer and user experience.
+          </p>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-8">
+          <div class="card text-center">
+            <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+              <ClientOnly>
+                <UIcon name="i-heroicons-bolt" class="w-6 h-6 text-blue-600" />
+                <template #fallback>
+                  <span class="text-blue-600 text-xl">⚡</span>
+                </template>
+              </ClientOnly>
+            </div>
+            <h3 class="text-xl font-semibold text-gray-900 mb-2">
+              Fast & Modern
+            </h3>
+            <p class="text-gray-600">
+              Built with Nuxt 3 and TypeScript for optimal performance and developer experience.
+            </p>
+          </div>
+
+          <div class="card text-center">
+            <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+              <ClientOnly>
+                <UIcon name="i-heroicons-users" class="w-6 h-6 text-green-600" />
+                <template #fallback>
+                  <span class="text-green-600 text-xl">👥</span>
+                </template>
+              </ClientOnly>
+            </div>
+            <h3 class="text-xl font-semibold text-gray-900 mb-2">
+              Collaborative
+            </h3>
+            <p class="text-gray-600">
+              Real-time collaboration features to work together on music projects seamlessly.
+            </p>
+          </div>
+
+          <div class="card text-center">
+            <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+              <ClientOnly>
+                <UIcon name="i-heroicons-musical-note" class="w-6 h-6 text-purple-600" />
+                <template #fallback>
+                  <span class="text-purple-600 text-xl">🎵</span>
+                </template>
+              </ClientOnly>
+            </div>
+            <h3 class="text-xl font-semibold text-gray-900 mb-2">
+              Music-First
+            </h3>
+            <p class="text-gray-600">
+              Designed specifically for musicians with intuitive interfaces and powerful tools.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="bg-gray-900 text-white py-16">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <h2 class="text-3xl md:text-4xl font-bold mb-4">
+          Ready to Get Started?
+        </h2>
+        <p class="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
+          Join the future of collaborative music creation. Set up your project and start building amazing music experiences.
+        </p>
+        <button class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-8 rounded-lg transition-colors">
+          Start Building
+        </button>
+      </div>
+    </section>
+  </div>
+</template>
+
+<script setup lang="ts">
+// Page metadata
+useSeoMeta({
+  title: 'MusicAid - Collaborative Music Creation Platform',
+  description: 'Your collaborative music creation platform powered by modern web technologies',
+})
+
+// Optional: Add page-specific logic here
+</script>
+
+<style scoped>
+/* Page-specific styles if needed */
+</style> 
