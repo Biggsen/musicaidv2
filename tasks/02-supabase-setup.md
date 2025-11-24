@@ -19,7 +19,7 @@ Set up Supabase project and integrate it with Nuxt 3 for database and authentica
 - [x] Create `artists` table
 - [x] Create `tracks` table
 - [x] Set up basic foreign key relationships
-- [x] Configure Row Level Security (RLS) policies
+- [ ] Configure Row Level Security (RLS) policies (deferred - see Task 07)
 
 ### 3. Authentication Setup
 
@@ -45,6 +45,7 @@ Set up Supabase project and integrate it with Nuxt 3 for database and authentica
 
 - **Storage**: File storage (audio files, images) uses S3-compatible object storage (AWS S3, Backblaze B2, etc.) and is configured separately. Supabase is only used for database and authentication.
 - **File Upload**: File upload functionality will be implemented in a later task with S3 integration.
+- **RLS Policies**: Row Level Security policies are defined in migrations but not currently enabled due to implementation issues. RLS implementation has been deferred to Task 07: RLS Implementation.
 
 ## Estimated Time
 
