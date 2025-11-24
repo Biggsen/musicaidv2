@@ -33,9 +33,27 @@
           
           <!-- User Actions -->
           <div class="flex items-center space-x-4">
-            <button class="btn-primary">
-              Get Started
-            </button>
+            <ClientOnly>
+              <template v-if="user">
+                <div class="flex items-center space-x-3">
+                  <span class="text-sm text-gray-700">{{ userProfile?.name || user.email }}</span>
+                  <button 
+                    @click="handleLogout"
+                    class="text-sm text-gray-500 hover:text-gray-900 px-3 py-2 rounded-md transition-colors"
+                  >
+                    Logout
+                  </button>
+                </div>
+              </template>
+              <template v-else>
+                <NuxtLink to="/login" class="text-sm text-gray-700 hover:text-gray-900 px-3 py-2">
+                  Login
+                </NuxtLink>
+                <NuxtLink to="/register" class="btn-primary">
+                  Get Started
+                </NuxtLink>
+              </template>
+            </ClientOnly>
           </div>
           
           <!-- Mobile menu button -->
@@ -72,6 +90,37 @@
           >
             About
           </NuxtLink>
+          <ClientOnly>
+            <template v-if="user">
+              <div class="border-t border-gray-200 pt-2 mt-2">
+                <div class="px-3 py-2 text-base font-medium text-gray-700">
+                  {{ userProfile?.name || user.email }}
+                </div>
+                <button
+                  @click="handleLogout"
+                  class="block w-full text-left px-3 py-2 text-base font-medium text-gray-500 hover:text-gray-900"
+                >
+                  Logout
+                </button>
+              </div>
+            </template>
+            <template v-else>
+              <NuxtLink 
+                to="/login" 
+                class="block px-3 py-2 text-base font-medium text-gray-500 hover:text-gray-900"
+                @click="mobileMenuOpen = false"
+              >
+                Login
+              </NuxtLink>
+              <NuxtLink 
+                to="/register" 
+                class="block px-3 py-2 text-base font-medium text-gray-500 hover:text-gray-900"
+                @click="mobileMenuOpen = false"
+              >
+                Register
+              </NuxtLink>
+            </template>
+          </ClientOnly>
         </div>
       </div>
     </nav>
@@ -93,13 +142,44 @@
 </template>
 
 <script setup lang="ts">
+import type { UserProfile } from '~/composables/useAuth'
+
+const { getUserProfile, signOut } = useAuth()
+const user = useSupabaseUser()
+const userProfile = ref<UserProfile | null>(null)
 const mobileMenuOpen = ref(false)
+
+// Fetch user profile when user is logged in (client-side only)
+onMounted(async () => {
+  // Wait for Supabase to initialize
+  await nextTick()
+  if (user.value?.id) {
+    userProfile.value = await getUserProfile()
+  }
+})
+
+watch(user, async (newUser) => {
+  if (newUser?.id && process.client) {
+    userProfile.value = await getUserProfile()
+  } else {
+    userProfile.value = null
+  }
+})
 
 // Close mobile menu when route changes
 const route = useRoute()
 watch(route, () => {
   mobileMenuOpen.value = false
 })
+
+// Handle logout
+const handleLogout = async () => {
+  try {
+    await signOut()
+  } catch (error) {
+    console.error('Error signing out:', error)
+  }
+}
 </script>
 
 <style scoped>

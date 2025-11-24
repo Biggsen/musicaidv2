@@ -11,7 +11,8 @@ export default defineNuxtConfig({
     '@nuxt/image',
     '@nuxt/scripts',
     '@nuxt/test-utils',
-    '@pinia/nuxt'
+    '@pinia/nuxt',
+    '@nuxtjs/supabase'
   ],
 
   // TypeScript configuration
@@ -36,5 +37,21 @@ export default defineNuxtConfig({
   // Experimental features to help with hydration
   experimental: {
     payloadExtraction: false
+  },
+
+  // Supabase configuration
+  supabase: {
+    redirectOptions: {
+      login: '/login',
+      callback: '/auth/callback',
+      exclude: ['/', '/about', '/login', '/register', '/auth/callback']
+    }
+  },
+
+  // Runtime config for environment variables
+  runtimeConfig: {
+    public: {
+      apiBase: process.env.NUXT_PUBLIC_API_BASE || '/api'
+    }
   }
 })
