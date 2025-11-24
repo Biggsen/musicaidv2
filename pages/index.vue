@@ -10,16 +10,18 @@
             projects with ease
           </p>
           <div class="flex flex-col sm:flex-row gap-4 justify-center">
-            <button
-              class="bg-white text-blue-600 hover:bg-gray-100 font-medium py-3 px-8 rounded-lg transition-colors"
+            <NuxtLink
+              to="/register"
+              class="inline-flex items-center justify-center px-8 py-3 text-base font-medium rounded-lg bg-white text-blue-600 hover:bg-gray-100 transition-colors"
             >
               Get Started
-            </button>
-            <button
-              class="border-2 border-white text-white hover:bg-white hover:text-blue-600 font-medium py-3 px-8 rounded-lg transition-colors"
+            </NuxtLink>
+            <NuxtLink
+              to="/about"
+              class="inline-flex items-center justify-center px-8 py-3 text-base font-medium rounded-lg border-2 border-white text-white hover:bg-white hover:text-blue-600 transition-colors"
             >
               Learn More
-            </button>
+            </NuxtLink>
           </div>
         </div>
       </div>
@@ -104,11 +106,13 @@
           Start organizing your music production workflow today. Track your projects, manage
           recording sessions, and keep everything in sync.
         </p>
-        <button
-          class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-8 rounded-lg transition-colors"
+        <UButton
+          to="/register"
+          color="success"
+          size="lg"
         >
           Start Building
-        </button>
+        </UButton>
       </div>
     </section>
   </div>

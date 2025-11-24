@@ -7,36 +7,42 @@
 
     <div class="grid md:grid-cols-2 gap-8">
       <!-- Artists Section -->
-      <div class="card">
-        <h2 class="text-2xl font-semibold text-gray-900 mb-4">Artists</h2>
+      <UCard>
+        <template #header>
+          <h2 class="text-2xl font-semibold text-gray-900">Artists</h2>
+        </template>
 
         <!-- Create Artist Form -->
         <div class="mb-6 p-4 bg-gray-50 rounded-lg">
           <h3 class="text-lg font-medium mb-3">Create Artist</h3>
-          <form @submit.prevent="createNewArtist" class="space-y-3">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Name</label>
-              <input
+          <form @submit.prevent="createNewArtist" class="space-y-4">
+            <div class="space-y-2">
+              <label for="artist-name" class="block text-sm font-medium text-gray-700">
+                Artist name
+              </label>
+              <UInput
+                id="artist-name"
                 v-model="newArtist.name"
-                type="text"
-                required
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                 placeholder="Artist name"
-              />
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Slug</label>
-              <input
-                v-model="newArtist.slug"
-                type="text"
                 required
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                placeholder="artist-slug"
+                class="bg-white"
               />
             </div>
-            <button type="submit" :disabled="creatingArtist" class="w-full btn-primary">
-              {{ creatingArtist ? 'Creating...' : 'Create Artist' }}
-            </button>
+            <div class="space-y-2">
+              <label for="artist-slug" class="block text-sm font-medium text-gray-700">
+                artist-slug
+              </label>
+              <UInput
+                id="artist-slug"
+                v-model="newArtist.slug"
+                placeholder="artist-slug"
+                required
+                class="bg-white"
+              />
+            </div>
+            <UButton type="submit" :loading="creatingArtist" color="success" block>
+              Create Artist
+            </UButton>
           </form>
         </div>
 
@@ -48,10 +54,10 @@
             No artists yet. Create one above!
           </div>
           <div v-else class="space-y-2">
-            <div
+            <UCard
               v-for="artist in artists"
               :key="artist.id"
-              class="p-3 border border-gray-200 rounded-lg hover:bg-gray-50"
+              class="hover:bg-gray-50"
             >
               <div class="flex justify-between items-start">
                 <div>
@@ -59,68 +65,75 @@
                   <p class="text-sm text-gray-500">Slug: {{ artist.slug }}</p>
                   <p class="text-xs text-gray-400">ID: {{ artist.id }}</p>
                 </div>
-                <div class="flex space-x-2">
-                  <button
-                    @click="handleDeleteArtist(artist.id)"
-                    class="text-red-600 hover:text-red-800 text-sm"
-                  >
-                    Delete
-                  </button>
-                </div>
+                <UButton
+                  color="error"
+                  variant="ghost"
+                  size="sm"
+                  @click="handleDeleteArtist(artist.id)"
+                >
+                  Delete
+                </UButton>
               </div>
-            </div>
+            </UCard>
           </div>
         </div>
-      </div>
+      </UCard>
 
       <!-- Tracks Section -->
-      <div class="card">
-        <h2 class="text-2xl font-semibold text-gray-900 mb-4">Tracks</h2>
+      <UCard>
+        <template #header>
+          <h2 class="text-2xl font-semibold text-gray-900">Tracks</h2>
+        </template>
 
         <!-- Create Track Form -->
         <div class="mb-6 p-4 bg-gray-50 rounded-lg">
           <h3 class="text-lg font-medium mb-3">Create Track</h3>
-          <form @submit.prevent="createNewTrack" class="space-y-3">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Name</label>
-              <input
+          <form @submit.prevent="createNewTrack" class="space-y-4">
+            <div class="space-y-2">
+              <label for="track-name" class="block text-sm font-medium text-gray-700">
+                Track name
+              </label>
+              <UInput
+                id="track-name"
                 v-model="newTrack.name"
-                type="text"
-                required
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                 placeholder="Track name"
+                required
+                class="bg-white"
               />
             </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Key</label>
-              <input
+            <div class="space-y-2">
+              <label for="track-key" class="block text-sm font-medium text-gray-700">
+                track-key
+              </label>
+              <UInput
+                id="track-key"
                 v-model="newTrack.key"
-                type="text"
-                required
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                 placeholder="track-key"
+                required
+                class="bg-white"
               />
             </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Artist</label>
-              <select
+            <div class="space-y-2">
+              <label for="track-artist" class="block text-sm font-medium text-gray-700">
+                Select an artist
+              </label>
+              <USelect
+                id="track-artist"
                 v-model="newTrack.artist_id"
+                :items="artistOptions"
+                placeholder="Select an artist"
                 required
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              >
-                <option value="">Select an artist</option>
-                <option v-for="artist in artists" :key="artist.id" :value="artist.id">
-                  {{ artist.name }}
-                </option>
-              </select>
+              />
             </div>
-            <button
+            <UButton
               type="submit"
-              :disabled="creatingTrack || artists.length === 0"
-              class="w-full btn-primary"
+              :loading="creatingTrack"
+              :disabled="artists.length === 0"
+              color="success"
+              block
             >
-              {{ creatingTrack ? 'Creating...' : 'Create Track' }}
-            </button>
+              Create Track
+            </UButton>
           </form>
         </div>
 
@@ -133,10 +146,10 @@
               No tracks for this artist yet.
             </div>
             <div v-else class="space-y-2">
-              <div
+              <UCard
                 v-for="track in tracks"
                 :key="track.id"
-                class="p-3 border border-gray-200 rounded-lg hover:bg-gray-50"
+                class="hover:bg-gray-50"
               >
                 <div class="flex justify-between items-start">
                   <div>
@@ -144,16 +157,16 @@
                     <p class="text-sm text-gray-500">Key: {{ track.key }}</p>
                     <p class="text-xs text-gray-400">ID: {{ track.id }}</p>
                   </div>
-                  <div class="flex space-x-2">
-                    <button
-                      @click="handleDeleteTrack(track.id)"
-                      class="text-red-600 hover:text-red-800 text-sm"
-                    >
-                      Delete
-                    </button>
-                  </div>
+                  <UButton
+                    color="error"
+                    variant="ghost"
+                    size="sm"
+                    @click="handleDeleteTrack(track.id)"
+                  >
+                    Delete
+                  </UButton>
                 </div>
-              </div>
+              </UCard>
             </div>
           </div>
           <div v-else class="text-center py-4 text-gray-500">
@@ -163,29 +176,31 @@
 
         <!-- Artist Selector for Tracks -->
         <div v-if="artists.length > 0" class="mt-4">
-          <label class="block text-sm font-medium text-gray-700 mb-2">View tracks for:</label>
-          <select
-            v-model="selectedArtistId"
-            @change="loadTracks"
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-          >
-            <option value="">Select an artist</option>
-            <option v-for="artist in artists" :key="artist.id" :value="artist.id">
-              {{ artist.name }}
-            </option>
-          </select>
+          <div class="space-y-2">
+            <label for="view-artist" class="block text-sm font-medium text-gray-700">
+              View tracks for:
+            </label>
+            <USelect
+              id="view-artist"
+              v-model="selectedArtistId"
+              :items="artistOptions"
+              placeholder="Select an artist"
+              @update:model-value="loadTracks"
+            />
+          </div>
         </div>
-      </div>
+      </UCard>
     </div>
 
     <!-- Messages -->
-    <div
+    <UAlert
       v-if="message"
-      class="mt-4 p-4 rounded-md"
-      :class="messageType === 'error' ? 'bg-red-50 text-red-800' : 'bg-green-50 text-green-800'"
+      :color="messageType === 'error' ? 'error' : 'success'"
+      variant="soft"
+      class="mt-4"
     >
       {{ message }}
-    </div>
+    </UAlert>
   </div>
 </template>
 
@@ -219,6 +234,14 @@ const newTrack = ref({
   name: '',
   key: '',
   artist_id: '',
+})
+
+// Convert artists to USelect options format
+const artistOptions = computed(() => {
+  return artists.value.map(artist => ({
+    label: artist.name,
+    value: artist.id,
+  }))
 })
 
 // Wait for user to be available before loading

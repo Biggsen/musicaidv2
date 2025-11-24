@@ -11,67 +11,64 @@
         </p>
       </div>
 
-      <form class="mt-8 space-y-6" @submit.prevent="handleLogin">
-        <div v-if="registered" class="rounded-md bg-green-50 p-4">
-          <div class="flex">
-            <div class="ml-3">
-              <h3 class="text-sm font-medium text-green-800">
-                Account created! Please check your email to confirm your account, then sign in.
-              </h3>
-            </div>
-          </div>
-        </div>
+      <UCard class="bg-white">
+        <form class="space-y-6" @submit.prevent="handleLogin">
+          <UAlert
+            v-if="registered"
+            color="success"
+            variant="soft"
+            title="Account created!"
+            description="Please check your email to confirm your account, then sign in."
+          />
 
-        <div v-if="error" class="rounded-md bg-red-50 p-4">
-          <div class="flex">
-            <div class="ml-3">
-              <h3 class="text-sm font-medium text-red-800">
-                {{ error }}
-              </h3>
-            </div>
-          </div>
-        </div>
+          <UAlert
+            v-if="error"
+            color="error"
+            variant="soft"
+            :title="error"
+          />
 
-        <div class="rounded-md shadow-sm -space-y-px">
-          <div>
-            <label for="email" class="sr-only">Email address</label>
-            <input
+          <div class="space-y-2">
+            <label for="email" class="block text-sm font-medium text-gray-700">
+              Email address
+            </label>
+            <UInput
               id="email"
               v-model="email"
-              name="email"
               type="email"
+              placeholder="Email address"
               autocomplete="email"
               required
-              class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-              placeholder="Email address"
+              class="bg-white"
             />
           </div>
-          <div>
-            <label for="password" class="sr-only">Password</label>
-            <input
+
+          <div class="space-y-2">
+            <label for="password" class="block text-sm font-medium text-gray-700">
+              Password
+            </label>
+            <UInput
               id="password"
               v-model="password"
-              name="password"
               type="password"
+              placeholder="Password"
               autocomplete="current-password"
               required
-              class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-              placeholder="Password"
+              class="bg-white"
             />
           </div>
-        </div>
 
-        <div>
-          <button
+          <UButton
             type="submit"
-            :disabled="loading"
-            class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            :loading="loading"
+            color="primary"
+            block
+            size="lg"
           >
-            <span v-if="loading">Signing in...</span>
-            <span v-else>Sign in</span>
-          </button>
-        </div>
-      </form>
+            Sign in
+          </UButton>
+        </form>
+      </UCard>
     </div>
   </div>
 </template>

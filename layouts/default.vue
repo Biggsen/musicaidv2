@@ -26,6 +26,13 @@
               >
                 About
               </NuxtLink>
+              <NuxtLink
+                to="/test-crud"
+                class="text-gray-500 hover:text-gray-900 px-3 py-2 text-sm font-medium transition-colors"
+                :class="{ 'text-blue-600': $route.path === '/test-crud' }"
+              >
+                Test
+              </NuxtLink>
             </div>
           </div>
 
@@ -35,19 +42,32 @@
               <template v-if="user">
                 <div class="flex items-center space-x-3">
                   <span class="text-sm text-gray-700">{{ userProfile?.name || user.email }}</span>
-                  <button
+                  <UButton
                     @click="handleLogout"
-                    class="text-sm text-gray-500 hover:text-gray-900 px-3 py-2 rounded-md transition-colors"
+                    color="primary"
+                    variant="ghost"
+                    size="sm"
                   >
                     Logout
-                  </button>
+                  </UButton>
                 </div>
               </template>
               <template v-else>
-                <NuxtLink to="/login" class="text-sm text-gray-700 hover:text-gray-900 px-3 py-2">
+                <UButton
+                  to="/login"
+                  color="primary"
+                  variant="ghost"
+                  size="sm"
+                >
                   Login
-                </NuxtLink>
-                <NuxtLink to="/register" class="btn-primary"> Get Started </NuxtLink>
+                </UButton>
+                <UButton
+                  to="/register"
+                  color="primary"
+                  size="sm"
+                >
+                  Get Started
+                </UButton>
               </template>
             </ClientOnly>
           </div>
@@ -86,18 +106,28 @@
           >
             About
           </NuxtLink>
+          <NuxtLink
+            to="/test-crud"
+            class="block px-3 py-2 text-base font-medium text-gray-500 hover:text-gray-900"
+            @click="mobileMenuOpen = false"
+          >
+            Test
+          </NuxtLink>
           <ClientOnly>
             <template v-if="user">
               <div class="border-t border-gray-200 pt-2 mt-2">
                 <div class="px-3 py-2 text-base font-medium text-gray-700">
                   {{ userProfile?.name || user.email }}
                 </div>
-                <button
+                <UButton
                   @click="handleLogout"
-                  class="block w-full text-left px-3 py-2 text-base font-medium text-gray-500 hover:text-gray-900"
+                  color="primary"
+                  variant="ghost"
+                  class="w-full justify-start"
+                  size="sm"
                 >
                   Logout
-                </button>
+                </UButton>
               </div>
             </template>
             <template v-else>
