@@ -12,13 +12,13 @@ export default defineNuxtConfig({
     '@nuxt/scripts',
     '@nuxt/test-utils',
     '@pinia/nuxt',
-    '@nuxtjs/supabase'
+    '@nuxtjs/supabase',
   ],
 
   // TypeScript configuration
   typescript: {
     strict: true,
-    typeCheck: true
+    typeCheck: true,
   },
 
   // Enable SSR for full-stack capabilities
@@ -27,16 +27,16 @@ export default defineNuxtConfig({
   // API configuration
   nitro: {
     experimental: {
-      wasm: true
-    }
+      wasm: true,
+    },
   },
 
   // CSS configuration
   css: ['~/assets/css/main.css'],
-  
+
   // Experimental features to help with hydration
   experimental: {
-    payloadExtraction: false
+    payloadExtraction: false,
   },
 
   // Supabase configuration
@@ -44,14 +44,14 @@ export default defineNuxtConfig({
     redirectOptions: {
       login: '/login',
       callback: '/auth/callback',
-      exclude: ['/', '/about', '/login', '/register', '/auth/callback']
-    }
+      exclude: ['/', '/about', '/login', '/register', '/auth/callback'],
+    },
   },
 
   // Runtime config for environment variables
   runtimeConfig: {
     public: {
-      apiBase: process.env.NUXT_PUBLIC_API_BASE || '/api'
-    }
-  }
+      apiBase: process.env.NUXT_PUBLIC_API_BASE || '/api',
+    },
+  },
 })

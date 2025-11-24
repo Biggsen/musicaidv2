@@ -80,11 +80,7 @@ export const useTracks = () => {
 
   // Get a single track by ID
   const getTrack = async (id: string): Promise<Track | null> => {
-    const { data, error } = await supabase
-      .from('tracks')
-      .select('*')
-      .eq('id', id)
-      .single()
+    const { data, error } = await supabase.from('tracks').select('*').eq('id', id).single()
 
     if (error) {
       throw error
@@ -95,11 +91,7 @@ export const useTracks = () => {
 
   // Create a new track
   const createTrack = async (track: TrackInsert): Promise<Track> => {
-    const { data, error } = await supabase
-      .from('tracks')
-      .insert(track)
-      .select()
-      .single()
+    const { data, error } = await supabase.from('tracks').insert(track).select().single()
 
     if (error) {
       throw error
@@ -126,10 +118,7 @@ export const useTracks = () => {
 
   // Delete a track
   const deleteTrack = async (id: string): Promise<void> => {
-    const { error } = await supabase
-      .from('tracks')
-      .delete()
-      .eq('id', id)
+    const { error } = await supabase.from('tracks').delete().eq('id', id)
 
     if (error) {
       throw error
@@ -141,7 +130,6 @@ export const useTracks = () => {
     getTrack,
     createTrack,
     updateTrack,
-    deleteTrack
+    deleteTrack,
   }
 }
-

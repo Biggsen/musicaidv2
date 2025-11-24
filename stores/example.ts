@@ -3,27 +3,27 @@ import { defineStore } from 'pinia'
 export const useExampleStore = defineStore('example', {
   state: () => ({
     count: 0,
-    message: 'Hello from Pinia!'
+    message: 'Hello from Pinia!',
   }),
 
   getters: {
-    doubleCount: (state) => state.count * 2,
-    formattedMessage: (state) => `📱 ${state.message}`
+    doubleCount: state => state.count * 2,
+    formattedMessage: state => `📱 ${state.message}`,
   },
 
   actions: {
     increment() {
       this.count++
     },
-    
+
     decrement() {
       this.count--
     },
-    
+
     setMessage(newMessage: string) {
       this.message = newMessage
     },
-    
+
     async fetchData() {
       // Example async action
       try {
@@ -33,6 +33,6 @@ export const useExampleStore = defineStore('example', {
       } catch (error) {
         console.error('Failed to fetch data:', error)
       }
-    }
-  }
-}) 
+    },
+  },
+})

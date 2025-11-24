@@ -16,16 +16,19 @@ All API endpoints (except public ones) require authentication via session cookie
 ### Authentication Methods
 
 #### Session-Based Authentication
+
 ```http
 Cookie: session_id=abc123; HttpOnly; Secure; SameSite=Lax
 ```
 
 #### Token-Based Authentication
+
 ```http
 Authorization: Bearer <jwt_token>
 ```
 
 #### API Key Authentication
+
 ```http
 X-API-Key: <api_key>
 ```
@@ -35,6 +38,7 @@ X-API-Key: <api_key>
 All API responses follow a consistent format:
 
 ### Success Response
+
 ```json
 {
   "success": true,
@@ -48,6 +52,7 @@ All API responses follow a consistent format:
 ```
 
 ### Error Response
+
 ```json
 {
   "success": false,
@@ -84,9 +89,11 @@ All API responses follow a consistent format:
 ### Authentication Endpoints
 
 #### POST /api/auth/login
+
 Authenticate a user and create session.
 
 **Request Body:**
+
 ```json
 {
   "email": "user@example.com",
@@ -96,6 +103,7 @@ Authenticate a user and create session.
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -114,9 +122,11 @@ Authenticate a user and create session.
 ```
 
 #### POST /api/auth/register
+
 Register a new user account.
 
 **Request Body:**
+
 ```json
 {
   "name": "User Name",
@@ -127,15 +137,18 @@ Register a new user account.
 ```
 
 **Validation Rules:**
+
 - Name: Required, 1-100 characters
 - Email: Required, valid email format, unique
 - Password: Required, minimum 8 characters, complexity rules
 - Password confirmation: Must match password
 
 #### POST /api/auth/logout
+
 End user session.
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -144,9 +157,11 @@ End user session.
 ```
 
 #### POST /api/auth/forgot-password
+
 Request password reset email.
 
 **Request Body:**
+
 ```json
 {
   "email": "user@example.com"
@@ -154,9 +169,11 @@ Request password reset email.
 ```
 
 #### POST /api/auth/reset-password
+
 Reset user password with token.
 
 **Request Body:**
+
 ```json
 {
   "token": "reset_token",
@@ -168,9 +185,11 @@ Reset user password with token.
 ### User Endpoints
 
 #### GET /api/users/profile
+
 Get current user profile and associated artists.
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -192,9 +211,11 @@ Get current user profile and associated artists.
 ```
 
 #### PUT /api/users/profile
+
 Update current user profile.
 
 **Request Body:**
+
 ```json
 {
   "name": "Updated Name",
@@ -203,9 +224,11 @@ Update current user profile.
 ```
 
 #### PUT /api/users/password
+
 Change user password.
 
 **Request Body:**
+
 ```json
 {
   "current_password": "current123",
@@ -217,9 +240,11 @@ Change user password.
 ### Artist Endpoints
 
 #### GET /api/artists
+
 Get all artists accessible to the current user.
 
 **Query Parameters:**
+
 - `page`: Page number (default: 1)
 - `limit`: Items per page (default: 10, max: 100)
 - `search`: Search term for artist name
@@ -227,6 +252,7 @@ Get all artists accessible to the current user.
 - `order`: Sort order (asc, desc)
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -262,9 +288,11 @@ Get all artists accessible to the current user.
 ```
 
 #### POST /api/artists
+
 Create a new artist.
 
 **Request Body:**
+
 ```json
 {
   "name": "New Artist",
@@ -273,13 +301,16 @@ Create a new artist.
 ```
 
 **Validation Rules:**
+
 - Name: Required, 1-100 characters, unique slug generation
 - Template ID: Optional, must exist and be accessible
 
 #### GET /api/artists/{id}
+
 Get a specific artist by ID.
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -319,9 +350,11 @@ Get a specific artist by ID.
 ```
 
 #### PUT /api/artists/{id}
+
 Update an artist.
 
 **Request Body:**
+
 ```json
 {
   "name": "Updated Artist Name",
@@ -330,9 +363,11 @@ Update an artist.
 ```
 
 #### DELETE /api/artists/{id}
+
 Delete an artist (requires owner role).
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -343,9 +378,11 @@ Delete an artist (requires owner role).
 ### Track Endpoints
 
 #### GET /api/tracks
+
 Get tracks with filtering and pagination.
 
 **Query Parameters:**
+
 - `artist_id`: Filter by artist ID
 - `album_id`: Filter by album ID
 - `status`: Filter by track status
@@ -357,6 +394,7 @@ Get tracks with filtering and pagination.
 - `order`: Sort order (asc, desc)
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -403,21 +441,21 @@ Get tracks with filtering and pagination.
     },
     "filters": {
       "available_statuses": [
-        {"id": "status1", "name": "Writing"},
-        {"id": "status2", "name": "Recording"}
+        { "id": "status1", "name": "Writing" },
+        { "id": "status2", "name": "Recording" }
       ],
-      "available_artists": [
-        {"id": "artist1", "name": "Artist One"}
-      ]
+      "available_artists": [{ "id": "artist1", "name": "Artist One" }]
     }
   }
 }
 ```
 
 #### POST /api/tracks
+
 Create a new track.
 
 **Request Body:**
+
 ```json
 {
   "name": "New Track",
@@ -433,9 +471,11 @@ Create a new track.
 ```
 
 #### GET /api/tracks/{id}
+
 Get a specific track with full details.
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -521,9 +561,11 @@ Get a specific track with full details.
 ```
 
 #### PUT /api/tracks/{id}
+
 Update a track.
 
 **Request Body:**
+
 ```json
 {
   "name": "Updated Track Name",
@@ -536,12 +578,15 @@ Update a track.
 ```
 
 #### DELETE /api/tracks/{id}
+
 Delete a track.
 
 #### PUT /api/tracks/{id}/status
+
 Move track to a different status.
 
 **Request Body:**
+
 ```json
 {
   "status_id": "new_status_id",
@@ -552,18 +597,22 @@ Move track to a different status.
 ### Album Endpoints
 
 #### GET /api/albums
+
 Get albums with filtering and pagination.
 
 **Query Parameters:**
+
 - `artist_id`: Filter by artist ID
 - `search`: Search in album names
 - `page`: Page number (default: 1)
 - `limit`: Items per page (default: 10, max: 100)
 
 #### POST /api/albums
+
 Create a new album.
 
 **Request Body:**
+
 ```json
 {
   "name": "New Album",
@@ -574,23 +623,28 @@ Create a new album.
 ```
 
 #### GET /api/albums/{id}
+
 Get album details with tracks.
 
 #### PUT /api/albums/{id}
+
 Update album information.
 
 #### DELETE /api/albums/{id}
+
 Delete an album.
 
 #### PUT /api/albums/{id}/tracks
+
 Update track order in album.
 
 **Request Body:**
+
 ```json
 {
   "track_orders": [
-    {"track_id": "track1", "order": 1},
-    {"track_id": "track2", "order": 2}
+    { "track_id": "track1", "order": 1 },
+    { "track_id": "track2", "order": 2 }
   ]
 }
 ```
@@ -598,29 +652,37 @@ Update track order in album.
 ### Template Endpoints
 
 #### GET /api/templates
+
 Get available templates for current user.
 
 #### POST /api/templates
+
 Create a new template.
 
 #### GET /api/templates/{id}
+
 Get template with all statuses and steps.
 
 #### PUT /api/templates/{id}
+
 Update template (only if not published).
 
 #### DELETE /api/templates/{id}
+
 Delete template (only if not published and no tracks using it).
 
 #### POST /api/templates/{id}/publish
+
 Publish a template (makes it immutable).
 
 ### File Upload Endpoints
 
 #### POST /api/upload/audio
+
 Upload audio file for a track.
 
 **Request**: Multipart form data
+
 - `track_id`: string
 - `name`: string
 - `description`: string (optional)
@@ -628,9 +690,11 @@ Upload audio file for a track.
 - `file`: file
 
 #### POST /api/upload/image
+
 Upload image file (album artwork, artist photos).
 
 **Request**: Multipart form data
+
 - `entity_type`: string (album, artist, user)
 - `entity_id`: string
 - `file`: file
@@ -638,21 +702,26 @@ Upload image file (album artwork, artist photos).
 ### Notes Endpoints
 
 #### GET /api/notes
+
 Get notes with filtering.
 
 **Query Parameters:**
+
 - `track_id`: Filter by track ID
 - `status_id`: Filter by status ID
 - `step_id`: Filter by step ID
 - `completed`: Filter by completion status
 
 #### POST /api/notes
+
 Create a new note.
 
 #### PUT /api/notes/{id}
+
 Update a note.
 
 #### DELETE /api/notes/{id}
+
 Delete a note.
 
 ## Error Handling
@@ -670,6 +739,7 @@ Delete a note.
 ### Error Response Examples
 
 **Validation Error:**
+
 ```json
 {
   "success": false,
@@ -685,6 +755,7 @@ Delete a note.
 ```
 
 **Authorization Error:**
+
 ```json
 {
   "success": false,
@@ -707,6 +778,7 @@ Delete a note.
 - **Search endpoints**: 30 requests per minute per user
 
 Rate limit headers included in responses:
+
 ```http
 X-RateLimit-Limit: 100
 X-RateLimit-Remaining: 95
@@ -716,6 +788,7 @@ X-RateLimit-Reset: 1640995200
 ## Versioning
 
 API versioning strategy options:
+
 1. **URL versioning**: `/api/v1/artists`
 2. **Header versioning**: `Accept: application/vnd.musicaid.v1+json`
 3. **Query parameter**: `/api/artists?version=1`
@@ -725,8 +798,9 @@ Current version: `v1`
 ## Testing
 
 All endpoints should include:
+
 - Unit tests for business logic
 - Integration tests for database operations
 - API endpoint tests for request/response validation
 - Authentication and authorization tests
-- Performance tests for high-load scenarios 
+- Performance tests for high-load scenarios

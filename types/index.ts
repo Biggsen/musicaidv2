@@ -57,4 +57,4 @@ export interface NavItem {
   to: string
   icon?: string
   external?: boolean
-} 
+}

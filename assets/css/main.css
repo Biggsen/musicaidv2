@@ -1,12 +1,12 @@
-@import "tailwindcss";
-@import "@nuxt/ui";
+@import 'tailwindcss';
+@import '@nuxt/ui';
 
 /* Custom base styles */
 @layer base {
   html {
     @apply antialiased;
   }
-  
+
   body {
     @apply bg-gray-50 text-gray-900;
   }
@@ -17,8 +17,8 @@
   .btn-primary {
     @apply bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors;
   }
-  
+
   .card {
     @apply bg-white rounded-lg shadow-sm border border-gray-200 p-6;
   }
-} 
+}

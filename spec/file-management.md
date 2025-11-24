@@ -7,6 +7,7 @@ This document defines the file management system for the MusicAid application, f
 ## File Storage Architecture
 
 ### Cloud Object Storage
+
 - **Primary Storage**: S3-compatible object storage for all file uploads (AWS S3, Google Cloud Storage, Azure Blob Storage, MinIO, Backblaze B2, etc.)
 - **CDN Integration**: Content Delivery Network for global distribution and caching
 - **Cost Efficiency**: Pay-as-you-go pricing model with tiered storage options
@@ -14,6 +15,7 @@ This document defines the file management system for the MusicAid application, f
 - **Redundancy**: Multi-zone replication for data durability
 
 ### File Organization Structure
+
 ```
 /audio/
   /{artist_id}/
@@ -39,6 +41,7 @@ This document defines the file management system for the MusicAid application, f
 ```
 
 ### Storage Tiers
+
 - **Hot Storage**: Frequently accessed files (recent uploads, active projects)
 - **Cool Storage**: Infrequently accessed files (older projects, archived content)
 - **Archive Storage**: Long-term storage for completed projects (lowest cost)
@@ -46,7 +49,9 @@ This document defines the file management system for the MusicAid application, f
 ## File Types and Limits
 
 ### Audio Files
+
 **Supported Formats**:
+
 - **MP3**: Up to 320kbps CBR/VBR
 - **WAV**: Up to 192kHz/32-bit (48kHz/24-bit recommended)
 - **FLAC**: Lossless compression
@@ -55,19 +60,23 @@ This document defines the file management system for the MusicAid application, f
 - **AIFF**: Apple's audio format
 
 **File Size Limits**:
+
 - **Maximum Size**: 500MB per file (configurable)
 - **Recommended Size**: Under 100MB for optimal performance
 - **Batch Upload**: Up to 2GB total per batch
 - **Total Storage**: Configurable per plan/user
 
 **Quality Guidelines**:
+
 - **Demo/Reference**: MP3 128-192kbps or AAC equivalent
 - **Working Files**: WAV 44.1kHz/16-bit minimum
 - **Master Files**: WAV 48kHz/24-bit or higher
 - **Archive Files**: FLAC for lossless compression
 
 ### Image Files
+
 **Supported Formats**:
+
 - **JPEG**: Optimized for photographs and complex images
 - **PNG**: Optimized for graphics with transparency
 - **WebP**: Modern format with superior compression
@@ -75,12 +84,14 @@ This document defines the file management system for the MusicAid application, f
 - **SVG**: Vector graphics (with sanitization)
 
 **File Size Limits**:
+
 - **Maximum Size**: 25MB per file
 - **Recommended Size**: Under 5MB
 - **Dimensions**: Up to 8192x8192 pixels
 - **Thumbnail Generation**: Automatic for images > 1MB
 
 **Use Cases**:
+
 - **Album Artwork**: 1400x1400px minimum, square aspect ratio
 - **Artist Photos**: Various aspect ratios, minimum 800px width
 - **User Avatars**: 400x400px recommended, square aspect ratio
@@ -89,13 +100,16 @@ This document defines the file management system for the MusicAid application, f
 ## File Upload System
 
 ### Upload Architecture
+
 **Upload Methods**:
+
 - **Direct Upload**: Client uploads directly to object storage using signed URLs
 - **Chunked Upload**: Large files uploaded in chunks for reliability
 - **Resume Upload**: Interrupted uploads can be resumed
 - **Background Processing**: Post-upload processing for optimization
 
 ### Upload Flow
+
 1. **Client Request**: Request upload permission with file metadata
 2. **Server Validation**: Validate file type, size, and user permissions
 3. **Signed URL Generation**: Generate time-limited upload URL
@@ -108,9 +122,11 @@ This document defines the file management system for the MusicAid application, f
 ### Upload API Endpoints
 
 #### POST /api/upload/initialize
+
 Initialize file upload and get signed URL.
 
 **Request**:
+
 ```json
 {
   "file_name": "final_mix_v2.wav",
@@ -124,6 +140,7 @@ Initialize file upload and get signed URL.
 ```
 
 **Response**:
+
 ```json
 {
   "success": true,
@@ -141,9 +158,11 @@ Initialize file upload and get signed URL.
 ```
 
 #### POST /api/upload/complete
+
 Complete file upload and create database record.
 
 **Request**:
+
 ```json
 {
   "upload_id": "upload_456",
@@ -154,6 +173,7 @@ Complete file upload and create database record.
 ```
 
 **Response**:
+
 ```json
 {
   "success": true,
@@ -176,9 +196,11 @@ Complete file upload and create database record.
 ```
 
 #### POST /api/upload/multipart/initialize
+
 Initialize multipart upload for large files.
 
 **Request**:
+
 ```json
 {
   "file_name": "large_session.wav",
@@ -193,20 +215,22 @@ Initialize multipart upload for large files.
 ### File Processing
 
 #### Audio Processing
+
 ```typescript
 interface AudioMetadata {
-  duration: number; // seconds
-  bitrate: number; // kbps
-  sample_rate: number; // Hz
-  channels: number; // 1 = mono, 2 = stereo
-  format: string; // 'mp3', 'wav', 'flac'
-  size: number; // bytes
-  codec?: string; // specific codec information
-  bit_depth?: number; // for uncompressed formats
+  duration: number // seconds
+  bitrate: number // kbps
+  sample_rate: number // Hz
+  channels: number // 1 = mono, 2 = stereo
+  format: string // 'mp3', 'wav', 'flac'
+  size: number // bytes
+  codec?: string // specific codec information
+  bit_depth?: number // for uncompressed formats
 }
 ```
 
 **Processing Pipeline**:
+
 1. **Metadata Extraction**: Extract audio properties using audio processing libraries
 2. **Waveform Generation**: Generate visual waveform data for UI display
 3. **Thumbnail Creation**: Generate spectrogram images for audio visualization
@@ -215,20 +239,22 @@ interface AudioMetadata {
 6. **Validation**: Verify file integrity and format compliance
 
 #### Image Processing
+
 ```typescript
 interface ImageMetadata {
-  width: number;
-  height: number;
-  format: string; // 'jpeg', 'png', 'webp'
-  size: number; // bytes
-  aspect_ratio: number;
-  color_space?: string;
-  dpi?: number;
-  has_transparency?: boolean;
+  width: number
+  height: number
+  format: string // 'jpeg', 'png', 'webp'
+  size: number // bytes
+  aspect_ratio: number
+  color_space?: string
+  dpi?: number
+  has_transparency?: boolean
 }
 ```
 
 **Processing Pipeline**:
+
 1. **Metadata Extraction**: Extract image properties and EXIF data
 2. **Thumbnail Generation**: Create multiple sizes (150px, 300px, 600px, 1200px)
 3. **Format Optimization**: Convert to modern formats (WebP, AVIF) where supported
@@ -239,141 +265,151 @@ interface ImageMetadata {
 ## Database Schema
 
 ### File Storage Models
+
 ```typescript
 interface AudioFile {
-  id: string;
-  name: string;
-  slug: string;
-  track_id: string;
-  
+  id: string
+  name: string
+  slug: string
+  track_id: string
+
   // Storage information
-  file_key: string; // Object storage key
-  file_url: string; // CDN URL
-  download_url: string; // Signed download URL
-  
+  file_key: string // Object storage key
+  file_url: string // CDN URL
+  download_url: string // Signed download URL
+
   // File metadata
-  size: number; // bytes
-  format: string; // 'mp3', 'wav', 'flac'
-  duration?: number; // seconds
-  bitrate?: number; // kbps
-  sample_rate?: number; // Hz
-  channels?: number; // 1 = mono, 2 = stereo
-  bit_depth?: number; // for uncompressed formats
-  
+  size: number // bytes
+  format: string // 'mp3', 'wav', 'flac'
+  duration?: number // seconds
+  bitrate?: number // kbps
+  sample_rate?: number // Hz
+  channels?: number // 1 = mono, 2 = stereo
+  bit_depth?: number // for uncompressed formats
+
   // Organization
-  category: 'master' | 'stem' | 'demo' | 'raw' | 'archive';
-  description?: string;
-  
+  category: 'master' | 'stem' | 'demo' | 'raw' | 'archive'
+  description?: string
+
   // Processing status
-  processing_status: 'pending' | 'processing' | 'completed' | 'failed';
-  processing_error?: string;
-  
+  processing_status: 'pending' | 'processing' | 'completed' | 'failed'
+  processing_error?: string
+
   // Audit fields
-  created_at: Date;
-  updated_at: Date;
-  created_by: string;
-  updated_by?: string;
+  created_at: Date
+  updated_at: Date
+  created_by: string
+  updated_by?: string
 }
 
 interface ImageFile {
-  id: string;
-  name: string;
-  entity_type: 'album' | 'artist' | 'user';
-  entity_id: string;
-  
+  id: string
+  name: string
+  entity_type: 'album' | 'artist' | 'user'
+  entity_id: string
+
   // Storage information
-  file_key: string;
-  file_url: string;
+  file_key: string
+  file_url: string
   thumbnail_urls: {
-    small: string;
-    medium: string;
-    large: string;
-  };
-  
+    small: string
+    medium: string
+    large: string
+  }
+
   // File metadata
-  size: number;
-  format: string;
-  width: number;
-  height: number;
-  aspect_ratio: number;
-  
+  size: number
+  format: string
+  width: number
+  height: number
+  aspect_ratio: number
+
   // Processing status
-  processing_status: 'pending' | 'processing' | 'completed' | 'failed';
-  processing_error?: string;
-  
+  processing_status: 'pending' | 'processing' | 'completed' | 'failed'
+  processing_error?: string
+
   // Audit fields
-  created_at: Date;
-  updated_at: Date;
-  created_by: string;
+  created_at: Date
+  updated_at: Date
+  created_by: string
 }
 
 interface FileUpload {
-  id: string;
-  upload_key: string;
-  file_name: string;
-  file_size: number;
-  content_type: string;
-  
+  id: string
+  upload_key: string
+  file_name: string
+  file_size: number
+  content_type: string
+
   // Upload status
-  status: 'initialized' | 'uploading' | 'completed' | 'failed' | 'expired';
-  upload_url?: string;
-  expires_at: Date;
-  
+  status: 'initialized' | 'uploading' | 'completed' | 'failed' | 'expired'
+  upload_url?: string
+  expires_at: Date
+
   // Progress tracking
-  bytes_uploaded: number;
-  chunks_completed?: number;
-  total_chunks?: number;
-  
+  bytes_uploaded: number
+  chunks_completed?: number
+  total_chunks?: number
+
   // Error information
-  error_message?: string;
-  error_code?: string;
-  
+  error_message?: string
+  error_code?: string
+
   // Associated entity
-  entity_type: string;
-  entity_id: string;
-  
+  entity_type: string
+  entity_id: string
+
   // Audit fields
-  created_at: Date;
-  updated_at: Date;
-  created_by: string;
+  created_at: Date
+  updated_at: Date
+  created_by: string
 }
 ```
 
 ## File Access and Security
 
 ### Access Control
+
 **Permission-Based Access**:
+
 - Files inherit permissions from parent entities (track, album, artist)
 - Users can only access files for artists they collaborate with
 - Role-based permissions for different file operations
 
 **File Operations**:
+
 - **Read**: View file metadata and generate download URLs
 - **Upload**: Add new files to entities user has access to
 - **Delete**: Remove files (usually restricted to owners)
 - **Update**: Modify file metadata and descriptions
 
 ### Signed URLs
+
 **Download URLs**:
+
 - Time-limited signed URLs for secure downloads
 - Configurable expiration (1 hour default, up to 7 days)
 - IP-based restrictions (optional)
 - Single-use URLs for sensitive content
 
 **Upload URLs**:
+
 - Pre-signed URLs for direct-to-storage uploads
 - Short expiration (15 minutes default)
 - Size and content-type restrictions
 - Callback URL for completion notification
 
 ### Security Measures
+
 **File Validation**:
+
 - Content-type verification
 - File signature validation
 - Malware scanning for uploaded files
 - Size and format restrictions
 
 **Access Logging**:
+
 - Log all file access and modifications
 - Track download patterns and unusual activity
 - Audit trail for file deletions
@@ -382,26 +418,32 @@ interface FileUpload {
 ## Performance Optimization
 
 ### Caching Strategy
+
 **CDN Caching**:
+
 - Static files cached at edge locations globally
 - Cache headers for optimal browser caching
 - Automatic cache invalidation on file updates
 - Separate cache policies for different file types
 
 **Application Caching**:
+
 - File metadata cached in application layer
 - Signed URL caching with automatic refresh
 - Thumbnail URLs cached for quick access
 - Search index caching for file discovery
 
 ### Optimization Techniques
+
 **Lazy Loading**:
+
 - Load audio/image files only when needed
 - Progressive loading for large files
 - Thumbnail previews before full resolution
 - Streaming for audio playback
 
 **Compression**:
+
 - Automatic compression for supported formats
 - Multiple quality levels for different use cases
 - Modern format support (WebP, AVIF, Opus)
@@ -412,9 +454,11 @@ interface FileUpload {
 ### File Operations
 
 #### GET /api/files/audio/{id}
+
 Get audio file metadata and download URL.
 
 **Response**:
+
 ```json
 {
   "success": true,
@@ -441,12 +485,15 @@ Get audio file metadata and download URL.
 ```
 
 #### DELETE /api/files/audio/{id}
+
 Delete audio file and remove from storage.
 
 #### PUT /api/files/audio/{id}
+
 Update audio file metadata.
 
 **Request**:
+
 ```json
 {
   "name": "Updated Mix Name",
@@ -456,12 +503,15 @@ Update audio file metadata.
 ```
 
 #### GET /api/files/images/{id}
+
 Get image file metadata and URLs.
 
 #### POST /api/files/batch-delete
+
 Delete multiple files in a single operation.
 
 **Request**:
+
 ```json
 {
   "file_ids": ["audio_123", "audio_456", "image_789"],
@@ -472,9 +522,11 @@ Delete multiple files in a single operation.
 ### File Search and Discovery
 
 #### GET /api/files/search
+
 Search for files across all accessible entities.
 
 **Query Parameters**:
+
 - `q`: Search query (file names, descriptions)
 - `type`: File type filter ('audio', 'image')
 - `format`: File format filter ('mp3', 'wav', 'jpeg', etc.)
@@ -490,26 +542,32 @@ Search for files across all accessible entities.
 ## Storage Management
 
 ### Cleanup and Maintenance
+
 **Automated Cleanup**:
+
 - Remove expired upload sessions
 - Clean up temporary files
 - Archive old files to cheaper storage tiers
 - Remove orphaned files without database records
 
 **Storage Monitoring**:
+
 - Track storage usage per user/artist
 - Monitor upload/download patterns
 - Alert on unusual storage consumption
 - Generate storage usage reports
 
 ### Backup and Recovery
+
 **Backup Strategy**:
+
 - Cross-region replication for critical files
 - Regular backup verification
 - Point-in-time recovery capabilities
 - Automated backup testing
 
 **Disaster Recovery**:
+
 - Multi-region storage setup
 - Recovery time objectives (RTO) planning
 - Data integrity verification
@@ -518,48 +576,58 @@ Search for files across all accessible entities.
 ## Implementation Guidelines
 
 ### Framework Considerations
+
 **Backend Implementation**:
+
 - Use cloud SDK for object storage operations
 - Implement async processing for file operations
 - Use job queues for background processing
 - Implement retry logic for failed operations
 
 **Frontend Implementation**:
+
 - Use direct-to-storage uploads to reduce server load
 - Implement progress indicators for uploads
 - Support drag-and-drop file uploads
 - Provide file preview capabilities
 
 ### Error Handling
+
 **Upload Errors**:
+
 - Network interruption recovery
 - File size limit exceeded
 - Invalid file format
 - Permission denied
 
 **Processing Errors**:
+
 - Corrupted file handling
 - Unsupported format errors
 - Processing timeout
 - Insufficient storage space
 
 ### Testing Strategy
+
 **Unit Tests**:
+
 - File validation functions
 - Metadata extraction
 - Permission checking
 - URL generation
 
 **Integration Tests**:
+
 - File upload workflows
 - Processing pipelines
 - Storage operations
 - API endpoints
 
 **Performance Tests**:
+
 - Large file uploads
 - Concurrent upload handling
 - CDN performance
 - Database query optimization
 
-This specification provides a comprehensive, technology-agnostic approach to file management that can be implemented using any cloud storage provider and backend framework while ensuring security, performance, and scalability. 
+This specification provides a comprehensive, technology-agnostic approach to file management that can be implemented using any cloud storage provider and backend framework while ensuring security, performance, and scalability.

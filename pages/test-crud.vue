@@ -9,7 +9,7 @@
       <!-- Artists Section -->
       <div class="card">
         <h2 class="text-2xl font-semibold text-gray-900 mb-4">Artists</h2>
-        
+
         <!-- Create Artist Form -->
         <div class="mb-6 p-4 bg-gray-50 rounded-lg">
           <h3 class="text-lg font-medium mb-3">Create Artist</h3>
@@ -34,11 +34,7 @@
                 placeholder="artist-slug"
               />
             </div>
-            <button
-              type="submit"
-              :disabled="creatingArtist"
-              class="w-full btn-primary"
-            >
+            <button type="submit" :disabled="creatingArtist" class="w-full btn-primary">
               {{ creatingArtist ? 'Creating...' : 'Create Artist' }}
             </button>
           </form>
@@ -47,9 +43,7 @@
         <!-- Artists List -->
         <div>
           <h3 class="text-lg font-medium mb-3">Existing Artists</h3>
-          <div v-if="loadingArtists" class="text-center py-4 text-gray-500">
-            Loading...
-          </div>
+          <div v-if="loadingArtists" class="text-center py-4 text-gray-500">Loading...</div>
           <div v-else-if="artists.length === 0" class="text-center py-4 text-gray-500">
             No artists yet. Create one above!
           </div>
@@ -82,7 +76,7 @@
       <!-- Tracks Section -->
       <div class="card">
         <h2 class="text-2xl font-semibold text-gray-900 mb-4">Tracks</h2>
-        
+
         <!-- Create Track Form -->
         <div class="mb-6 p-4 bg-gray-50 rounded-lg">
           <h3 class="text-lg font-medium mb-3">Create Track</h3>
@@ -133,9 +127,7 @@
         <!-- Tracks List -->
         <div>
           <h3 class="text-lg font-medium mb-3">Existing Tracks</h3>
-          <div v-if="loadingTracks" class="text-center py-4 text-gray-500">
-            Loading...
-          </div>
+          <div v-if="loadingTracks" class="text-center py-4 text-gray-500">Loading...</div>
           <div v-else-if="selectedArtistId">
             <div v-if="tracks.length === 0" class="text-center py-4 text-gray-500">
               No tracks for this artist yet.
@@ -187,7 +179,11 @@
     </div>
 
     <!-- Messages -->
-    <div v-if="message" class="mt-4 p-4 rounded-md" :class="messageType === 'error' ? 'bg-red-50 text-red-800' : 'bg-green-50 text-green-800'">
+    <div
+      v-if="message"
+      class="mt-4 p-4 rounded-md"
+      :class="messageType === 'error' ? 'bg-red-50 text-red-800' : 'bg-green-50 text-green-800'"
+    >
       {{ message }}
     </div>
   </div>
@@ -195,7 +191,7 @@
 
 <script setup lang="ts">
 definePageMeta({
-  middleware: 'auth'
+  middleware: 'auth',
 })
 
 import type { Artist } from '~/composables/useArtists'
@@ -216,13 +212,13 @@ const messageType = ref<'success' | 'error'>('success')
 
 const newArtist = ref({
   name: '',
-  slug: ''
+  slug: '',
 })
 
 const newTrack = ref({
   name: '',
   key: '',
-  artist_id: ''
+  artist_id: '',
 })
 
 // Wait for user to be available before loading
@@ -238,7 +234,7 @@ onMounted(async () => {
 })
 
 // Also watch for user changes
-watch(user, async (newUser) => {
+watch(user, async newUser => {
   if (newUser && artists.value.length === 0) {
     await loadArtists()
   }
@@ -260,7 +256,7 @@ const loadTracks = async () => {
     tracks.value = []
     return
   }
-  
+
   loadingTracks.value = true
   try {
     tracks.value = await getTracks(selectedArtistId.value)
@@ -304,7 +300,7 @@ const createNewTrack = async () => {
 
 const handleDeleteArtist = async (id: string) => {
   if (!confirm('Are you sure you want to delete this artist?')) return
-  
+
   try {
     await deleteArtist(id)
     showMessage('Artist deleted successfully!', 'success')
@@ -320,7 +316,7 @@ const handleDeleteArtist = async (id: string) => {
 
 const handleDeleteTrack = async (id: string) => {
   if (!confirm('Are you sure you want to delete this track?')) return
-  
+
   try {
     await deleteTrackFn(id)
     showMessage('Track deleted successfully!', 'success')
@@ -340,7 +336,6 @@ const showMessage = (msg: string, type: 'success' | 'error' = 'success') => {
 
 useSeoMeta({
   title: 'CRUD Test - MusicAid',
-  description: 'Test database operations'
+  description: 'Test database operations',
 })
 </script>
-

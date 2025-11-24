@@ -7,6 +7,7 @@ This document outlines the complete migration plan for rebuilding the MusicAid a
 ## Migration Strategy
 
 ### Approach: Complete Rebuild with Data Migration
+
 - **New Application**: Build entirely new application using modern web stack
 - **Data Export**: Extract data from existing Keystone.js/MongoDB system
 - **Data Import**: Import and transform data into new relational database schema
@@ -14,8 +15,9 @@ This document outlines the complete migration plan for rebuilding the MusicAid a
 - **Cutover**: Switch from old to new system when ready
 
 ### Timeline Estimate
+
 - **Phase 1 (Foundation)**: 2-3 weeks
-- **Phase 2 (Core Features)**: 3-4 weeks  
+- **Phase 2 (Core Features)**: 3-4 weeks
 - **Phase 3 (Advanced Features)**: 2-3 weeks
 - **Phase 4 (Migration & Testing)**: 1-2 weeks
 - **Phase 5 (Deployment & Monitoring)**: 1 week
@@ -26,13 +28,16 @@ This document outlines the complete migration plan for rebuilding the MusicAid a
 ### Week 1: Technology Selection and Setup
 
 #### Day 1-2: Technology Stack Decision
+
 **Frontend Framework Options**:
+
 - **React**: Mature ecosystem, extensive community, excellent tooling
-- **Vue.js**: Progressive framework, gentle learning curve, great documentation  
+- **Vue.js**: Progressive framework, gentle learning curve, great documentation
 - **Angular**: Full framework, TypeScript-first, enterprise-ready
 - **Svelte**: Compiled approach, small bundle sizes, modern design
 
 **Backend Framework Options**:
+
 - **Node.js**: Express, Fastify, Koa, or NestJS
 - **Python**: Django, FastAPI, or Flask
 - **TypeScript/Node**: Express with TypeScript, tRPC
@@ -42,11 +47,13 @@ This document outlines the complete migration plan for rebuilding the MusicAid a
 - **Ruby**: Ruby on Rails
 
 **Database Selection**:
+
 - **PostgreSQL**: Recommended for relational data with JSON support
 - **MySQL**: Alternative relational database
 - **SQLite**: For development and small deployments
 
 #### Day 3-4: Project Initialization
+
 ```bash
 # Example for a typical web application setup
 # Create project structure
@@ -61,11 +68,12 @@ git remote add origin <repository-url>
 npm init -y  # or equivalent for chosen stack
 # OR
 pip install -r requirements.txt  # Python
-# OR  
+# OR
 go mod init musicaid  # Go
 ```
 
 #### Day 5-7: Database and Environment Setup
+
 - [ ] Set up development database (PostgreSQL recommended)
 - [ ] Create database schema based on specification
 - [ ] Run initial migration scripts
@@ -92,6 +100,7 @@ flyway migrate
 ### Week 2: Core Architecture
 
 #### Day 8-10: Authentication System
+
 - [ ] Configure authentication framework
 - [ ] Implement user registration/login
 - [ ] Set up session management
@@ -99,6 +108,7 @@ flyway migrate
 - [ ] Build login/register pages
 
 **Framework-Specific Examples**:
+
 ```bash
 # Express.js with Passport
 npm install passport passport-local express-session
@@ -111,6 +121,7 @@ dotnet add package Microsoft.AspNetCore.Identity.EntityFrameworkCore
 ```
 
 #### Day 11-14: API Foundation and Basic UI
+
 - [ ] Set up API route structure
 - [ ] Implement error handling middleware
 - [ ] Create validation schemas
@@ -123,6 +134,7 @@ dotnet add package Microsoft.AspNetCore.Identity.EntityFrameworkCore
 ### Week 3: Artist Management
 
 #### Day 15-17: Artist CRUD Operations
+
 - [ ] Create Artist model and API routes
 - [ ] Implement artist creation, editing, deletion
 - [ ] Build artist listing page
@@ -130,6 +142,7 @@ dotnet add package Microsoft.AspNetCore.Identity.EntityFrameworkCore
 - [ ] Add artist search and filtering
 
 **Implementation Examples**:
+
 ```typescript
 // Express.js/Node.js example
 app.post('/api/artists', authenticateUser, async (req, res) => {
@@ -145,6 +158,7 @@ class ArtistViewSet(ModelViewSet):
 ```
 
 #### Day 18-21: User-Artist Relationships
+
 - [ ] Implement user invitation system
 - [ ] Create role-based permissions
 - [ ] Build user management interface
@@ -154,6 +168,7 @@ class ArtistViewSet(ModelViewSet):
 ### Week 4: Track Management
 
 #### Day 22-24: Track CRUD Operations
+
 - [ ] Create Track model and API routes
 - [ ] Implement track creation form
 - [ ] Build track listing with filtering
@@ -161,6 +176,7 @@ class ArtistViewSet(ModelViewSet):
 - [ ] Add track metadata management
 
 #### Day 25-28: Track Status System
+
 - [ ] Implement TrackStatus and Step models
 - [ ] Create status progression logic
 - [ ] Build status selection interface
@@ -170,6 +186,7 @@ class ArtistViewSet(ModelViewSet):
 ### Week 5: Template System
 
 #### Day 29-31: Template Management
+
 - [ ] Create Template model and API routes
 - [ ] Build template creation interface
 - [ ] Implement template-track association
@@ -177,6 +194,7 @@ class ArtistViewSet(ModelViewSet):
 - [ ] Create template preview functionality
 
 #### Day 32-35: Workflow Engine
+
 - [ ] Implement workflow transition logic
 - [ ] Create status change validation
 - [ ] Build workflow visualization
@@ -188,6 +206,7 @@ class ArtistViewSet(ModelViewSet):
 ### Week 6: File Management
 
 #### Day 36-38: File Upload System
+
 - [ ] Set up cloud object storage (AWS S3, Google Cloud, Azure, etc.)
 - [ ] Implement audio file upload API
 - [ ] Create image upload for albums/artists
@@ -195,6 +214,7 @@ class ArtistViewSet(ModelViewSet):
 - [ ] Build file management interface
 
 **Cloud Storage Setup Examples**:
+
 ```bash
 # AWS S3
 aws configure
@@ -208,6 +228,7 @@ az storage account create --name musicaidfiles
 ```
 
 #### Day 39-42: Audio Management
+
 - [ ] Create Audio model and API routes
 - [ ] Implement audio player component
 - [ ] Add audio file organization
@@ -217,6 +238,7 @@ az storage account create --name musicaidfiles
 ### Week 7: Recording & Sessions
 
 #### Day 43-45: Recording Management
+
 - [ ] Create Record and Session models
 - [ ] Implement recording tracking
 - [ ] Build session management interface
@@ -224,6 +246,7 @@ az storage account create --name musicaidfiles
 - [ ] Create recording workflow
 
 #### Day 46-49: Notes and Comments
+
 - [ ] Create Note model and API routes
 - [ ] Implement note creation/editing
 - [ ] Build note display interface
@@ -233,6 +256,7 @@ az storage account create --name musicaidfiles
 ### Week 8: Album Management
 
 #### Day 50-52: Album CRUD Operations
+
 - [ ] Create Album model and API routes
 - [ ] Implement album creation/editing
 - [ ] Build album listing page
@@ -240,6 +264,7 @@ az storage account create --name musicaidfiles
 - [ ] Add album artwork upload
 
 #### Day 53-56: Track-Album Association
+
 - [ ] Implement track ordering in albums
 - [ ] Create album track management
 - [ ] Add drag-and-drop reordering
@@ -251,14 +276,16 @@ az storage account create --name musicaidfiles
 ### Week 9: Data Migration
 
 #### Day 57-59: Migration Scripts
+
 **Generic Migration Script Structure**:
+
 ```python
 # Example Python migration script
 class DataMigrator:
     def __init__(self, old_db_connection, new_db_connection):
         self.old_db = old_db_connection
         self.new_db = new_db_connection
-    
+
     def migrate_users(self):
         """Migrate users from old system to new"""
         old_users = self.old_db.query("SELECT * FROM users")
@@ -271,12 +298,12 @@ class DataMigrator:
                 'email_verified': True  # Assume existing users are verified
             }
             self.new_db.insert('users', new_user)
-    
+
     def migrate_artists(self):
         """Migrate artists and user associations"""
         # Implementation for artist migration
         pass
-    
+
     def migrate_tracks(self):
         """Migrate tracks with status mapping"""
         # Implementation for track migration
@@ -284,6 +311,7 @@ class DataMigrator:
 ```
 
 #### Day 60-63: Data Validation and Testing
+
 - [ ] Run data migration in staging environment
 - [ ] Validate data integrity and completeness
 - [ ] Test application functionality with migrated data
@@ -295,7 +323,9 @@ class DataMigrator:
 ### Week 10: Production Deployment
 
 #### Day 64-66: Infrastructure Setup
+
 **Cloud Platform Options**:
+
 - **AWS**: EC2, RDS, S3, CloudFront
 - **Google Cloud**: Compute Engine, Cloud SQL, Cloud Storage
 - **Azure**: App Service, Azure SQL, Blob Storage
@@ -320,6 +350,7 @@ docker run -p 3000:3000 musicaid
 ```
 
 #### Day 67-70: Production Cutover
+
 - [ ] Set up production database
 - [ ] Run production data migration
 - [ ] Configure SSL certificates
@@ -332,6 +363,7 @@ docker run -p 3000:3000 musicaid
 ### Frontend Framework Setup
 
 #### React with TypeScript
+
 ```bash
 npx create-react-app musicaid-frontend --template typescript
 cd musicaid-frontend
@@ -341,6 +373,7 @@ npm install axios
 ```
 
 #### Vue.js with TypeScript
+
 ```bash
 npm create vue@latest musicaid-frontend
 cd musicaid-frontend
@@ -350,6 +383,7 @@ npm install vue-router@4
 ```
 
 #### Angular
+
 ```bash
 ng new musicaid-frontend --routing --style=scss
 cd musicaid-frontend
@@ -360,6 +394,7 @@ ng generate @angular/pwa
 ### Backend Framework Setup
 
 #### Express.js with TypeScript
+
 ```bash
 mkdir musicaid-backend
 cd musicaid-backend
@@ -370,6 +405,7 @@ npm install prisma @prisma/client  # or preferred ORM
 ```
 
 #### Django with DRF
+
 ```bash
 django-admin startproject musicaid_backend
 cd musicaid_backend
@@ -379,6 +415,7 @@ pip install psycopg2-binary  # for PostgreSQL
 ```
 
 #### FastAPI
+
 ```bash
 mkdir musicaid-backend
 cd musicaid-backend
@@ -390,7 +427,9 @@ pip install alembic  # for migrations
 ## Database Migration Considerations
 
 ### Schema Mapping
+
 **Old MongoDB Schema → New PostgreSQL Schema**:
+
 ```javascript
 // Old Keystone.js User model
 {
@@ -424,6 +463,7 @@ CREATE TABLE user_artists (
 ```
 
 ### Data Transformation Rules
+
 1. **ID Mapping**: Convert MongoDB ObjectIds to UUIDs
 2. **Relationship Normalization**: Convert embedded documents to relational tables
 3. **Field Renaming**: Standardize field names (camelCase → snake_case)
@@ -433,6 +473,7 @@ CREATE TABLE user_artists (
 ## Testing Strategy
 
 ### Migration Testing
+
 - [ ] **Unit Tests**: Test individual migration functions
 - [ ] **Integration Tests**: Test complete migration process
 - [ ] **Data Validation**: Verify data integrity after migration
@@ -440,6 +481,7 @@ CREATE TABLE user_artists (
 - [ ] **Rollback Tests**: Test ability to revert changes
 
 ### Application Testing
+
 - [ ] **Functional Tests**: Test all core features work with migrated data
 - [ ] **User Acceptance Tests**: Test with real users on staging environment
 - [ ] **Performance Tests**: Verify application performance meets requirements
@@ -448,12 +490,14 @@ CREATE TABLE user_artists (
 ## Risk Mitigation
 
 ### Technical Risks
+
 - **Data Loss**: Multiple backups, incremental migration, validation checks
 - **Downtime**: Blue-green deployment, feature flags, rollback procedures
 - **Performance Issues**: Load testing, monitoring, gradual traffic migration
 - **Integration Failures**: Thorough testing, staging environment validation
 
 ### Business Risks
+
 - **User Disruption**: Clear communication, training materials, support resources
 - **Feature Gaps**: Comprehensive feature comparison, user feedback loops
 - **Timeline Delays**: Buffer time, priority-based development, MVP approach
@@ -461,6 +505,7 @@ CREATE TABLE user_artists (
 ## Success Criteria
 
 ### Technical Metrics
+
 - [ ] All existing data successfully migrated (100% data integrity)
 - [ ] Application response time < 200ms for API calls
 - [ ] Zero critical security vulnerabilities
@@ -468,10 +513,11 @@ CREATE TABLE user_artists (
 - [ ] All automated tests passing
 
 ### Business Metrics
+
 - [ ] All existing features available in new system
 - [ ] User adoption rate > 90% within 30 days
 - [ ] Support ticket volume < 20% increase
 - [ ] Performance improvements measurable by users
 - [ ] Hosting costs reduced by target percentage
 
-This migration plan provides a framework-agnostic approach that can be adapted to any modern web technology stack while ensuring a systematic, low-risk transition from the legacy system to the new application. 
+This migration plan provides a framework-agnostic approach that can be adapted to any modern web technology stack while ensuring a systematic, low-risk transition from the legacy system to the new application.

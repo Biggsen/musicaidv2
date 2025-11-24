@@ -34,17 +34,19 @@ export const useAuth = () => {
   // Sign up with email and password
   const signUp = async (email: string, password: string, name: string) => {
     const config = useRuntimeConfig()
-    const origin = process.client ? window.location.origin : (config.public.siteUrl || 'http://localhost:3000')
-    
+    const origin = process.client
+      ? window.location.origin
+      : config.public.siteUrl || 'http://localhost:3000'
+
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         data: {
-          name
+          name,
         },
-        emailRedirectTo: `${origin}/auth/callback`
-      }
+        emailRedirectTo: `${origin}/auth/callback`,
+      },
     })
 
     return { data, error }
@@ -54,7 +56,7 @@ export const useAuth = () => {
   const signIn = async (email: string, password: string) => {
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
-      password
+      password,
     })
 
     if (error) {
@@ -67,7 +69,7 @@ export const useAuth = () => {
   // Sign out
   const signOut = async () => {
     const { error } = await supabase.auth.signOut()
-    
+
     if (error) {
       throw error
     }
@@ -84,7 +86,6 @@ export const useAuth = () => {
     signUp,
     signIn,
     signOut,
-    isAuthenticated
+    isAuthenticated,
   }
 }
-

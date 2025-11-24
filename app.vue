@@ -8,8 +8,6 @@
 // Global app configuration
 useHead({
   title: 'MusicAid',
-  meta: [
-    { name: 'description', content: 'Collaborative music creation platform' }
-  ]
+  meta: [{ name: 'description', content: 'Collaborative music creation platform' }],
 })
 </script>

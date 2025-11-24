@@ -2,9 +2,7 @@
   <div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
     <div class="max-w-md w-full space-y-8">
       <div>
-        <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
-          Create your account
-        </h2>
+        <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">Create your account</h2>
         <p class="mt-2 text-center text-sm text-gray-600">
           Or
           <NuxtLink to="/login" class="font-medium text-blue-600 hover:text-blue-500">
@@ -12,7 +10,7 @@
           </NuxtLink>
         </p>
       </div>
-      
+
       <form class="mt-8 space-y-6" @submit.prevent="handleRegister">
         <div v-if="error" class="rounded-md bg-red-50 p-4">
           <div class="flex">
@@ -100,7 +98,10 @@
           </button>
         </div>
 
-        <div v-if="password && confirmPassword && password !== confirmPassword" class="text-sm text-red-600">
+        <div
+          v-if="password && confirmPassword && password !== confirmPassword"
+          class="text-sm text-red-600"
+        >
           Passwords do not match
         </div>
       </form>
@@ -111,7 +112,7 @@
 <script setup lang="ts">
 definePageMeta({
   layout: false,
-  middleware: 'guest'
+  middleware: 'guest',
 })
 
 const { signUp } = useAuth()
@@ -127,7 +128,7 @@ const successMessage = ref('')
 
 const handleRegister = async () => {
   error.value = ''
-  
+
   if (password.value !== confirmPassword.value) {
     error.value = 'Passwords do not match'
     return
@@ -142,7 +143,7 @@ const handleRegister = async () => {
 
   try {
     const { data, error: signUpError } = await signUp(email.value, password.value, name.value)
-    
+
     if (signUpError) {
       throw signUpError
     }
@@ -153,7 +154,8 @@ const handleRegister = async () => {
       await router.push('/')
     } else {
       // Email confirmation is required
-      successMessage.value = 'Account created! Please check your email to confirm your account before signing in.'
+      successMessage.value =
+        'Account created! Please check your email to confirm your account before signing in.'
       // Clear form
       name.value = ''
       email.value = ''
@@ -173,7 +175,6 @@ const handleRegister = async () => {
 
 useSeoMeta({
   title: 'Register - MusicAid',
-  description: 'Create your MusicAid account'
+  description: 'Create your MusicAid account',
 })
 </script>
-

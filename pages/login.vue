@@ -2,9 +2,7 @@
   <div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
     <div class="max-w-md w-full space-y-8">
       <div>
-        <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
-          Sign in to MusicAid
-        </h2>
+        <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">Sign in to MusicAid</h2>
         <p class="mt-2 text-center text-sm text-gray-600">
           Or
           <NuxtLink to="/register" class="font-medium text-blue-600 hover:text-blue-500">
@@ -12,7 +10,7 @@
           </NuxtLink>
         </p>
       </div>
-      
+
       <form class="mt-8 space-y-6" @submit.prevent="handleLogin">
         <div v-if="registered" class="rounded-md bg-green-50 p-4">
           <div class="flex">
@@ -81,7 +79,7 @@
 <script setup lang="ts">
 definePageMeta({
   layout: false,
-  middleware: 'guest'
+  middleware: 'guest',
 })
 
 const { signIn } = useAuth()
@@ -110,7 +108,6 @@ const handleLogin = async () => {
 
 useSeoMeta({
   title: 'Login - MusicAid',
-  description: 'Sign in to your MusicAid account'
+  description: 'Sign in to your MusicAid account',
 })
 </script>
-

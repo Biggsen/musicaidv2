@@ -40,24 +40,28 @@ musicaidv2/
 ## Key Configuration Files
 
 ### `nuxt.config.ts`
+
 - Supabase module configuration
 - TailwindCSS setup
 - TypeScript configuration
 - Build settings for Netlify
 
 ### `netlify.toml`
+
 - Build command and publish directory
 - Serverless function configuration
 - Redirect rules for SPA routing
 
 ### Environment Variables (`.env`)
+
 ```
 SUPABASE_URL=your_supabase_url
 SUPABASE_ANON_KEY=your_supabase_anon_key
 ```
 
 This structure provides:
+
 - Clear separation of concerns
 - Type safety throughout
 - Scalable organization
-- Easy to navigate and maintain 
+- Easy to navigate and maintain

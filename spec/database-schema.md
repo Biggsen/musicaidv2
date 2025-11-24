@@ -254,61 +254,73 @@ enum StepType {
 ## Model Descriptions
 
 ### User
+
 - **Purpose**: System users who can access and manage artist data
 - **Key Features**: Authentication, multi-artist access
 - **Relationships**: Many-to-many with Artists
 
 ### Artist
+
 - **Purpose**: Musical artists or bands being managed
 - **Key Features**: Slug for URLs, default templates, multi-user collaboration
 - **Relationships**: Has many tracks, albums, templates, and users
 
 ### Track
+
 - **Purpose**: Individual songs with comprehensive metadata
 - **Key Features**: Workflow tracking, timing info, location tracking, audit trail
 - **Relationships**: Belongs to artist and album, has many audio files, notes, records
 
 ### Album
+
 - **Purpose**: Collection of tracks for release
 - **Key Features**: Release date tracking, album artwork
 - **Relationships**: Belongs to artist, has many tracks
 
 ### Audio
+
 - **Purpose**: Audio file storage and metadata
 - **Key Features**: Support for both legacy Dropbox URLs and new S3-compatible storage
 - **Relationships**: Belongs to track
 
 ### Instrument
+
 - **Purpose**: Catalog of available instruments for recording
 - **Key Features**: Simple name and description
 - **Relationships**: Has many records
 
 ### Note
+
 - **Purpose**: Comments and notes attached to tracks at various workflow stages
 - **Key Features**: Can be marked as done, attached to specific steps or statuses
 - **Relationships**: Belongs to track, optionally to step or track status
 
 ### Record
+
 - **Purpose**: Individual instrument recordings for tracks
 - **Key Features**: Recording and editing status tracking
 - **Relationships**: Belongs to track and instrument, optionally to track status
 
 ### Session
+
 - **Purpose**: Recording session management
 - **Key Features**: Session completion and editing status
 - **Relationships**: Belongs to track, optionally to track status
 
 ### Step
+
 - **Purpose**: Individual workflow steps within templates
 - **Key Features**: Different step types (normal, text, list, record), artist-specific
 - **Relationships**: Belongs to artist, used in track statuses
 
 ### Template
+
 - **Purpose**: Reusable workflow templates for different project types
 - **Key Features**: Contains multiple track statuses, artist-specific or global
 - **Relationships**: Belongs to artist, contains track statuses, used by tracks
 
 ### TrackStatus
+
 - **Purpose**: Workflow states that tracks can be in
 - **Key Features**: Linear or non-linear workflow support, contains multiple steps
 - **Relationships**: Contains steps, used by tracks, templates, notes, records, sessions
@@ -348,4 +360,4 @@ DATABASE_URL="postgresql://..."
 2. Run initial migration to create tables
 3. Set up seed data for development
 4. Create database access patterns and queries
-5. Implement data validation and business rules 
+5. Implement data validation and business rules

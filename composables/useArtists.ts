@@ -39,11 +39,7 @@ export const useArtists = () => {
 
   // Get a single artist by ID
   const getArtist = async (id: string): Promise<Artist | null> => {
-    const { data, error } = await supabase
-      .from('artists')
-      .select('*')
-      .eq('id', id)
-      .single()
+    const { data, error } = await supabase.from('artists').select('*').eq('id', id).single()
 
     if (error) {
       throw error
@@ -56,7 +52,7 @@ export const useArtists = () => {
   const createArtist = async (artist: ArtistInsert): Promise<Artist> => {
     // Check for active session (more reliable than useSupabaseUser)
     const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
-    
+
     if (sessionError || !sessionData.session || !sessionData.session.user) {
       throw new Error('No active session. Please log in again.')
     }
@@ -64,11 +60,7 @@ export const useArtists = () => {
     const userId = sessionData.session.user.id
 
     // Create the artist
-    const { data, error } = await supabase
-      .from('artists')
-      .insert(artist)
-      .select()
-      .single()
+    const { data, error } = await supabase.from('artists').insert(artist).select().single()
 
     if (error) {
       console.error('Error creating artist:', error)
@@ -76,13 +68,11 @@ export const useArtists = () => {
     }
 
     // Automatically add the creator as an owner in user_artists
-    const { error: userArtistError } = await supabase
-      .from('user_artists')
-      .insert({
-        user_id: userId,
-        artist_id: data.id,
-        role: 'owner'
-      })
+    const { error: userArtistError } = await supabase.from('user_artists').insert({
+      user_id: userId,
+      artist_id: data.id,
+      role: 'owner',
+    })
 
     if (userArtistError) {
       // If adding user_artist fails, try to delete the artist we just created
@@ -111,10 +101,7 @@ export const useArtists = () => {
 
   // Delete an artist
   const deleteArtist = async (id: string): Promise<void> => {
-    const { error } = await supabase
-      .from('artists')
-      .delete()
-      .eq('id', id)
+    const { error } = await supabase.from('artists').delete().eq('id', id)
 
     if (error) {
       throw error
@@ -126,7 +113,6 @@ export const useArtists = () => {
     getArtist,
     createArtist,
     updateArtist,
-    deleteArtist
+    deleteArtist,
   }
 }
-
