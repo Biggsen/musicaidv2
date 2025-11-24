@@ -8,7 +8,7 @@
             Welcome to MusicAid
           </h1>
           <p class="text-xl md:text-2xl mb-8 text-blue-100 max-w-3xl mx-auto">
-            Your collaborative music creation platform powered by modern web technologies
+            Manage your music production workflows, track recording sessions, and organize your projects with ease
           </p>
           <div class="flex flex-col sm:flex-row gap-4 justify-center">
             <button class="bg-white text-blue-600 hover:bg-gray-100 font-medium py-3 px-8 rounded-lg transition-colors">
@@ -27,10 +27,10 @@
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-12">
           <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            Built with Modern Technology
+            Everything You Need to Manage Your Music Production
           </h2>
           <p class="text-lg text-gray-600 max-w-2xl mx-auto">
-            MusicAid is built with Nuxt 3, TypeScript, and modern web technologies for the best developer and user experience.
+            Track workflows, organize recording sessions, manage artists and tracks, and keep your production process organized from start to finish.
           </p>
         </div>
 
@@ -45,10 +45,10 @@
               </ClientOnly>
             </div>
             <h3 class="text-xl font-semibold text-gray-900 mb-2">
-              Fast & Modern
+              Workflow Management
             </h3>
             <p class="text-gray-600">
-              Built with Nuxt 3 and TypeScript for optimal performance and developer experience.
+              Create custom workflow templates, track production stages, and manage your projects through every step of the process.
             </p>
           </div>
 
@@ -62,10 +62,10 @@
               </ClientOnly>
             </div>
             <h3 class="text-xl font-semibold text-gray-900 mb-2">
-              Collaborative
+              Recording Tracking
             </h3>
             <p class="text-gray-600">
-              Real-time collaboration features to work together on music projects seamlessly.
+              Organize recording sessions, track instrument recordings, and manage audio files for all your projects in one place.
             </p>
           </div>
 
@@ -79,10 +79,10 @@
               </ClientOnly>
             </div>
             <h3 class="text-xl font-semibold text-gray-900 mb-2">
-              Music-First
+              Project Organization
             </h3>
             <p class="text-gray-600">
-              Designed specifically for musicians with intuitive interfaces and powerful tools.
+              Manage artists, tracks, albums, and templates. Keep notes, track statuses, and organize your entire music production workflow.
             </p>
           </div>
         </div>
@@ -96,7 +96,7 @@
           Ready to Get Started?
         </h2>
         <p class="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
-          Join the future of collaborative music creation. Set up your project and start building amazing music experiences.
+          Start organizing your music production workflow today. Track your projects, manage recording sessions, and keep everything in sync.
         </p>
         <button class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-8 rounded-lg transition-colors">
           Start Building
@@ -109,8 +109,8 @@
 <script setup lang="ts">
 // Page metadata
 useSeoMeta({
-  title: 'MusicAid - Collaborative Music Creation Platform',
-  description: 'Your collaborative music creation platform powered by modern web technologies',
+  title: 'MusicAid - Music Production & Recording Management System',
+  description: 'Manage your music production workflows, track recording sessions, and organize your projects. Built for artists, producers, and studios.',
 })
 
 // Optional: Add page-specific logic here
