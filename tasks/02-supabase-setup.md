@@ -1,7 +1,7 @@
 # Task 02: Supabase Integration & Database Setup
 
 ## Objective
-Set up Supabase project and integrate it with Nuxt 3 for database, auth, and storage.
+Set up Supabase project and integrate it with Nuxt 3 for database and authentication. Note: File storage (audio/images) uses S3-compatible storage and is handled separately (see file-management.md spec).
 
 ## Tasks
 
@@ -24,13 +24,7 @@ Set up Supabase project and integrate it with Nuxt 3 for database, auth, and sto
 - [ ] Set up login/register pages
 - [ ] Implement auth middleware for protected routes
 
-### 4. Storage Setup
-- [ ] Create storage bucket for audio files
-- [ ] Configure storage policies
-- [ ] Set up file upload helpers
-- [ ] Create basic file upload component
-
-### 5. Basic API Integration
+### 4. Basic API Integration
 - [ ] Create Supabase client composable
 - [ ] Set up basic CRUD operations for artists/tracks
 - [ ] Test database connectivity
@@ -39,8 +33,11 @@ Set up Supabase project and integrate it with Nuxt 3 for database, auth, and sto
 - Supabase connection works from Nuxt app
 - User can register and login
 - Basic database operations work
-- File upload to Supabase storage works
 - Environment variables are properly configured
+
+## Notes
+- **Storage**: File storage (audio files, images) uses S3-compatible object storage (AWS S3, Backblaze B2, etc.) and is configured separately. Supabase is only used for database and authentication.
+- **File Upload**: File upload functionality will be implemented in a later task with S3 integration.
 
 ## Estimated Time
 4-6 hours
