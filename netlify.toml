@@ -5,6 +5,12 @@
   NODE_VERSION = "18"
   SECRETS_SCAN_OMIT_KEYS = "SUPABASE_URL,SUPABASE_KEY"
 
+# Redirect all requests to the serverless function, except static assets
+[[redirects]]
+  from = "/.netlify/functions/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
+
 [[redirects]]
   from = "/*"
   to = "/.netlify/functions/server"
