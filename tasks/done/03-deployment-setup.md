@@ -91,3 +91,4 @@ The app is successfully deployed and working in production. The minimal configur
 - The minimal configuration approach is correct for this setup
 - Caching headers are automatically generated in the build output
 
+

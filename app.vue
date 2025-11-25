@@ -1,9 +1,3 @@
-<template>
-  <NuxtLayout>
-    <NuxtPage />
-  </NuxtLayout>
-</template>
-
 <script setup lang="ts">
 // Global app configuration
 useHead({
@@ -11,3 +5,11 @@ useHead({
   meta: [{ name: 'description', content: 'Collaborative music creation platform' }],
 })
 </script>
+
+<template>
+  <UApp>
+    <NuxtLayout>
+      <NuxtPage />
+    </NuxtLayout>
+  </UApp>
+</template>

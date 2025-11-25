@@ -57,3 +57,4 @@ After running the migrations, verify:
 1. Test authentication by registering a new user
 2. Verify the user profile is automatically created in `public.users`
 3. Test creating an artist and track through the application
+

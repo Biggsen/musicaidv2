@@ -119,3 +119,4 @@ Based on previous migration attempts:
   - `supabase/migrations/004_verify_and_fix_artists_policy.sql` - Artists policy verification
   - `supabase/migrations/005_fix_artists_rls_comprehensive.sql` - Comprehensive artists fixes
 
+

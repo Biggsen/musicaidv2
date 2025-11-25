@@ -19,19 +19,30 @@
               >
                 Home
               </NuxtLink>
+              <ClientOnly>
+                <template v-if="user">
+                  <NuxtLink
+                    to="/artists"
+                    class="text-gray-500 hover:text-gray-900 px-3 py-2 text-sm font-medium transition-colors"
+                    :class="{ 'text-blue-600': $route.path.startsWith('/artists') }"
+                  >
+                    Artists
+                  </NuxtLink>
+                  <NuxtLink
+                    to="/tracks"
+                    class="text-gray-500 hover:text-gray-900 px-3 py-2 text-sm font-medium transition-colors"
+                    :class="{ 'text-blue-600': $route.path.startsWith('/tracks') }"
+                  >
+                    Tracks
+                  </NuxtLink>
+                </template>
+              </ClientOnly>
               <NuxtLink
                 to="/about"
                 class="text-gray-500 hover:text-gray-900 px-3 py-2 text-sm font-medium transition-colors"
                 :class="{ 'text-blue-600': $route.path === '/about' }"
               >
                 About
-              </NuxtLink>
-              <NuxtLink
-                to="/test-crud"
-                class="text-gray-500 hover:text-gray-900 px-3 py-2 text-sm font-medium transition-colors"
-                :class="{ 'text-blue-600': $route.path === '/test-crud' }"
-              >
-                Test
               </NuxtLink>
             </div>
           </div>
@@ -99,19 +110,30 @@
           >
             Home
           </NuxtLink>
+          <ClientOnly>
+            <template v-if="user">
+              <NuxtLink
+                to="/artists"
+                class="block px-3 py-2 text-base font-medium text-gray-500 hover:text-gray-900"
+                @click="mobileMenuOpen = false"
+              >
+                Artists
+              </NuxtLink>
+              <NuxtLink
+                to="/tracks"
+                class="block px-3 py-2 text-base font-medium text-gray-500 hover:text-gray-900"
+                @click="mobileMenuOpen = false"
+              >
+                Tracks
+              </NuxtLink>
+            </template>
+          </ClientOnly>
           <NuxtLink
             to="/about"
             class="block px-3 py-2 text-base font-medium text-gray-500 hover:text-gray-900"
             @click="mobileMenuOpen = false"
           >
             About
-          </NuxtLink>
-          <NuxtLink
-            to="/test-crud"
-            class="block px-3 py-2 text-base font-medium text-gray-500 hover:text-gray-900"
-            @click="mobileMenuOpen = false"
-          >
-            Test
           </NuxtLink>
           <ClientOnly>
             <template v-if="user">
