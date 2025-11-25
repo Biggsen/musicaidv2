@@ -33,6 +33,7 @@ export default defineNuxtConfig({
 
   // API configuration
   nitro: {
+    preset: 'netlify',
     experimental: {
       wasm: true,
     },
