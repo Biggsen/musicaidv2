@@ -95,8 +95,39 @@ export const useAudio = () => {
     return data
   }
 
-  // Delete an audio file
+  // Delete an audio file (from both database and R2)
   const deleteAudioFile = async (id: string): Promise<void> => {
+    // First, get the file to get the file_key/file_url
+    const audioFile = await getAudioFile(id)
+    
+    if (!audioFile) {
+      throw new Error('Audio file not found')
+    }
+
+    // Delete from R2 if file_url exists
+    if (audioFile.file_url) {
+      try {
+        // Extract file key from URL
+        // URL format: https://...r2.dev/audio/{trackId}/{filename}
+        // or: https://...r2.cloudflarestorage.com/audio/{trackId}/{filename}
+        const url = new URL(audioFile.file_url)
+        const fileKey = url.pathname.startsWith('/') ? url.pathname.substring(1) : url.pathname
+
+        // Delete from R2
+        const response = await fetch(`/api/upload/audio?key=${encodeURIComponent(fileKey)}`, {
+          method: 'DELETE',
+        })
+
+        if (!response.ok) {
+          console.warn('Failed to delete file from R2, but continuing with database deletion')
+        }
+      } catch (err) {
+        // Log but don't fail - file might already be deleted from R2
+        console.warn('Error deleting file from R2:', err)
+      }
+    }
+
+    // Delete from database
     const { error } = await supabase.from('audios').delete().eq('id', id)
 
     if (error) {

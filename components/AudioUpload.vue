@@ -81,7 +81,7 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const emit = defineEmits<{
-  uploaded: [file: File, url: string]
+  uploaded: [result: { fileUrl: string; fileKey: string; fileName: string; slug: string; size: number; type: string }]
   error: [error: string]
 }>()
 
@@ -146,9 +146,14 @@ const formatFileSize = (bytes: number): string => {
 }
 
 // Expose upload method for parent component
-const upload = async () => {
+const upload = async (name?: string, description?: string) => {
   if (!selectedFile.value) {
     error.value = 'Please select a file first'
+    return
+  }
+
+  if (!props.trackId) {
+    error.value = 'Track ID is required'
     return
   }
 
@@ -158,28 +163,64 @@ const upload = async () => {
   success.value = ''
 
   try {
-    // TODO: Implement actual S3 upload when storage is configured
-    // For now, simulate upload progress
-    const interval = setInterval(() => {
-      uploadProgress.value += 10
-      if (uploadProgress.value >= 100) {
-        clearInterval(interval)
-        uploading.value = false
-        success.value = 'File uploaded successfully!'
-        // In real implementation, emit with actual URL
-        // emit('uploaded', selectedFile.value, uploadUrl)
-        setTimeout(() => {
-          clearFile()
-        }, 2000)
+    // Create FormData
+    const formData = new FormData()
+    formData.append('file', selectedFile.value)
+    formData.append('track_id', props.trackId)
+    if (name) {
+      formData.append('name', name)
+    }
+    if (description) {
+      formData.append('description', description)
+    }
+
+    // Simulate progress (we can't track actual upload progress easily with fetch)
+    const progressInterval = setInterval(() => {
+      if (uploadProgress.value < 90) {
+        uploadProgress.value += 10
       }
     }, 200)
 
-    // Simulate error for demonstration
-    // throw new Error('Upload failed: S3 storage not configured')
+    // Upload to API
+    const response = await fetch('/api/upload/audio', {
+      method: 'POST',
+      body: formData,
+    })
+
+    clearInterval(progressInterval)
+    uploadProgress.value = 100
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ message: 'Upload failed' }))
+      throw new Error(errorData.message || `Upload failed: ${response.statusText}`)
+    }
+
+    const result = await response.json()
+    
+    if (result.success) {
+      success.value = 'File uploaded successfully!'
+      emit('uploaded', {
+        fileUrl: result.fileUrl,
+        fileKey: result.fileKey,
+        fileName: result.fileName,
+        slug: result.slug,
+        size: result.size,
+        type: result.type,
+      })
+      
+      // Clear file after a short delay
+      setTimeout(() => {
+        clearFile()
+      }, 2000)
+    } else {
+      throw new Error(result.error || 'Upload failed')
+    }
   } catch (err: any) {
     error.value = err.message || 'Upload failed'
     uploading.value = false
     emit('error', error.value)
+  } finally {
+    uploading.value = false
   }
 }
 

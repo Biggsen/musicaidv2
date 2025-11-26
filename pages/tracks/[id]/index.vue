@@ -329,21 +329,56 @@
       <UModal v-model:open="showUploadModal" title="Upload Audio File">
         <template #body>
           <div class="space-y-4">
-            <p class="text-sm text-gray-600">
-              Audio file upload functionality will be implemented with S3-compatible storage.
-            </p>
-            <UAlert
-              color="info"
-              variant="soft"
-              title="Coming Soon"
-              description="Audio file uploads will be available in a future update."
+            <div>
+              <label for="audio-name" class="block text-sm font-medium text-gray-700 mb-1">
+                Name (optional)
+              </label>
+              <UInput
+                id="audio-name"
+                v-model="newAudioName"
+                placeholder="Audio file name"
+                :disabled="uploadingAudio"
+              />
+            </div>
+            <div>
+              <label for="audio-description" class="block text-sm font-medium text-gray-700 mb-1">
+                Description (optional)
+              </label>
+              <UTextarea
+                id="audio-description"
+                v-model="newAudioDescription"
+                placeholder="File description"
+                :rows="2"
+                :disabled="uploadingAudio"
+              />
+            </div>
+            <AudioUpload
+              ref="audioUploadRef"
+              :track-id="track?.id"
+              :max-size-m-b="100"
+              @uploaded="handleAudioUploaded"
+              @error="handleAudioUploadError"
             />
+            <UAlert v-if="audioUploadError" color="error" variant="soft" :title="audioUploadError" />
           </div>
         </template>
         <template #footer>
-          <div class="flex justify-end">
-            <UButton color="neutral" variant="ghost" @click="showUploadModal = false">
-              Close
+          <div class="flex justify-end gap-3">
+            <UButton
+              color="neutral"
+              variant="ghost"
+              @click="closeUploadModal"
+              :disabled="uploadingAudio"
+            >
+              Cancel
+            </UButton>
+            <UButton
+              color="primary"
+              :loading="uploadingAudio"
+              :disabled="!audioUploadRef?.selectedFile"
+              @click="handleUploadAudio"
+            >
+              Upload
             </UButton>
           </div>
         </template>
@@ -455,7 +490,7 @@ const route = useRoute()
 const router = useRouter()
 const { getTrack, updateTrack, deleteTrack } = useTracks()
 const { getNotes, createNote, updateNote, deleteNote } = useNotes()
-const { getAudioFiles } = useAudio()
+const { getAudioFiles, createAudioFile, deleteAudioFile } = useAudio()
 const {
   getTemplateWithStatuses,
   getTrackStatusWithSteps,
@@ -478,6 +513,11 @@ const addingNote = ref(false)
 const editingNote = ref(false)
 const noteError = ref('')
 const editingNoteId = ref<string | null>(null)
+const uploadingAudio = ref(false)
+const audioUploadError = ref('')
+const audioUploadRef = ref<any>(null)
+const newAudioName = ref('')
+const newAudioDescription = ref('')
 
 const newNote = ref<NoteInsert>({
   note: '',
@@ -735,8 +775,16 @@ const getAudioMenuItems = (audio: AudioFile) => {
     {
       label: 'Delete',
       icon: 'i-heroicons-trash',
-      click: () => {
-        // TODO: Implement audio deletion
+      click: async () => {
+        if (confirm('Are you sure you want to delete this audio file? This will remove it from R2 storage and cannot be undone.')) {
+          try {
+            await deleteAudioFile(audio.id)
+            await loadAudioFiles()
+          } catch (err: any) {
+            console.error('Failed to delete audio file:', err)
+            alert(err.message || 'Failed to delete audio file')
+          }
+        }
       },
     },
   ]
@@ -798,6 +846,64 @@ const formatDate = (dateString: string): string => {
     hour: '2-digit',
     minute: '2-digit',
   })
+}
+
+const handleUploadAudio = async () => {
+  if (!audioUploadRef.value || !track.value) return
+
+  uploadingAudio.value = true
+  audioUploadError.value = ''
+
+  try {
+    await audioUploadRef.value.upload(newAudioName.value || undefined, newAudioDescription.value || undefined)
+  } catch (err: any) {
+    audioUploadError.value = err.message || 'Upload failed'
+  } finally {
+    uploadingAudio.value = false
+  }
+}
+
+const handleAudioUploaded = async (result: {
+  fileUrl: string
+  fileKey: string
+  fileName: string
+  slug: string
+  size: number
+  type: string
+}) => {
+  if (!track.value) return
+
+  try {
+    // Save to database
+    await createAudioFile({
+      name: newAudioName.value || result.fileName,
+      slug: result.slug,
+      file_url: result.fileUrl,
+      track_id: track.value.id,
+      description: newAudioDescription.value || null,
+    })
+
+    // Reload audio files
+    await loadAudioFiles()
+
+    // Close modal and reset
+    closeUploadModal()
+  } catch (err: any) {
+    audioUploadError.value = err.message || 'Failed to save audio file to database'
+    console.error('Failed to save audio file:', err)
+  }
+}
+
+const handleAudioUploadError = (errorMessage: string) => {
+  audioUploadError.value = errorMessage
+}
+
+const closeUploadModal = () => {
+  showUploadModal.value = false
+  newAudioName.value = ''
+  newAudioDescription.value = ''
+  audioUploadError.value = ''
+  audioUploadRef.value?.clearFile()
 }
 
 useSeoMeta({
