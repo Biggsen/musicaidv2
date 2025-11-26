@@ -62,6 +62,22 @@
             </p>
           </div>
 
+          <div>
+            <label for="track-template" class="block text-sm font-medium text-gray-700 mb-1">
+              Workflow Template
+            </label>
+            <USelect
+              id="track-template"
+              v-model="formData.template_id"
+              :items="templateOptions"
+              placeholder="Select a template (optional)"
+              :disabled="saving || loadingTemplates"
+            />
+            <p class="mt-1 text-xs text-gray-500">
+              Select a workflow template to track production progress.
+            </p>
+          </div>
+
           <div class="grid grid-cols-2 gap-4">
             <div>
               <label for="track-tempo" class="block text-sm font-medium text-gray-700 mb-1">
@@ -166,19 +182,32 @@ definePageMeta({
 })
 
 import type { Track, TrackUpdate } from '~/composables/useTracks'
+import type { Template } from '~/composables/useWorkflow'
 
 const route = useRoute()
 const { getTrack, updateTrack } = useTracks()
+const { getTemplates } = useWorkflow()
 
 const track = ref<Track | null>(null)
+const templates = ref<Template[]>([])
 const loading = ref(true)
+const loadingTemplates = ref(false)
 const saving = ref(false)
 const error = ref('')
 const saveError = ref('')
 
+const templateOptions = computed(() => [
+  { label: 'None', value: null },
+  ...templates.value.map(template => ({
+    label: template.name,
+    value: template.id,
+  })),
+])
+
 const formData = ref<TrackUpdate>({
   name: '',
   key: '',
+  template_id: null,
   tempo: null,
   minutes: null,
   seconds: null,
@@ -187,9 +216,9 @@ const formData = ref<TrackUpdate>({
   live_ready: false,
 })
 
-// Load track
+// Load track and templates
 onMounted(async () => {
-  await loadTrack()
+  await Promise.all([loadTrack(), loadTemplates()])
 })
 
 const loadTrack = async () => {
@@ -203,6 +232,7 @@ const loadTrack = async () => {
       formData.value = {
         name: track.value.name,
         key: track.value.key,
+        template_id: track.value.template_id,
         tempo: track.value.tempo,
         minutes: track.value.minutes,
         seconds: track.value.seconds,
@@ -215,6 +245,18 @@ const loadTrack = async () => {
     error.value = err.message || 'Failed to load track'
   } finally {
     loading.value = false
+  }
+}
+
+const loadTemplates = async () => {
+  loadingTemplates.value = true
+  try {
+    templates.value = await getTemplates()
+  } catch (err: any) {
+    console.error('Failed to load templates:', err)
+    templates.value = []
+  } finally {
+    loadingTemplates.value = false
   }
 }
 

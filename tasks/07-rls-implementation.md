@@ -120,3 +120,5 @@ Based on previous migration attempts:
   - `supabase/migrations/005_fix_artists_rls_comprehensive.sql` - Comprehensive artists fixes
 
 
+
+

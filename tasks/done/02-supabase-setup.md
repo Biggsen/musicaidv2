@@ -56,3 +56,5 @@ Set up Supabase project and integrate it with Nuxt 3 for database and authentica
 - Task 01: Project Setup & Foundation
 
 
+
+

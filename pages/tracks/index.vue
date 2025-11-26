@@ -247,6 +247,22 @@
             </p>
           </div>
 
+          <div>
+            <label for="track-template" class="block text-sm font-medium text-gray-700 mb-1">
+              Workflow Template
+            </label>
+            <USelect
+              id="track-template"
+              v-model="newTrack.template_id"
+              :items="templateOptions"
+              placeholder="Select a template (optional)"
+              :disabled="creating"
+            />
+            <p class="mt-1 text-xs text-gray-500">
+              Select a workflow template to track production progress.
+            </p>
+          </div>
+
           <div class="grid grid-cols-2 gap-4">
             <div>
               <label for="track-tempo" class="block text-sm font-medium text-gray-700 mb-1">
@@ -307,13 +323,16 @@ definePageMeta({
 
 import type { Artist } from '~/composables/useArtists'
 import type { Track, TrackInsert } from '~/composables/useTracks'
+import type { Template } from '~/composables/useWorkflow'
 
 const router = useRouter()
 const { getArtists } = useArtists()
 const { getTracks, createTrack, deleteTrack } = useTracks()
+const { getTemplates } = useWorkflow()
 
 const artists = ref<Artist[]>([])
 const allTracks = ref<Track[]>([])
+const templates = ref<Template[]>([])
 const loading = ref(true)
 const creating = ref(false)
 const showCreateModal = ref(false)
@@ -326,6 +345,7 @@ const newTrack = ref<TrackInsert>({
   name: '',
   key: '',
   artist_id: '',
+  template_id: null,
   location: 'Soundation',
   tempo: null,
 })
@@ -344,6 +364,14 @@ const artistOptionsForCreate = computed(() => {
     value: artist.id,
   }))
 })
+
+const templateOptions = computed(() => [
+  { label: 'None', value: null },
+  ...templates.value.map(template => ({
+    label: template.name,
+    value: template.id,
+  })),
+])
 
 const filteredTracks = computed(() => {
   let filtered = allTracks.value
@@ -401,7 +429,7 @@ const tableRows = computed<TableRow[]>(() => {
 // Load data
 onMounted(async () => {
   await loadArtists()
-  await loadTracks()
+  await Promise.all([loadTracks(), loadTemplates()])
 })
 
 const loadArtists = async () => {
@@ -409,6 +437,15 @@ const loadArtists = async () => {
     artists.value = await getArtists()
   } catch (err: any) {
     console.error('Failed to load artists:', err)
+  }
+}
+
+const loadTemplates = async () => {
+  try {
+    templates.value = await getTemplates()
+  } catch (err: any) {
+    console.error('Failed to load templates:', err)
+    templates.value = []
   }
 }
 
@@ -456,6 +493,7 @@ const handleCreateTrack = async () => {
       name: '',
       key: '',
       artist_id: '',
+      template_id: null,
       location: 'Soundation',
       tempo: null,
     }

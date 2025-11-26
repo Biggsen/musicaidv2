@@ -181,6 +181,20 @@
             </div>
           </UCard>
 
+          <!-- Workflow Status Section -->
+          <UCard v-if="workflowStatuses.length > 0 && track">
+            <WorkflowStatus
+              :statuses="workflowStatuses"
+              :current-status-id="track?.track_status_id"
+              :current-step-id="track?.step_id"
+              :track-id="track?.id"
+              :completed-step-ids="Array.from(completedStepIds)"
+              @status-selected="handleStatusSelected"
+              @step-completed="handleStepCompleted"
+              @step-uncompleted="handleStepUncompleted"
+            />
+          </UCard>
+
           <!-- Notes Section -->
           <UCard>
             <template #header>
@@ -433,18 +447,28 @@ definePageMeta({
 })
 
 import type { Track } from '~/composables/useTracks'
-import type { Note, NoteInsert } from '~/composables/useNotes'
+import type { Note, NoteInsert, NoteUpdate } from '~/composables/useNotes'
 import type { AudioFile } from '~/composables/useAudio'
+import type { TrackStatusWithSteps, TemplateWithStatuses } from '~/composables/useWorkflow'
 
 const route = useRoute()
 const router = useRouter()
 const { getTrack, updateTrack, deleteTrack } = useTracks()
 const { getNotes, createNote, updateNote, deleteNote } = useNotes()
 const { getAudioFiles } = useAudio()
+const {
+  getTemplateWithStatuses,
+  getTrackStatusWithSteps,
+  getCompletedSteps,
+  completeStep,
+  uncompleteStep,
+} = useWorkflow()
 
 const track = ref<Track | null>(null)
 const audioFiles = ref<AudioFile[]>([])
 const notes = ref<Note[]>([])
+const workflowStatuses = ref<TrackStatusWithSteps[]>([])
+const completedStepIds = ref<Set<string>>(new Set())
 const loading = ref(true)
 const error = ref('')
 const showUploadModal = ref(false)
@@ -487,6 +511,7 @@ onMounted(async () => {
   if (track.value) {
     await loadAudioFiles()
     await loadNotes()
+    await loadWorkflow()
   }
 })
 
@@ -524,6 +549,115 @@ const loadNotes = async () => {
   } catch (err: any) {
     console.error('Failed to load notes:', err)
     notes.value = []
+  }
+}
+
+const loadWorkflow = async () => {
+  if (!track.value) return
+
+  try {
+    // Load completed steps for this track (gracefully handles missing table)
+    try {
+      const completedSteps = await getCompletedSteps(track.value.id)
+      completedStepIds.value = new Set(completedSteps)
+    } catch (err: any) {
+      // If table doesn't exist, just use empty set
+      console.warn('Could not load completed steps:', err)
+      completedStepIds.value = new Set()
+    }
+
+    // If track has a template, load it with statuses
+    if (track.value.template_id) {
+      const template = await getTemplateWithStatuses(track.value.template_id)
+      if (template && template.statuses) {
+        // Load steps for each status
+        const statusesWithSteps: TrackStatusWithSteps[] = []
+        for (const status of template.statuses) {
+          try {
+            const statusWithSteps = await getTrackStatusWithSteps(status.id)
+            if (statusWithSteps) {
+              // Mark steps as done if they're in completed steps
+              if (statusWithSteps.steps) {
+                statusWithSteps.steps = statusWithSteps.steps.map(step => ({
+                  ...step,
+                  done: completedStepIds.value.has(step.id),
+                }))
+              }
+              statusesWithSteps.push(statusWithSteps)
+            }
+          } catch (err: any) {
+            console.error(`Failed to load steps for status ${status.id}:`, err)
+            // Continue with other statuses even if one fails
+          }
+        }
+        workflowStatuses.value = statusesWithSteps
+      }
+    } else if (track.value.track_status_id) {
+      // If no template but has a status, load just that status
+      try {
+        const status = await getTrackStatusWithSteps(track.value.track_status_id)
+        if (status) {
+          // Mark steps as done if they're in completed steps
+          if (status.steps) {
+            status.steps = status.steps.map(step => ({
+              ...step,
+              done: completedStepIds.value.has(step.id),
+            }))
+          }
+          workflowStatuses.value = [status]
+        }
+      } catch (err: any) {
+        console.error('Failed to load status with steps:', err)
+      }
+    }
+  } catch (err: any) {
+    console.error('Failed to load workflow:', err)
+    workflowStatuses.value = []
+  }
+}
+
+const handleStatusSelected = async (statusId: string) => {
+  if (!track.value) return
+
+  try {
+    await updateTrack(track.value.id, {
+      track_status_id: statusId,
+      step_id: null, // Reset step when changing status
+    })
+    track.value.track_status_id = statusId
+    track.value.step_id = null
+    await loadWorkflow()
+  } catch (err: any) {
+    console.error('Failed to update track status:', err)
+  }
+}
+
+const handleStepCompleted = async (stepId: string) => {
+  if (!track.value) return
+
+  try {
+    // Mark step as completed in track_steps table
+    await completeStep(track.value.id, stepId)
+    // Also update track's current step_id
+    await updateTrack(track.value.id, {
+      step_id: stepId,
+    })
+    track.value.step_id = stepId
+    await loadWorkflow()
+  } catch (err: any) {
+    console.error('Failed to complete step:', err)
+  }
+}
+
+const handleStepUncompleted = async (stepId: string) => {
+  if (!track.value) return
+
+  try {
+    // Mark step as incomplete (remove from track_steps table)
+    await uncompleteStep(track.value.id, stepId)
+    await loadWorkflow()
+  } catch (err: any) {
+    console.error('Failed to uncomplete step:', err)
   }
 }
 

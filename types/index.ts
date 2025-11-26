@@ -188,6 +188,16 @@ export interface Step {
   updated_at: string
 }
 
+export interface Template {
+  id: string
+  name: string
+  description: string | null
+  artist_id: string | null
+  published: boolean
+  created_at: string
+  updated_at: string
+}
+
 // API Response types
 export interface ApiResponse<T = any> {
   success: boolean

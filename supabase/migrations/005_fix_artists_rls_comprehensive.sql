@@ -18,3 +18,5 @@ CREATE POLICY "Allow authenticated users to insert artists"
 -- You can run this separately to check: SELECT * FROM pg_policies WHERE tablename = 'artists';
 
 
+
+

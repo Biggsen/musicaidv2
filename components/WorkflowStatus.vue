@@ -44,12 +44,22 @@
           >
             Complete
           </UButton>
+          <UButton
+            v-else
+            color="neutral"
+            size="sm"
+            variant="ghost"
+            icon="i-heroicons-x-mark"
+            @click="uncompleteStep(step)"
+          >
+            Undo
+          </UButton>
         </div>
       </div>
     </div>
 
     <!-- Progress Bar -->
-    <div v-if="progressPercentage > 0" class="space-y-2">
+    <div v-if="props.statuses.length > 0" class="space-y-2">
       <div class="flex justify-between text-sm text-gray-600">
         <span>Overall Progress</span>
         <span>{{ Math.round(progressPercentage) }}%</span>
@@ -79,6 +89,7 @@ interface Props {
   currentStatusId?: string | null
   currentStepId?: string | null
   trackId?: string
+  completedStepIds?: string[]
 }
 
 const props = defineProps<Props>()
@@ -86,6 +97,7 @@ const props = defineProps<Props>()
 const emit = defineEmits<{
   'status-selected': [statusId: string]
   'step-completed': [stepId: string]
+  'step-uncompleted': [stepId: string]
 }>()
 
 const currentStatus = computed(() => {
@@ -94,11 +106,33 @@ const currentStatus = computed(() => {
 })
 
 const progressPercentage = computed(() => {
-  if (!currentStatus.value || !currentStatus.value.steps || currentStatus.value.steps.length === 0) {
+  // Calculate progress based on completed steps
+  if (!props.statuses || props.statuses.length === 0) {
     return 0
   }
-  const completedSteps = currentStatus.value.steps.filter(s => s.done).length
-  return (completedSteps / currentStatus.value.steps.length) * 100
+
+  // Count total steps across all statuses
+  let totalSteps = 0
+  let completedSteps = 0
+  const completedSet = new Set(props.completedStepIds || [])
+
+  for (const status of props.statuses) {
+    if (status.steps && status.steps.length > 0) {
+      totalSteps += status.steps.length
+      // Count completed steps in this status
+      for (const step of status.steps) {
+        if (completedSet.has(step.id)) {
+          completedSteps++
+        }
+      }
+    }
+  }
+
+  if (totalSteps === 0) {
+    return 0
+  }
+
+  return (completedSteps / totalSteps) * 100
 })
 
 const getStatusColor = (status: TrackStatus): 'primary' | 'neutral' => {
@@ -112,6 +146,10 @@ const selectStatus = (status: TrackStatus) => {
 
 const completeStep = (step: Step) => {
   emit('step-completed', step.id)
+}
+
+const uncompleteStep = (step: Step) => {
+  emit('step-uncompleted', step.id)
 }
 </script>
 
