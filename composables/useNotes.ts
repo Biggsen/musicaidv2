@@ -60,7 +60,19 @@ export const useNotes = () => {
 
   // Create a new note
   const createNote = async (note: NoteInsert): Promise<Note> => {
-    const { data, error } = await supabase.from('notes').insert(note).select().single()
+    // Get user ID from session if not provided
+    let userId = note.created_by
+    if (!userId) {
+      const { data: sessionData } = await supabase.auth.getSession()
+      userId = sessionData.session?.user?.id || null
+    }
+
+    const noteWithUser = {
+      ...note,
+      created_by: userId,
+    }
+    
+    const { data, error } = await supabase.from('notes').insert(noteWithUser).select().single()
 
     if (error) {
       throw error
@@ -71,9 +83,18 @@ export const useNotes = () => {
 
   // Update a note
   const updateNote = async (id: string, updates: NoteUpdate): Promise<Note> => {
+    // Get user ID from session
+    const { data: sessionData } = await supabase.auth.getSession()
+    const userId = sessionData.session?.user?.id || null
+
+    const updatesWithUser = {
+      ...updates,
+      updated_by: userId,
+    }
+    
     const { data, error } = await supabase
       .from('notes')
-      .update(updates)
+      .update(updatesWithUser)
       .eq('id', id)
       .select()
       .single()

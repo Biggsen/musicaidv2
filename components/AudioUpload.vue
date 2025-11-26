@@ -40,7 +40,12 @@
       <div class="flex items-center justify-between">
         <div class="flex-1">
           <p class="font-medium text-gray-900">{{ selectedFile.name }}</p>
-          <p class="text-sm text-gray-600">{{ formatFileSize(selectedFile.size) }}</p>
+          <div class="flex items-center gap-2 text-sm text-gray-600">
+            <span>{{ formatFileSize(selectedFile.size) }}</span>
+            <span v-if="extractedDuration" class="font-medium text-gray-700">
+              {{ formatDuration(extractedDuration) }}
+            </span>
+          </div>
         </div>
           <UButton
             color="neutral"
@@ -81,9 +86,24 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const emit = defineEmits<{
-  uploaded: [result: { fileUrl: string; fileKey: string; fileName: string; slug: string; size: number; type: string }]
+  uploaded: [result: {
+    fileUrl: string
+    fileKey: string
+    fileName: string
+    slug: string
+    size: number
+    type: string
+    version?: string | null
+    duration_seconds?: number | null
+    format?: string | null
+    bitrate?: number | null
+    sample_rate?: number | null
+    file_size_bytes?: number | null
+  }]
   error: [error: string]
 }>()
+
+const extractedDuration = ref<number | null>(null)
 
 const fileInput = ref<HTMLInputElement | null>(null)
 const selectedFile = ref<File | null>(null)
@@ -93,21 +113,21 @@ const uploadProgress = ref(0)
 const error = ref('')
 const success = ref('')
 
-const handleFileSelect = (event: Event) => {
+const handleFileSelect = async (event: Event) => {
   const target = event.target as HTMLInputElement
   if (target.files && target.files.length > 0) {
-    processFile(target.files[0])
+    await processFile(target.files[0])
   }
 }
 
-const handleDrop = (event: DragEvent) => {
+const handleDrop = async (event: DragEvent) => {
   isDragging.value = false
   if (event.dataTransfer?.files && event.dataTransfer.files.length > 0) {
-    processFile(event.dataTransfer.files[0])
+    await processFile(event.dataTransfer.files[0])
   }
 }
 
-const processFile = (file: File) => {
+const processFile = async (file: File) => {
   error.value = ''
   success.value = ''
 
@@ -126,10 +146,34 @@ const processFile = (file: File) => {
   }
 
   selectedFile.value = file
+  extractedDuration.value = null
+
+  // Extract duration using browser Audio API
+  try {
+    const audioUrl = URL.createObjectURL(file)
+    const audio = new Audio(audioUrl)
+    
+    await new Promise<void>((resolve, reject) => {
+      audio.addEventListener('loadedmetadata', () => {
+        extractedDuration.value = Math.round(audio.duration)
+        URL.revokeObjectURL(audioUrl)
+        resolve()
+      })
+      audio.addEventListener('error', (e) => {
+        URL.revokeObjectURL(audioUrl)
+        reject(e)
+      })
+      audio.load()
+    })
+  } catch (err) {
+    // If duration extraction fails, continue without it
+    console.warn('Failed to extract audio duration:', err)
+  }
 }
 
 const clearFile = () => {
   selectedFile.value = null
+  extractedDuration.value = null
   error.value = ''
   success.value = ''
   if (fileInput.value) {
@@ -145,8 +189,14 @@ const formatFileSize = (bytes: number): string => {
   return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i]
 }
 
+const formatDuration = (seconds: number): string => {
+  const mins = Math.floor(seconds / 60)
+  const secs = Math.floor(seconds % 60)
+  return `${mins}:${String(secs).padStart(2, '0')}`
+}
+
 // Expose upload method for parent component
-const upload = async (name?: string, description?: string) => {
+const upload = async (name?: string, description?: string, version?: string) => {
   if (!selectedFile.value) {
     error.value = 'Please select a file first'
     return
@@ -172,6 +222,12 @@ const upload = async (name?: string, description?: string) => {
     }
     if (description) {
       formData.append('description', description)
+    }
+    if (version) {
+      formData.append('version', version)
+    }
+    if (extractedDuration.value !== null) {
+      formData.append('duration_seconds', extractedDuration.value.toString())
     }
 
     // Simulate progress (we can't track actual upload progress easily with fetch)
@@ -206,6 +262,12 @@ const upload = async (name?: string, description?: string) => {
         slug: result.slug,
         size: result.size,
         type: result.type,
+        version: result.version || null,
+        duration_seconds: result.duration_seconds || extractedDuration.value || null,
+        format: result.format || null,
+        bitrate: result.bitrate || null,
+        sample_rate: result.sample_rate || null,
+        file_size_bytes: result.file_size_bytes || null,
       })
       
       // Clear file after a short delay

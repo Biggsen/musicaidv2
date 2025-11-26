@@ -36,6 +36,13 @@
                     Tracks
                   </NuxtLink>
                   <NuxtLink
+                    to="/albums"
+                    class="text-gray-500 hover:text-gray-900 px-3 py-2 text-sm font-medium transition-colors"
+                    :class="{ 'text-blue-600': $route.path.startsWith('/albums') }"
+                  >
+                    Albums
+                  </NuxtLink>
+                  <NuxtLink
                     to="/templates"
                     class="text-gray-500 hover:text-gray-900 px-3 py-2 text-sm font-medium transition-colors"
                     :class="{ 'text-blue-600': $route.path.startsWith('/templates') }"
@@ -132,6 +139,13 @@
                 @click="mobileMenuOpen = false"
               >
                 Tracks
+              </NuxtLink>
+              <NuxtLink
+                to="/albums"
+                class="block px-3 py-2 text-base font-medium text-gray-500 hover:text-gray-900"
+                @click="mobileMenuOpen = false"
+              >
+                Albums
               </NuxtLink>
               <NuxtLink
                 to="/templates"

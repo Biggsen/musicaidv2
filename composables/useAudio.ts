@@ -8,6 +8,12 @@ export interface AudioFile {
   track_id: string
   mixdown_date: string | null
   description: string | null
+  version: string | null
+  duration_seconds: number | null
+  format: string | null
+  bitrate: number | null
+  sample_rate: number | null
+  file_size_bytes: number | null
   created_at: string
   updated_at: string
   created_by: string | null
@@ -22,6 +28,12 @@ export interface AudioFileInsert {
   track_id: string
   mixdown_date?: string | null
   description?: string | null
+  version?: string | null
+  duration_seconds?: number | null
+  format?: string | null
+  bitrate?: number | null
+  sample_rate?: number | null
+  file_size_bytes?: number | null
   created_by?: string | null
 }
 
@@ -32,6 +44,12 @@ export interface AudioFileUpdate {
   dropbox_url?: string | null
   mixdown_date?: string | null
   description?: string | null
+  version?: string | null
+  duration_seconds?: number | null
+  format?: string | null
+  bitrate?: number | null
+  sample_rate?: number | null
+  file_size_bytes?: number | null
   updated_by?: string | null
 }
 
@@ -70,7 +88,19 @@ export const useAudio = () => {
 
   // Create a new audio file
   const createAudioFile = async (audio: AudioFileInsert): Promise<AudioFile> => {
-    const { data, error } = await supabase.from('audios').insert(audio).select().single()
+    // Get user ID from session if not provided
+    let userId = audio.created_by
+    if (!userId) {
+      const { data: sessionData } = await supabase.auth.getSession()
+      userId = sessionData.session?.user?.id || null
+    }
+
+    const audioWithUser = {
+      ...audio,
+      created_by: userId,
+    }
+    
+    const { data, error } = await supabase.from('audios').insert(audioWithUser).select().single()
 
     if (error) {
       throw error
@@ -81,9 +111,18 @@ export const useAudio = () => {
 
   // Update an audio file
   const updateAudioFile = async (id: string, updates: AudioFileUpdate): Promise<AudioFile> => {
+    // Get user ID from session
+    const { data: sessionData } = await supabase.auth.getSession()
+    const userId = sessionData.session?.user?.id || null
+
+    const updatesWithUser = {
+      ...updates,
+      updated_by: userId,
+    }
+    
     const { data, error } = await supabase
       .from('audios')
-      .update(updates)
+      .update(updatesWithUser)
       .eq('id', id)
       .select()
       .single()

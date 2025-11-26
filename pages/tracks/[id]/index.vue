@@ -133,8 +133,26 @@
               >
                 <div class="flex items-center justify-between">
                   <div class="flex-1">
-                    <h4 class="font-medium text-gray-900 mb-1">{{ audio.name }}</h4>
-                    <p class="text-sm text-gray-600">{{ audio.description || 'No description' }}</p>
+                    <div class="flex items-center gap-2 mb-1">
+                      <h4 class="font-medium text-gray-900">{{ audio.name }}</h4>
+                      <UBadge v-if="audio.version" color="primary" variant="soft" size="xs">
+                        {{ audio.version }}
+                      </UBadge>
+                    </div>
+                    <p class="text-sm text-gray-600 mb-1">{{ audio.description || 'No description' }}</p>
+                    <div class="flex items-center gap-3 text-xs text-gray-500">
+                      <span v-if="audio.format">{{ audio.format }}</span>
+                      <span v-if="audio.duration_seconds" class="font-medium text-gray-700">
+                        {{ formatDuration(audio.duration_seconds) }}
+                      </span>
+                      <span v-if="audio.file_size_bytes">{{ formatFileSize(audio.file_size_bytes) }}</span>
+                      <span v-if="audio.mixdown_date" class="flex items-center gap-1">
+                        <UIcon name="i-heroicons-calendar" class="w-3 h-3" />
+                        {{ formatDate(audio.mixdown_date) }}
+                      </span>
+                      <span v-if="audio.bitrate">{{ audio.bitrate }} kbps</span>
+                      <span v-if="audio.sample_rate">{{ audio.sample_rate }} Hz</span>
+                    </div>
                   </div>
                   <div class="flex items-center gap-2">
                     <UButton
@@ -352,6 +370,31 @@
                 :disabled="uploadingAudio"
               />
             </div>
+            <div>
+              <label for="audio-version" class="block text-sm font-medium text-gray-700 mb-1">
+                Version (optional)
+              </label>
+              <UInput
+                id="audio-version"
+                v-model="newAudioVersion"
+                placeholder="e.g., v1, v2, final, master"
+                :disabled="uploadingAudio"
+              />
+              <p class="mt-1 text-xs text-gray-500">
+                Track different versions of the same audio file
+              </p>
+            </div>
+            <div>
+              <label for="audio-mixdown-date" class="block text-sm font-medium text-gray-700 mb-1">
+                Mixdown Date (optional)
+              </label>
+              <UInput
+                id="audio-mixdown-date"
+                v-model="newAudioMixdownDate"
+                type="date"
+                :disabled="uploadingAudio"
+              />
+            </div>
             <AudioUpload
               ref="audioUploadRef"
               :track-id="track?.id"
@@ -518,6 +561,8 @@ const audioUploadError = ref('')
 const audioUploadRef = ref<any>(null)
 const newAudioName = ref('')
 const newAudioDescription = ref('')
+const newAudioVersion = ref('')
+const newAudioMixdownDate = ref('')
 
 const newNote = ref<NoteInsert>({
   note: '',
@@ -848,6 +893,20 @@ const formatDate = (dateString: string): string => {
   })
 }
 
+const formatDuration = (seconds: number): string => {
+  const mins = Math.floor(seconds / 60)
+  const secs = Math.floor(seconds % 60)
+  return `${mins}:${String(secs).padStart(2, '0')}`
+}
+
+const formatFileSize = (bytes: number): string => {
+  if (bytes === 0) return '0 Bytes'
+  const k = 1024
+  const sizes = ['Bytes', 'KB', 'MB', 'GB']
+  const i = Math.floor(Math.log(bytes) / Math.log(k))
+  return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i]
+}
+
 const handleUploadAudio = async () => {
   if (!audioUploadRef.value || !track.value) return
 
@@ -855,7 +914,11 @@ const handleUploadAudio = async () => {
   audioUploadError.value = ''
 
   try {
-    await audioUploadRef.value.upload(newAudioName.value || undefined, newAudioDescription.value || undefined)
+    await audioUploadRef.value.upload(
+      newAudioName.value || undefined,
+      newAudioDescription.value || undefined,
+      newAudioVersion.value || undefined
+    )
   } catch (err: any) {
     audioUploadError.value = err.message || 'Upload failed'
   } finally {
@@ -870,8 +933,16 @@ const handleAudioUploaded = async (result: {
   slug: string
   size: number
   type: string
+  version?: string | null
+  duration_seconds?: number | null
+  format?: string | null
+  bitrate?: number | null
+  sample_rate?: number | null
+  file_size_bytes?: number | null
 }) => {
   if (!track.value) return
+
+  const user = useSupabaseUser()
 
   try {
     // Save to database
@@ -881,6 +952,14 @@ const handleAudioUploaded = async (result: {
       file_url: result.fileUrl,
       track_id: track.value.id,
       description: newAudioDescription.value || null,
+      version: result.version || newAudioVersion.value || null,
+      duration_seconds: result.duration_seconds || null,
+      format: result.format || null,
+      bitrate: result.bitrate || null,
+      sample_rate: result.sample_rate || null,
+      file_size_bytes: result.file_size_bytes || null,
+      mixdown_date: newAudioMixdownDate.value ? new Date(newAudioMixdownDate.value).toISOString() : null,
+      created_by: user.value?.id || null,
     })
 
     // Reload audio files
@@ -902,6 +981,8 @@ const closeUploadModal = () => {
   showUploadModal.value = false
   newAudioName.value = ''
   newAudioDescription.value = ''
+  newAudioVersion.value = ''
+  newAudioMixdownDate.value = ''
   audioUploadError.value = ''
   audioUploadRef.value?.clearFile()
 }
