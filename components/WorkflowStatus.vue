@@ -59,12 +59,12 @@
     </div>
 
     <!-- Progress Bar -->
-    <div v-if="props.statuses.length > 0" class="space-y-2">
+    <div v-if="hasSteps" class="space-y-2">
       <div class="flex justify-between text-sm text-gray-600">
         <span>Overall Progress</span>
-        <span>{{ Math.round(progressPercentage) }}%</span>
+        <span>{{ Math.round(progressValue) }}%</span>
       </div>
-      <UProgress :value="progressPercentage" />
+      <UProgress v-model="progressValue" :max="100" />
     </div>
   </div>
 </template>
@@ -105,6 +105,13 @@ const currentStatus = computed(() => {
   return props.statuses.find(s => s.id === props.currentStatusId) || null
 })
 
+const hasSteps = computed(() => {
+  if (!props.statuses || props.statuses.length === 0) {
+    return false
+  }
+  return props.statuses.some(status => status.steps && status.steps.length > 0)
+})
+
 const progressPercentage = computed(() => {
   // Calculate progress based on completed steps
   if (!props.statuses || props.statuses.length === 0) {
@@ -132,8 +139,17 @@ const progressPercentage = computed(() => {
     return 0
   }
 
-  return (completedSteps / totalSteps) * 100
+  const percentage = (completedSteps / totalSteps) * 100
+  // Ensure we return a valid number between 0 and 100
+  return Math.max(0, Math.min(100, isNaN(percentage) ? 0 : percentage))
 })
+
+const progressValue = ref(0)
+
+watch(progressPercentage, (newValue) => {
+  const value = typeof newValue === 'number' && !isNaN(newValue) ? newValue : 0
+  progressValue.value = Math.max(0, Math.min(100, value))
+}, { immediate: true })
 
 const getStatusColor = (status: TrackStatus): 'primary' | 'neutral' => {
   if (status.id === props.currentStatusId) return 'primary'
