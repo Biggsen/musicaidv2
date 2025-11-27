@@ -5,15 +5,25 @@
         <h1 class="text-3xl font-bold text-gray-900 mb-2">Tracks</h1>
         <p class="text-gray-600">Manage all your tracks</p>
       </div>
-      <UButton
-        v-if="artists.length > 0"
-        color="primary"
-        size="lg"
-        icon="i-heroicons-plus"
-        @click="showCreateModal = true"
-      >
-        Create Track
-      </UButton>
+      <div v-if="artists.length > 0" class="flex gap-3">
+        <UButton
+          color="primary"
+          size="lg"
+          icon="i-heroicons-plus"
+          @click="showCreateModal = true"
+        >
+          Create Track
+        </UButton>
+        <UButton
+          color="primary"
+          variant="outline"
+          size="lg"
+          icon="i-heroicons-arrow-up-tray"
+          to="/tracks/batch-upload"
+        >
+          Batch Upload
+        </UButton>
+      </div>
     </div>
 
     <!-- Filters -->
@@ -77,14 +87,23 @@
               : 'Get started by creating your first track'
         }}
       </p>
-      <UButton
-        v-if="artists.length > 0"
-        color="primary"
-        icon="i-heroicons-plus"
-        @click="showCreateModal = true"
-      >
-        Create Track
-      </UButton>
+      <div v-if="artists.length > 0" class="flex gap-3">
+        <UButton
+          color="primary"
+          icon="i-heroicons-plus"
+          @click="showCreateModal = true"
+        >
+          Create Track
+        </UButton>
+        <UButton
+          color="primary"
+          variant="outline"
+          icon="i-heroicons-arrow-up-tray"
+          to="/tracks/batch-upload"
+        >
+          Batch Upload
+        </UButton>
+      </div>
       <UButton v-else color="primary" to="/artists">Create Artist</UButton>
     </UCard>
 
