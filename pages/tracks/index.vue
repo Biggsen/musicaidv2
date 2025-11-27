@@ -231,21 +231,6 @@
             />
           </div>
 
-          <div>
-            <label for="track-key" class="block text-sm font-medium text-gray-700 mb-1">
-              Track Key
-            </label>
-            <UInput
-              id="track-key"
-              v-model="newTrack.key"
-              placeholder="track-key"
-              required
-              :disabled="creating"
-            />
-            <p class="mt-1 text-xs text-gray-500">
-              Unique identifier. Lowercase letters, numbers, and hyphens only.
-            </p>
-          </div>
 
           <div>
             <label for="track-template" class="block text-sm font-medium text-gray-700 mb-1">
@@ -343,7 +328,6 @@ const viewMode = ref<'grid' | 'list'>('grid')
 
 const newTrack = ref<TrackInsert>({
   name: '',
-  key: '',
   artist_id: '',
   template_id: null,
   location: 'Soundation',
@@ -482,16 +466,10 @@ const handleCreateTrack = async () => {
       return
     }
 
-    if (!/^[a-z0-9-]+$/.test(newTrack.value.key)) {
-      error.value = 'Key must contain only lowercase letters, numbers, and hyphens'
-      return
-    }
-
     await createTrack(newTrack.value)
     showCreateModal.value = false
     newTrack.value = {
       name: '',
-      key: '',
       artist_id: '',
       template_id: null,
       location: 'Soundation',

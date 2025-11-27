@@ -1,3 +1,5 @@
+import { generateSlug, generateUniqueSlug } from './useSlug'
+
 // Types for artists
 export interface Artist {
   id: string
@@ -10,7 +12,7 @@ export interface Artist {
 
 export interface ArtistInsert {
   name: string
-  slug: string
+  slug?: string
   template_id?: string | null
 }
 
@@ -59,8 +61,21 @@ export const useArtists = () => {
 
     const userId = sessionData.session.user.id
 
-    // Create the artist
-    const { data, error } = await supabase.from('artists').insert(artist).select().single()
+    // Auto-generate slug if not provided
+    let finalSlug = artist.slug
+    if (!finalSlug) {
+      const baseSlug = generateSlug(artist.name)
+      
+      // Check if slug exists and generate unique one
+      finalSlug = await generateUniqueSlug(baseSlug, async (slug) => {
+        const { data, error } = await supabase.from('artists').select('id').eq('slug', slug).maybeSingle()
+        return !!data && !error
+      })
+    }
+
+    // Create the artist with generated slug
+    const artistData = { ...artist, slug: finalSlug }
+    const { data, error } = await supabase.from('artists').insert(artistData).select().single()
 
     if (error) {
       console.error('Error creating artist:', error)

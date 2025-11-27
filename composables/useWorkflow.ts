@@ -1,3 +1,5 @@
+import { generateSlug, generateUniqueSlug } from './useSlug'
+
 // Types for workflow system
 export interface TrackStatus {
   id: string
@@ -14,7 +16,7 @@ export interface TrackStatus {
 
 export interface TrackStatusInsert {
   name: string
-  key: string
+  key?: string
   title?: string | null
   description?: string | null
   artist_id?: string | null
@@ -47,7 +49,7 @@ export interface Step {
 
 export interface StepInsert {
   name: string
-  key: string
+  key?: string
   title?: string | null
   description?: string | null
   type?: 'NORMAL' | 'TEXT' | 'LIST' | 'RECORD'
@@ -176,9 +178,23 @@ export const useWorkflow = () => {
   }
 
   const createTrackStatus = async (status: TrackStatusInsert): Promise<TrackStatus> => {
+    // Auto-generate key if not provided
+    let finalKey = status.key
+    if (!finalKey) {
+      const baseKey = generateSlug(status.name)
+      
+      // Check if key exists and generate unique one
+      finalKey = await generateUniqueSlug(baseKey, async (key) => {
+        const { data, error } = await supabase.from('track_statuses').select('id').eq('key', key).maybeSingle()
+        return !!data && !error
+      })
+    }
+
+    // Create the status with generated key
+    const statusData = { ...status, key: finalKey }
     const { data, error } = await supabase
       .from('track_statuses')
-      .insert(status)
+      .insert(statusData)
       .select()
       .single()
 
@@ -252,7 +268,21 @@ export const useWorkflow = () => {
   }
 
   const createStep = async (step: StepInsert): Promise<Step> => {
-    const { data, error } = await supabase.from('steps').insert(step).select().single()
+    // Auto-generate key if not provided
+    let finalKey = step.key
+    if (!finalKey) {
+      const baseKey = generateSlug(step.name)
+      
+      // Check if key exists and generate unique one
+      finalKey = await generateUniqueSlug(baseKey, async (key) => {
+        const { data, error } = await supabase.from('steps').select('id').eq('key', key).maybeSingle()
+        return !!data && !error
+      })
+    }
+
+    // Create the step with generated key
+    const stepData = { ...step, key: finalKey }
+    const { data, error } = await supabase.from('steps').insert(stepData).select().single()
 
     if (error) {
       throw error

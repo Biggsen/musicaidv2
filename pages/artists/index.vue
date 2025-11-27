@@ -112,22 +112,6 @@
             />
           </div>
 
-          <div>
-            <label for="artist-slug" class="block text-sm font-medium text-gray-700 mb-1">
-              Slug
-            </label>
-            <UInput
-              id="artist-slug"
-              v-model="newArtist.slug"
-              placeholder="artist-slug"
-              required
-              :disabled="creating"
-            />
-            <p class="mt-1 text-xs text-gray-500">
-              Used in URLs. Lowercase letters, numbers, and hyphens only.
-            </p>
-          </div>
-
           <UAlert v-if="error" color="error" variant="soft" :title="error" />
         </form>
       </template>
@@ -188,7 +172,6 @@ const notificationType = ref<'success' | 'error'>('success')
 
 const newArtist = ref<ArtistInsert>({
   name: '',
-  slug: '',
 })
 
 // Load data
@@ -225,16 +208,10 @@ const handleCreateArtist = async () => {
   creating.value = true
 
   try {
-    // Validate slug format
-    if (!/^[a-z0-9-]+$/.test(newArtist.value.slug)) {
-      error.value = 'Slug must contain only lowercase letters, numbers, and hyphens'
-      return
-    }
-
     await createArtist(newArtist.value)
     showNotification('Artist created successfully!', 'success')
     showCreateModal.value = false
-    newArtist.value = { name: '', slug: '' }
+    newArtist.value = { name: '' }
     await loadArtists()
   } catch (err: any) {
     error.value = err.message || 'Failed to create artist'

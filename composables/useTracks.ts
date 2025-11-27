@@ -1,3 +1,5 @@
+import { generateSlug, generateUniqueSlug } from './useSlug'
+
 // Types for tracks
 export interface Track {
   id: string
@@ -24,7 +26,7 @@ export interface Track {
 
 export interface TrackInsert {
   name: string
-  key: string
+  key?: string
   artist_id: string
   template_id?: string | null
   track_status_id?: string | null
@@ -91,7 +93,21 @@ export const useTracks = () => {
 
   // Create a new track
   const createTrack = async (track: TrackInsert): Promise<Track> => {
-    const { data, error } = await supabase.from('tracks').insert(track).select().single()
+    // Auto-generate key if not provided
+    let finalKey = track.key
+    if (!finalKey) {
+      const baseKey = generateSlug(track.name)
+      
+      // Check if key exists and generate unique one
+      finalKey = await generateUniqueSlug(baseKey, async (key) => {
+        const { data, error } = await supabase.from('tracks').select('id').eq('key', key).maybeSingle()
+        return !!data && !error
+      })
+    }
+
+    // Create the track with generated key
+    const trackData = { ...track, key: finalKey }
+    const { data, error } = await supabase.from('tracks').insert(trackData).select().single()
 
     if (error) {
       throw error

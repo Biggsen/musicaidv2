@@ -423,19 +423,6 @@
               />
             </div>
             <div>
-              <label for="status-key" class="block text-sm font-medium text-gray-700 mb-1">
-                Key
-              </label>
-              <UInput
-                id="status-key"
-                v-model="newStatus.key"
-                placeholder="recording"
-                required
-                :disabled="creatingStatus"
-              />
-              <p class="mt-1 text-xs text-gray-500">Lowercase, no spaces (e.g., recording, mixing)</p>
-            </div>
-            <div>
               <label for="status-description" class="block text-sm font-medium text-gray-700 mb-1">
                 Description
               </label>
@@ -534,19 +521,6 @@
                 required
                 :disabled="creatingStep"
               />
-            </div>
-            <div>
-              <label for="step-key" class="block text-sm font-medium text-gray-700 mb-1">
-                Key
-              </label>
-              <UInput
-                id="step-key"
-                v-model="newStep.key"
-                placeholder="record-vocals"
-                required
-                :disabled="creatingStep"
-              />
-              <p class="mt-1 text-xs text-gray-500">Lowercase, no spaces (e.g., record-vocals)</p>
             </div>
             <div>
               <label for="step-type" class="block text-sm font-medium text-gray-700 mb-1">
@@ -744,7 +718,6 @@ const editForm = ref<TemplateUpdate>({
 
 const newStatus = ref<TrackStatusInsert>({
   name: '',
-  key: '',
   description: null,
   non_linear: false,
 })
@@ -758,7 +731,6 @@ const editStatusForm = ref<TrackStatusUpdate>({
 
 const newStep = ref<StepInsert>({
   name: '',
-  key: '',
   type: 'NORMAL',
   description: null,
 })
@@ -900,11 +872,6 @@ const handleCreateStatus = async () => {
   creatingStatus.value = true
 
   try {
-    if (!/^[a-z0-9-]+$/.test(newStatus.value.key)) {
-      statusError.value = 'Key must contain only lowercase letters, numbers, and hyphens'
-      return
-    }
-
     const status = await createTrackStatus(newStatus.value)
     await loadAllStatuses()
     selectedStatusId.value = status.id
@@ -1000,11 +967,6 @@ const handleCreateStep = async () => {
   creatingStep.value = true
 
   try {
-    if (!/^[a-z0-9-]+$/.test(newStep.value.key)) {
-      stepError.value = 'Key must contain only lowercase letters, numbers, and hyphens'
-      return
-    }
-
     const step = await createStep(newStep.value)
     await loadAllSteps()
     selectedStepId.value = step.id
@@ -1017,7 +979,7 @@ const handleCreateStep = async () => {
     stepError.value = err.message || 'Failed to create step'
   } finally {
     creatingStep.value = false
-    newStep.value = { name: '', key: '', type: 'NORMAL', description: null }
+    newStep.value = { name: '', type: 'NORMAL', description: null }
   }
 }
 

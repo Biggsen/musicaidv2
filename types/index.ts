@@ -21,7 +21,7 @@ export interface Artist {
 
 export interface ArtistInsert {
   name: string
-  slug: string
+  slug?: string
   template_id?: string | null
 }
 
@@ -57,7 +57,7 @@ export interface Track {
 
 export interface TrackInsert {
   name: string
-  key: string
+  key?: string
   artist_id: string
   template_id?: string | null
   track_status_id?: string | null

@@ -1,3 +1,5 @@
+import { generateSlug, generateUniqueSlug } from './useSlug'
+
 // Types for albums
 export interface Album {
   id: string
@@ -13,7 +15,7 @@ export interface Album {
 
 export interface AlbumInsert {
   name: string
-  slug: string
+  slug?: string
   description?: string | null
   artist_id: string
   release_date?: string | null
@@ -114,7 +116,21 @@ export const useAlbums = () => {
 
   // Create a new album
   const createAlbum = async (album: AlbumInsert): Promise<Album> => {
-    const { data, error } = await supabase.from('albums').insert(album).select().single()
+    // Auto-generate slug if not provided
+    let finalSlug = album.slug
+    if (!finalSlug) {
+      const baseSlug = generateSlug(album.name)
+      
+      // Check if slug exists and generate unique one
+      finalSlug = await generateUniqueSlug(baseSlug, async (slug) => {
+        const { data, error } = await supabase.from('albums').select('id').eq('slug', slug).maybeSingle()
+        return !!data && !error
+      })
+    }
+
+    // Create the album with generated slug
+    const albumData = { ...album, slug: finalSlug }
+    const { data, error } = await supabase.from('albums').insert(albumData).select().single()
 
     if (error) {
       throw error

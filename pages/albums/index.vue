@@ -145,22 +145,6 @@
           </div>
 
           <div>
-            <label for="album-slug" class="block text-sm font-medium text-gray-700 mb-1">
-              Slug
-            </label>
-            <UInput
-              id="album-slug"
-              v-model="newAlbum.slug"
-              placeholder="album-slug"
-              required
-              :disabled="creating"
-            />
-            <p class="mt-1 text-xs text-gray-500">
-              Unique identifier. Lowercase letters, numbers, and hyphens only.
-            </p>
-          </div>
-
-          <div>
             <label for="album-artist" class="block text-sm font-medium text-gray-700 mb-1">
               Artist
             </label>
@@ -249,7 +233,6 @@ const selectedArtistId = ref<string>('all')
 
 const newAlbum = ref<AlbumInsert>({
   name: '',
-  slug: '',
   artist_id: '',
   description: null,
   release_date: null,
@@ -333,16 +316,10 @@ const handleCreateAlbum = async () => {
       return
     }
 
-    if (!/^[a-z0-9-]+$/.test(newAlbum.value.slug)) {
-      error.value = 'Slug must contain only lowercase letters, numbers, and hyphens'
-      return
-    }
-
     await createAlbum(newAlbum.value)
     showCreateModal.value = false
     newAlbum.value = {
       name: '',
-      slug: '',
       artist_id: '',
       description: null,
       release_date: null,
