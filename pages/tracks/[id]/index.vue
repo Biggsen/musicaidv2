@@ -148,7 +148,7 @@
                       <span v-if="audio.file_size_bytes">{{ formatFileSize(audio.file_size_bytes) }}</span>
                       <span v-if="audio.mixdown_date" class="flex items-center gap-1">
                         <UIcon name="i-heroicons-calendar" class="w-3 h-3" />
-                        {{ formatDate(audio.mixdown_date) }}
+                        {{ formatDateOnly(audio.mixdown_date) }}
                       </span>
                       <span v-if="audio.bitrate">{{ audio.bitrate }} kbps</span>
                       <span v-if="audio.sample_rate">{{ audio.sample_rate }} Hz</span>
@@ -997,6 +997,15 @@ const formatDate = (dateString: string): string => {
     day: 'numeric',
     hour: '2-digit',
     minute: '2-digit',
+  })
+}
+
+const formatDateOnly = (dateString: string): string => {
+  const date = new Date(dateString)
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
   })
 }
 
