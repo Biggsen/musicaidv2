@@ -515,6 +515,84 @@
           </div>
         </template>
       </UModal>
+
+      <!-- Edit Audio Modal -->
+      <UModal v-model:open="showEditAudioModal" title="Edit Audio File">
+        <template #body>
+          <form id="edit-audio-form" @submit.prevent="handleEditAudio" class="space-y-4">
+            <div>
+              <label for="edit-audio-name" class="block text-sm font-medium text-gray-700 mb-1">
+                Name
+              </label>
+              <UInput
+                id="edit-audio-name"
+                v-model="editAudio.name"
+                placeholder="Audio file name"
+                required
+                :disabled="editingAudio"
+              />
+            </div>
+            <div>
+              <label for="edit-audio-description" class="block text-sm font-medium text-gray-700 mb-1">
+                Description
+              </label>
+              <UTextarea
+                id="edit-audio-description"
+                v-model="editAudio.description"
+                placeholder="File description"
+                :rows="2"
+                :disabled="editingAudio"
+              />
+            </div>
+            <div>
+              <label for="edit-audio-version" class="block text-sm font-medium text-gray-700 mb-1">
+                Version
+              </label>
+              <UInput
+                id="edit-audio-version"
+                v-model="editAudio.version"
+                placeholder="e.g., v1, v2, final, master"
+                :disabled="editingAudio"
+              />
+              <p class="mt-1 text-xs text-gray-500">
+                Track different versions of the same audio file
+              </p>
+            </div>
+            <div>
+              <label for="edit-audio-mixdown-date" class="block text-sm font-medium text-gray-700 mb-1">
+                Mixdown Date
+              </label>
+              <UInput
+                id="edit-audio-mixdown-date"
+                v-model="editAudio.mixdown_date"
+                type="date"
+                :disabled="editingAudio"
+              />
+            </div>
+            <UAlert v-if="audioEditError" color="error" variant="soft" :title="audioEditError" />
+          </form>
+        </template>
+        <template #footer>
+          <div class="flex justify-end gap-3">
+            <UButton
+              color="neutral"
+              variant="ghost"
+              @click="closeEditAudioModal"
+              :disabled="editingAudio"
+            >
+              Cancel
+            </UButton>
+            <UButton
+              type="submit"
+              form="edit-audio-form"
+              color="primary"
+              :loading="editingAudio"
+            >
+              Save Changes
+            </UButton>
+          </div>
+        </template>
+      </UModal>
     </div>
   </div>
 </template>
@@ -533,7 +611,7 @@ const route = useRoute()
 const router = useRouter()
 const { getTrack, updateTrack, deleteTrack } = useTracks()
 const { getNotes, createNote, updateNote, deleteNote } = useNotes()
-const { getAudioFiles, createAudioFile, deleteAudioFile } = useAudio()
+const { getAudioFiles, createAudioFile, updateAudioFile, deleteAudioFile } = useAudio()
 const {
   getTemplateWithStatuses,
   getTrackStatusWithSteps,
@@ -552,10 +630,14 @@ const error = ref('')
 const showUploadModal = ref(false)
 const showNoteModal = ref(false)
 const showEditNoteModal = ref(false)
+const showEditAudioModal = ref(false)
 const addingNote = ref(false)
 const editingNote = ref(false)
+const editingAudio = ref(false)
 const noteError = ref('')
+const audioEditError = ref('')
 const editingNoteId = ref<string | null>(null)
+const editingAudioId = ref<string | null>(null)
 const uploadingAudio = ref(false)
 const audioUploadError = ref('')
 const audioUploadRef = ref<any>(null)
@@ -563,6 +645,17 @@ const newAudioName = ref('')
 const newAudioDescription = ref('')
 const newAudioVersion = ref('')
 const newAudioMixdownDate = ref('')
+const editAudio = ref<{
+  name: string
+  description: string
+  version: string
+  mixdown_date: string
+}>({
+  name: '',
+  description: '',
+  version: '',
+  mixdown_date: '',
+})
 
 const newNote = ref<NoteInsert>({
   note: '',
@@ -809,6 +902,20 @@ const handleDeleteTrack = async () => {
 const getAudioMenuItems = (audio: AudioFile) => {
   return [
     {
+      label: 'Edit',
+      icon: 'i-heroicons-pencil',
+      click: () => {
+        editingAudioId.value = audio.id
+        editAudio.value = {
+          name: audio.name,
+          description: audio.description || '',
+          version: audio.version || '',
+          mixdown_date: audio.mixdown_date ? new Date(audio.mixdown_date).toISOString().split('T')[0] : '',
+        }
+        showEditAudioModal.value = true
+      },
+    },
+    {
       label: 'Download',
       icon: 'i-heroicons-arrow-down-tray',
       click: () => {
@@ -985,6 +1092,38 @@ const closeUploadModal = () => {
   newAudioMixdownDate.value = ''
   audioUploadError.value = ''
   audioUploadRef.value?.clearFile()
+}
+
+const closeEditAudioModal = () => {
+  showEditAudioModal.value = false
+  editingAudioId.value = null
+  editAudio.value = { name: '', description: '', version: '', mixdown_date: '' }
+  audioEditError.value = ''
+}
+
+const handleEditAudio = async () => {
+  if (!editingAudioId.value) return
+
+  editingAudio.value = true
+  audioEditError.value = ''
+
+  try {
+    await updateAudioFile(editingAudioId.value, {
+      name: editAudio.value.name,
+      description: editAudio.value.description || null,
+      version: editAudio.value.version || null,
+      mixdown_date: editAudio.value.mixdown_date ? new Date(editAudio.value.mixdown_date).toISOString() : null,
+    })
+
+    await loadAudioFiles()
+
+    closeEditAudioModal()
+  } catch (err: any) {
+    audioEditError.value = err.message || 'Failed to update audio file'
+    console.error('Failed to update audio file:', err)
+  } finally {
+    editingAudio.value = false
+  }
 }
 
 useSeoMeta({
