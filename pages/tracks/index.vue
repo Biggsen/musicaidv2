@@ -2,8 +2,8 @@
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <div class="mb-8 flex justify-between items-center">
       <div>
-        <h1 class="text-3xl font-bold text-gray-900 mb-2">Tracks</h1>
-        <p class="text-gray-600">Manage all your tracks</p>
+        <h1 class="text-3xl font-bold text-default mb-2">Tracks</h1>
+        <p class="text-muted">Manage all your tracks</p>
       </div>
       <div v-if="artists.length > 0" class="flex gap-3">
         <UButton
@@ -30,7 +30,7 @@
     <UCard class="mb-6">
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Filter by Artist</label>
+          <label class="block text-sm font-medium text-default mb-1">Filter by Artist</label>
           <USelect
             v-model="selectedArtistId"
             :items="artistOptions"
@@ -39,7 +39,7 @@
           />
         </div>
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Search</label>
+          <label class="block text-sm font-medium text-default mb-1">Search</label>
           <UInput
             v-model="searchQuery"
             placeholder="Search tracks..."
@@ -48,7 +48,7 @@
           />
         </div>
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">View</label>
+          <label class="block text-sm font-medium text-default mb-1">View</label>
           <div class="flex gap-2">
             <UButton
               :color="viewMode === 'grid' ? 'primary' : 'neutral'"
@@ -69,16 +69,16 @@
 
     <!-- Loading State -->
     <div v-if="loading" class="flex justify-center py-12">
-      <UIcon name="i-heroicons-arrow-path" class="w-8 h-8 text-gray-400 animate-spin" />
+      <UIcon name="i-heroicons-arrow-path" class="w-8 h-8 text-dimmed animate-spin" />
     </div>
 
     <!-- Empty State -->
     <UCard v-else-if="filteredTracks.length === 0" class="text-center py-12">
-      <UIcon name="i-heroicons-musical-note" class="w-16 h-16 text-gray-400 mx-auto mb-4" />
-      <h3 class="text-xl font-semibold text-gray-900 mb-2">
+      <UIcon name="i-heroicons-musical-note" class="w-16 h-16 text-dimmed mx-auto mb-4" />
+      <h3 class="text-xl font-semibold text-default mb-2">
         {{ artists.length === 0 ? 'No artists yet' : 'No tracks found' }}
       </h3>
-      <p class="text-gray-600 mb-6">
+      <p class="text-muted mb-6">
         {{
           artists.length === 0
             ? 'Create an artist first to add tracks'
@@ -120,7 +120,7 @@
             class="flex-1"
             @click="() => router.push(`/tracks/${track.id}`)"
           >
-            <h3 class="text-lg font-semibold text-gray-900">{{ track.name }}</h3>
+            <h3 class="text-lg font-semibold text-default">{{ track.name }}</h3>
           </div>
           <UPopover :content="{ side: 'bottom', align: 'end' }">
             <UButton
@@ -152,7 +152,7 @@
           </UPopover>
         </div>
         <div
-          class="space-y-2 text-sm text-gray-600"
+          class="space-y-2 text-sm text-muted"
           @click="() => router.push(`/tracks/${track.id}`)"
         >
           <p>Key: {{ track.key }}</p>
@@ -174,7 +174,7 @@
         <template #name-cell="{ row }">
           <NuxtLink
             :to="`/tracks/${row.original.id}`"
-            class="font-semibold text-blue-600 hover:text-blue-800"
+            class="font-semibold text-primary hover:text-primary/80"
           >
             {{ row.original.name }}
           </NuxtLink>
@@ -184,7 +184,7 @@
         </template>
         <template #status-cell="{ row }">
           <UBadge v-if="row.original.live_ready" color="success">Live Ready</UBadge>
-          <span v-else class="text-gray-400">In Progress</span>
+          <span v-else class="text-dimmed">In Progress</span>
         </template>
         <template #actions-cell="{ row }">
           <UPopover :content="{ side: 'bottom', align: 'end' }">
@@ -224,7 +224,7 @@
       <template #body>
         <form id="create-track-form" @submit.prevent="handleCreateTrack" class="space-y-4">
           <div>
-            <label for="track-artist" class="block text-sm font-medium text-gray-700 mb-1">
+            <label for="track-artist" class="block text-sm font-medium text-default mb-1">
               Artist
             </label>
             <USelect
@@ -238,7 +238,7 @@
           </div>
 
           <div>
-            <label for="track-name" class="block text-sm font-medium text-gray-700 mb-1">
+            <label for="track-name" class="block text-sm font-medium text-default mb-1">
               Track Name
             </label>
             <UInput
@@ -252,7 +252,7 @@
 
 
           <div>
-            <label for="track-template" class="block text-sm font-medium text-gray-700 mb-1">
+            <label for="track-template" class="block text-sm font-medium text-default mb-1">
               Workflow Template
             </label>
             <USelect
@@ -262,14 +262,14 @@
               placeholder="Select a template (optional)"
               :disabled="creating"
             />
-            <p class="mt-1 text-xs text-gray-500">
+            <p class="mt-1 text-xs text-muted">
               Select a workflow template to track production progress.
             </p>
           </div>
 
           <div class="grid grid-cols-2 gap-4">
             <div>
-              <label for="track-tempo" class="block text-sm font-medium text-gray-700 mb-1">
+              <label for="track-tempo" class="block text-sm font-medium text-default mb-1">
                 Tempo (BPM)
               </label>
               <UInput
@@ -281,7 +281,7 @@
               />
             </div>
             <div>
-              <label for="track-location" class="block text-sm font-medium text-gray-700 mb-1">
+              <label for="track-location" class="block text-sm font-medium text-default mb-1">
                 Location
               </label>
               <UInput

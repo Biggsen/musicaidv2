@@ -13,12 +13,12 @@
 
     <UCard>
       <template #header>
-        <h1 class="text-2xl font-bold text-gray-900">Edit Album</h1>
+        <h1 class="text-2xl font-bold text-default">Edit Album</h1>
       </template>
 
       <form @submit.prevent="handleUpdate" class="space-y-4">
         <div>
-          <label for="album-name" class="block text-sm font-medium text-gray-700 mb-1">
+          <label for="album-name" class="block text-sm font-medium text-default mb-1">
             Album Name
           </label>
           <UInput
@@ -31,7 +31,7 @@
         </div>
 
         <div>
-          <label for="album-slug" class="block text-sm font-medium text-gray-700 mb-1">
+          <label for="album-slug" class="block text-sm font-medium text-default mb-1">
             Slug
           </label>
           <UInput
@@ -41,13 +41,13 @@
             required
             :disabled="saving"
           />
-          <p class="mt-1 text-xs text-gray-500">
+          <p class="mt-1 text-xs text-muted">
             Unique identifier. Lowercase letters, numbers, and hyphens only.
           </p>
         </div>
 
         <div>
-          <label for="album-description" class="block text-sm font-medium text-gray-700 mb-1">
+          <label for="album-description" class="block text-sm font-medium text-default mb-1">
             Description (optional)
           </label>
           <UTextarea
@@ -60,7 +60,7 @@
         </div>
 
         <div>
-          <label for="album-release-date" class="block text-sm font-medium text-gray-700 mb-1">
+          <label for="album-release-date" class="block text-sm font-medium text-default mb-1">
             Release Date (optional)
           </label>
           <UInput

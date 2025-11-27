@@ -1,15 +1,15 @@
 <template>
   <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <h1 class="text-3xl font-bold text-gray-900 mb-8">Test R2 Audio Upload</h1>
+    <h1 class="text-3xl font-bold text-default mb-8">Test R2 Audio Upload</h1>
 
     <UCard class="mb-6">
       <template #header>
-        <h2 class="text-xl font-semibold text-gray-900">Upload Test</h2>
+        <h2 class="text-xl font-semibold text-default">Upload Test</h2>
       </template>
 
       <form @submit.prevent="handleUpload" class="space-y-4">
         <div>
-          <label for="track-id" class="block text-sm font-medium text-gray-700 mb-1">
+          <label for="track-id" class="block text-sm font-medium text-default mb-1">
             Track ID (required)
           </label>
           <UInput
@@ -19,13 +19,13 @@
             required
             :disabled="uploading"
           />
-          <p class="mt-1 text-xs text-gray-500">
+          <p class="mt-1 text-xs text-muted">
             Use a valid track ID from your database, or any UUID for testing
           </p>
         </div>
 
         <div>
-          <label for="file-name" class="block text-sm font-medium text-gray-700 mb-1">
+          <label for="file-name" class="block text-sm font-medium text-default mb-1">
             Name (optional)
           </label>
           <UInput
@@ -37,7 +37,7 @@
         </div>
 
         <div>
-          <label for="file-description" class="block text-sm font-medium text-gray-700 mb-1">
+          <label for="file-description" class="block text-sm font-medium text-default mb-1">
             Description (optional)
           </label>
           <UTextarea
@@ -50,7 +50,7 @@
         </div>
 
         <div>
-          <label for="audio-file" class="block text-sm font-medium text-gray-700 mb-1">
+          <label for="audio-file" class="block text-sm font-medium text-default mb-1">
             Audio File
           </label>
           <input
@@ -59,9 +59,9 @@
             accept="audio/*"
             @change="handleFileSelect"
             :disabled="uploading"
-            class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+            class="block w-full text-sm text-muted file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"
           />
-          <p v-if="selectedFile" class="mt-2 text-sm text-gray-600">
+          <p v-if="selectedFile" class="mt-2 text-sm text-muted">
             Selected: {{ selectedFile.name }} ({{ formatFileSize(selectedFile.size) }})
           </p>
         </div>
@@ -75,7 +75,7 @@
     <!-- Upload Progress -->
     <UCard v-if="uploading" class="mb-6">
       <div class="space-y-2">
-        <div class="flex justify-between text-sm text-gray-600">
+        <div class="flex justify-between text-sm text-muted">
           <span>Uploading...</span>
           <span>{{ uploadProgress }}%</span>
         </div>
@@ -86,13 +86,13 @@
     <!-- Success Result -->
     <UCard v-if="uploadResult" class="mb-6">
       <template #header>
-        <h2 class="text-xl font-semibold text-gray-900">Upload Successful!</h2>
+        <h2 class="text-xl font-semibold text-default">Upload Successful!</h2>
       </template>
       <div class="space-y-3">
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">File URL</label>
+          <label class="block text-sm font-medium text-default mb-1">File URL</label>
           <div class="flex items-center gap-2">
-            <code class="flex-1 p-2 bg-gray-100 rounded text-sm break-all">{{ uploadResult.fileUrl }}</code>
+            <code class="flex-1 p-2 bg-default rounded text-sm break-all">{{ uploadResult.fileUrl }}</code>
             <UButton
               color="primary"
               variant="ghost"
@@ -105,25 +105,25 @@
           </div>
         </div>
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">File Key</label>
-          <code class="block p-2 bg-gray-100 rounded text-sm break-all">{{ uploadResult.fileKey }}</code>
+          <label class="block text-sm font-medium text-default mb-1">File Key</label>
+          <code class="block p-2 bg-default rounded text-sm break-all">{{ uploadResult.fileKey }}</code>
         </div>
         <div class="grid grid-cols-2 gap-4">
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">File Name</label>
-            <p class="text-gray-900">{{ uploadResult.fileName }}</p>
+            <label class="block text-sm font-medium text-default mb-1">File Name</label>
+            <p class="text-default">{{ uploadResult.fileName }}</p>
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Size</label>
-            <p class="text-gray-900">{{ formatFileSize(uploadResult.size) }}</p>
+            <label class="block text-sm font-medium text-default mb-1">Size</label>
+            <p class="text-default">{{ formatFileSize(uploadResult.size) }}</p>
           </div>
         </div>
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Slug</label>
-          <p class="text-gray-900">{{ uploadResult.slug }}</p>
+          <label class="block text-sm font-medium text-default mb-1">Slug</label>
+          <p class="text-default">{{ uploadResult.slug }}</p>
         </div>
         <div v-if="uploadResult.fileUrl">
-          <label class="block text-sm font-medium text-gray-700 mb-2">Preview</label>
+          <label class="block text-sm font-medium text-default mb-2">Preview</label>
           <audio :src="uploadResult.fileUrl" controls class="w-full">
             Your browser does not support the audio element.
           </audio>
@@ -134,7 +134,7 @@
     <!-- Error Result -->
     <UCard v-if="error" class="mb-6">
       <template #header>
-        <h2 class="text-xl font-semibold text-red-900">Upload Failed</h2>
+        <h2 class="text-xl font-semibold text-error">Upload Failed</h2>
       </template>
       <UAlert color="error" variant="soft" :title="error" />
     </UCard>
@@ -142,9 +142,9 @@
     <!-- Raw Response (for debugging) -->
     <UCard v-if="uploadResult" class="mb-6">
       <template #header>
-        <h2 class="text-xl font-semibold text-gray-900">Raw Response</h2>
+        <h2 class="text-xl font-semibold text-default">Raw Response</h2>
       </template>
-      <pre class="p-4 bg-gray-100 rounded text-xs overflow-auto">{{ JSON.stringify(uploadResult, null, 2) }}</pre>
+      <pre class="p-4 bg-default rounded text-xs overflow-auto">{{ JSON.stringify(uploadResult, null, 2) }}</pre>
     </UCard>
   </div>
 </template>

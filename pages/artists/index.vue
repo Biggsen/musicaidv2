@@ -2,8 +2,8 @@
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <div class="mb-8 flex justify-between items-center">
       <div>
-        <h1 class="text-3xl font-bold text-gray-900 mb-2">Artists</h1>
-        <p class="text-gray-600">Manage your artists and their music</p>
+        <h1 class="text-3xl font-bold text-default mb-2">Artists</h1>
+        <p class="text-muted">Manage your artists and their music</p>
       </div>
       <UButton
         color="primary"
@@ -17,14 +17,14 @@
 
     <!-- Loading State -->
     <div v-if="loading" class="flex justify-center py-12">
-      <UIcon name="i-heroicons-arrow-path" class="w-8 h-8 text-gray-400 animate-spin" />
+      <UIcon name="i-heroicons-arrow-path" class="w-8 h-8 text-dimmed animate-spin" />
     </div>
 
     <!-- Empty State -->
     <UCard v-else-if="artists.length === 0" class="text-center py-12">
-      <UIcon name="i-heroicons-musical-note" class="w-16 h-16 text-gray-400 mx-auto mb-4" />
-      <h3 class="text-xl font-semibold text-gray-900 mb-2">No artists yet</h3>
-      <p class="text-gray-600 mb-6">Get started by creating your first artist</p>
+      <UIcon name="i-heroicons-musical-note" class="w-16 h-16 text-dimmed mx-auto mb-4" />
+      <h3 class="text-xl font-semibold text-default mb-2">No artists yet</h3>
+      <p class="text-muted mb-6">Get started by creating your first artist</p>
       <UButton color="primary" icon="i-heroicons-plus" @click="showCreateModal = true">
         Create Artist
       </UButton>
@@ -43,9 +43,9 @@
             class="flex-1"
             @click="() => router.push(`/artists/${artist.id}`)"
           >
-            <h3 class="text-xl font-semibold text-gray-900 mb-2">{{ artist.name }}</h3>
-            <p class="text-sm text-gray-500 mb-4">Slug: {{ artist.slug }}</p>
-            <div class="flex items-center gap-4 text-sm text-gray-600">
+            <h3 class="text-xl font-semibold text-default mb-2">{{ artist.name }}</h3>
+            <p class="text-sm text-muted mb-4">Slug: {{ artist.slug }}</p>
+            <div class="flex items-center gap-4 text-sm text-muted">
               <span class="flex items-center gap-1">
                 <UIcon name="i-heroicons-musical-note" class="w-4 h-4" />
                 {{ getTrackCount(artist.id) }} tracks
@@ -100,7 +100,7 @@
       <template #body>
         <form id="create-artist-form" @submit.prevent="handleCreateArtist" class="space-y-4">
           <div>
-            <label for="artist-name" class="block text-sm font-medium text-gray-700 mb-1">
+            <label for="artist-name" class="block text-sm font-medium text-default mb-1">
               Artist Name
             </label>
             <UInput

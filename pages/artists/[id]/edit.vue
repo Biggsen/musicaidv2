@@ -2,14 +2,14 @@
   <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <!-- Loading State -->
     <div v-if="loading" class="flex justify-center py-12">
-      <UIcon name="i-heroicons-arrow-path" class="w-8 h-8 text-gray-400 animate-spin" />
+      <UIcon name="i-heroicons-arrow-path" class="w-8 h-8 text-dimmed animate-spin" />
     </div>
 
     <!-- Error State -->
     <UCard v-else-if="error" class="text-center py-12">
-      <UIcon name="i-heroicons-exclamation-triangle" class="w-16 h-16 text-red-400 mx-auto mb-4" />
-      <h3 class="text-xl font-semibold text-gray-900 mb-2">Artist Not Found</h3>
-      <p class="text-gray-600 mb-6">{{ error }}</p>
+      <UIcon name="i-heroicons-exclamation-triangle" class="w-16 h-16 text-error mx-auto mb-4" />
+      <h3 class="text-xl font-semibold text-default mb-2">Artist Not Found</h3>
+      <p class="text-muted mb-6">{{ error }}</p>
       <UButton color="primary" to="/artists">Back to Artists</UButton>
     </UCard>
 
@@ -24,17 +24,17 @@
           >
             Back
           </UButton>
-        <h1 class="text-3xl font-bold text-gray-900 mt-4">Edit Artist</h1>
+        <h1 class="text-3xl font-bold text-default mt-4">Edit Artist</h1>
       </div>
 
       <UCard>
         <template #header>
-          <h2 class="text-xl font-semibold text-gray-900">Artist Information</h2>
+          <h2 class="text-xl font-semibold text-default">Artist Information</h2>
         </template>
 
         <form @submit.prevent="handleUpdate" class="space-y-4">
           <div>
-            <label for="artist-name" class="block text-sm font-medium text-gray-700 mb-1">
+            <label for="artist-name" class="block text-sm font-medium text-default mb-1">
               Artist Name
             </label>
             <UInput
@@ -47,7 +47,7 @@
           </div>
 
           <div>
-            <label for="artist-slug" class="block text-sm font-medium text-gray-700 mb-1">
+            <label for="artist-slug" class="block text-sm font-medium text-default mb-1">
               Slug
             </label>
             <UInput
@@ -57,7 +57,7 @@
               required
               :disabled="saving"
             />
-            <p class="mt-1 text-xs text-gray-500">
+            <p class="mt-1 text-xs text-muted">
               Used in URLs. Lowercase letters, numbers, and hyphens only.
             </p>
           </div>

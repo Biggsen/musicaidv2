@@ -2,14 +2,14 @@
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <!-- Loading State -->
     <div v-if="loading" class="flex justify-center py-12">
-      <UIcon name="i-heroicons-arrow-path" class="w-8 h-8 text-gray-400 animate-spin" />
+      <UIcon name="i-heroicons-arrow-path" class="w-8 h-8 text-dimmed animate-spin" />
     </div>
 
     <!-- Error State -->
     <UCard v-else-if="error" class="text-center py-12">
-      <UIcon name="i-heroicons-exclamation-triangle" class="w-16 h-16 text-red-400 mx-auto mb-4" />
-      <h3 class="text-xl font-semibold text-gray-900 mb-2">Track Not Found</h3>
-      <p class="text-gray-600 mb-6">{{ error }}</p>
+      <UIcon name="i-heroicons-exclamation-triangle" class="w-16 h-16 text-error mx-auto mb-4" />
+      <h3 class="text-xl font-semibold text-default mb-2">Track Not Found</h3>
+      <p class="text-muted mb-6">{{ error }}</p>
       <UButton color="primary" to="/tracks">Back to Tracks</UButton>
     </UCard>
 
@@ -26,7 +26,7 @@
             >
               Back
             </UButton>
-          <h1 class="text-3xl font-bold text-gray-900">{{ track.name }}</h1>
+          <h1 class="text-3xl font-bold text-default">{{ track.name }}</h1>
           <UBadge v-if="track.live_ready" color="success">Live Ready</UBadge>
           <UPopover :content="{ side: 'bottom', align: 'end' }">
             <UButton
@@ -55,7 +55,7 @@
             </template>
           </UPopover>
         </div>
-        <p class="text-gray-600">Key: {{ track.key }}</p>
+        <p class="text-muted">Key: {{ track.key }}</p>
       </div>
 
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -64,35 +64,35 @@
           <!-- Track Info Card -->
           <UCard>
             <template #header>
-              <h2 class="text-xl font-semibold text-gray-900">Track Information</h2>
+              <h2 class="text-xl font-semibold text-default">Track Information</h2>
             </template>
 
             <div class="space-y-4">
               <div class="grid grid-cols-2 gap-4">
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Track Name</label>
-                  <p class="text-gray-900">{{ track.name }}</p>
+                  <label class="block text-sm font-medium text-default mb-1">Track Name</label>
+                  <p class="text-default">{{ track.name }}</p>
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Key</label>
-                  <p class="text-gray-900">{{ track.key }}</p>
+                  <label class="block text-sm font-medium text-default mb-1">Key</label>
+                  <p class="text-default">{{ track.key }}</p>
                 </div>
                 <div v-if="track.tempo">
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Tempo</label>
-                  <p class="text-gray-900">{{ track.tempo }} BPM</p>
+                  <label class="block text-sm font-medium text-default mb-1">Tempo</label>
+                  <p class="text-default">{{ track.tempo }} BPM</p>
                 </div>
                 <div v-if="track.minutes !== null && track.seconds !== null">
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Duration</label>
-                  <p class="text-gray-900">
+                  <label class="block text-sm font-medium text-default mb-1">Duration</label>
+                  <p class="text-default">
                     {{ track.minutes }}:{{ String(track.seconds).padStart(2, '0') }}
                   </p>
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Location</label>
-                  <p class="text-gray-900">{{ track.location }}</p>
+                  <label class="block text-sm font-medium text-default mb-1">Location</label>
+                  <p class="text-default">{{ track.location }}</p>
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Live Ready</label>
+                  <label class="block text-sm font-medium text-default mb-1">Live Ready</label>
                   <UBadge :color="track.live_ready ? 'success' : 'neutral'">
                     {{ track.live_ready ? 'Yes' : 'No' }}
                   </UBadge>
@@ -105,7 +105,7 @@
           <UCard>
             <template #header>
               <div class="flex justify-between items-center">
-                <h2 class="text-xl font-semibold text-gray-900">Audio Files</h2>
+                <h2 class="text-xl font-semibold text-default">Audio Files</h2>
                 <UButton
                   color="primary"
                   size="sm"
@@ -118,8 +118,8 @@
             </template>
 
             <div v-if="audioFiles.length === 0" class="text-center py-8">
-              <UIcon name="i-heroicons-musical-note" class="w-12 h-12 text-gray-400 mx-auto mb-3" />
-              <p class="text-gray-600 mb-4">No audio files yet</p>
+              <UIcon name="i-heroicons-musical-note" class="w-12 h-12 text-dimmed mx-auto mb-3" />
+              <p class="text-muted mb-4">No audio files yet</p>
               <UButton color="primary" size="sm" icon="i-heroicons-plus" @click="showUploadModal = true">
                 Upload Audio File
               </UButton>
@@ -134,15 +134,15 @@
                 <div class="flex items-center justify-between">
                   <div class="flex-1">
                     <div class="flex items-center gap-2 mb-1">
-                      <h4 class="font-medium text-gray-900">{{ audio.name }}</h4>
+                      <h4 class="font-medium text-default">{{ audio.name }}</h4>
                       <UBadge v-if="audio.version" color="primary" variant="soft" size="xs">
                         {{ audio.version }}
                       </UBadge>
                     </div>
-                    <p class="text-sm text-gray-600 mb-1">{{ audio.description || 'No description' }}</p>
-                    <div class="flex items-center gap-3 text-xs text-gray-500">
+                    <p class="text-sm text-muted mb-1">{{ audio.description || 'No description' }}</p>
+                    <div class="flex items-center gap-3 text-xs text-muted">
                       <span v-if="audio.format">{{ audio.format }}</span>
-                      <span v-if="audio.duration_seconds" class="font-medium text-gray-700">
+                      <span v-if="audio.duration_seconds" class="font-medium text-default">
                         {{ formatDuration(audio.duration_seconds) }}
                       </span>
                       <span v-if="audio.file_size_bytes">{{ formatFileSize(audio.file_size_bytes) }}</span>
@@ -217,7 +217,7 @@
           <UCard>
             <template #header>
               <div class="flex justify-between items-center">
-                <h2 class="text-xl font-semibold text-gray-900">Notes</h2>
+                <h2 class="text-xl font-semibold text-default">Notes</h2>
                 <UButton
                   color="primary"
                   size="sm"
@@ -230,8 +230,8 @@
             </template>
 
             <div v-if="notes.length === 0" class="text-center py-8">
-              <UIcon name="i-heroicons-document-text" class="w-12 h-12 text-gray-400 mx-auto mb-3" />
-              <p class="text-gray-600">No notes yet</p>
+              <UIcon name="i-heroicons-document-text" class="w-12 h-12 text-dimmed mx-auto mb-3" />
+              <p class="text-muted">No notes yet</p>
             </div>
 
             <div v-else class="space-y-3">
@@ -243,8 +243,8 @@
               >
                 <div class="flex items-start justify-between">
                   <div class="flex-1">
-                    <p class="text-gray-900 whitespace-pre-wrap">{{ note.note }}</p>
-                    <p class="text-xs text-gray-500 mt-2">
+                    <p class="text-default whitespace-pre-wrap">{{ note.note }}</p>
+                    <p class="text-xs text-muted mt-2">
                       {{ formatDate(note.created_at) }}
                     </p>
                   </div>
@@ -296,7 +296,7 @@
           <!-- Quick Actions -->
           <UCard>
             <template #header>
-              <h3 class="text-lg font-semibold text-gray-900">Quick Actions</h3>
+              <h3 class="text-lg font-semibold text-default">Quick Actions</h3>
             </template>
             <div class="space-y-2">
               <UButton
@@ -323,20 +323,20 @@
           <!-- Track Metadata -->
           <UCard>
             <template #header>
-              <h3 class="text-lg font-semibold text-gray-900">Metadata</h3>
+              <h3 class="text-lg font-semibold text-default">Metadata</h3>
             </template>
             <div class="space-y-3 text-sm">
               <div>
-                <p class="text-gray-600">Created</p>
-                <p class="text-gray-900 font-medium">{{ formatDate(track.created_at) }}</p>
+                <p class="text-muted">Created</p>
+                <p class="text-default font-medium">{{ formatDate(track.created_at) }}</p>
               </div>
               <div>
-                <p class="text-gray-600">Last Updated</p>
-                <p class="text-gray-900 font-medium">{{ formatDate(track.updated_at) }}</p>
+                <p class="text-muted">Last Updated</p>
+                <p class="text-default font-medium">{{ formatDate(track.updated_at) }}</p>
               </div>
               <div v-if="track.isrc_code">
-                <p class="text-gray-600">ISRC Code</p>
-                <p class="text-gray-900 font-medium">{{ track.isrc_code }}</p>
+                <p class="text-muted">ISRC Code</p>
+                <p class="text-default font-medium">{{ track.isrc_code }}</p>
               </div>
             </div>
           </UCard>
@@ -348,7 +348,7 @@
         <template #body>
           <div class="space-y-4">
             <div>
-              <label for="audio-name" class="block text-sm font-medium text-gray-700 mb-1">
+              <label for="audio-name" class="block text-sm font-medium text-default mb-1">
                 Name (optional)
               </label>
               <UInput
@@ -359,7 +359,7 @@
               />
             </div>
             <div>
-              <label for="audio-description" class="block text-sm font-medium text-gray-700 mb-1">
+              <label for="audio-description" class="block text-sm font-medium text-default mb-1">
                 Description (optional)
               </label>
               <UTextarea
@@ -371,7 +371,7 @@
               />
             </div>
             <div>
-              <label for="audio-version" class="block text-sm font-medium text-gray-700 mb-1">
+              <label for="audio-version" class="block text-sm font-medium text-default mb-1">
                 Version (optional)
               </label>
               <UInput
@@ -380,12 +380,12 @@
                 placeholder="e.g., v1, v2, final, master"
                 :disabled="uploadingAudio"
               />
-              <p class="mt-1 text-xs text-gray-500">
+              <p class="mt-1 text-xs text-muted">
                 Track different versions of the same audio file
               </p>
             </div>
             <div>
-              <label for="audio-mixdown-date" class="block text-sm font-medium text-gray-700 mb-1">
+              <label for="audio-mixdown-date" class="block text-sm font-medium text-default mb-1">
                 Mixdown Date (optional)
               </label>
               <UInput
@@ -432,7 +432,7 @@
         <template #body>
           <form id="add-note-form" @submit.prevent="handleAddNote" class="space-y-4">
             <div>
-              <label for="note-text" class="block text-sm font-medium text-gray-700 mb-1">
+              <label for="note-text" class="block text-sm font-medium text-default mb-1">
                 Note
               </label>
               <UTextarea
@@ -474,7 +474,7 @@
         <template #body>
           <form id="edit-note-form" @submit.prevent="handleEditNote" class="space-y-4">
             <div>
-              <label for="edit-note-text" class="block text-sm font-medium text-gray-700 mb-1">
+              <label for="edit-note-text" class="block text-sm font-medium text-default mb-1">
                 Note
               </label>
               <UTextarea
@@ -521,7 +521,7 @@
         <template #body>
           <form id="edit-audio-form" @submit.prevent="handleEditAudio" class="space-y-4">
             <div>
-              <label for="edit-audio-name" class="block text-sm font-medium text-gray-700 mb-1">
+              <label for="edit-audio-name" class="block text-sm font-medium text-default mb-1">
                 Name
               </label>
               <UInput
@@ -533,7 +533,7 @@
               />
             </div>
             <div>
-              <label for="edit-audio-description" class="block text-sm font-medium text-gray-700 mb-1">
+              <label for="edit-audio-description" class="block text-sm font-medium text-default mb-1">
                 Description
               </label>
               <UTextarea
@@ -545,7 +545,7 @@
               />
             </div>
             <div>
-              <label for="edit-audio-version" class="block text-sm font-medium text-gray-700 mb-1">
+              <label for="edit-audio-version" class="block text-sm font-medium text-default mb-1">
                 Version
               </label>
               <UInput
@@ -554,12 +554,12 @@
                 placeholder="e.g., v1, v2, final, master"
                 :disabled="editingAudio"
               />
-              <p class="mt-1 text-xs text-gray-500">
+              <p class="mt-1 text-xs text-muted">
                 Track different versions of the same audio file
               </p>
             </div>
             <div>
-              <label for="edit-audio-mixdown-date" class="block text-sm font-medium text-gray-700 mb-1">
+              <label for="edit-audio-mixdown-date" class="block text-sm font-medium text-default mb-1">
                 Mixdown Date
               </label>
               <UInput

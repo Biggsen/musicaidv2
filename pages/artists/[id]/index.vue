@@ -2,14 +2,14 @@
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <!-- Loading State -->
     <div v-if="loading" class="flex justify-center py-12">
-      <UIcon name="i-heroicons-arrow-path" class="w-8 h-8 text-gray-400 animate-spin" />
+      <UIcon name="i-heroicons-arrow-path" class="w-8 h-8 text-dimmed animate-spin" />
     </div>
 
     <!-- Error State -->
     <UCard v-else-if="error" class="text-center py-12">
-      <UIcon name="i-heroicons-exclamation-triangle" class="w-16 h-16 text-red-400 mx-auto mb-4" />
-      <h3 class="text-xl font-semibold text-gray-900 mb-2">Artist Not Found</h3>
-      <p class="text-gray-600 mb-6">{{ error }}</p>
+      <UIcon name="i-heroicons-exclamation-triangle" class="w-16 h-16 text-error mx-auto mb-4" />
+      <h3 class="text-xl font-semibold text-default mb-2">Artist Not Found</h3>
+      <p class="text-muted mb-6">{{ error }}</p>
       <UButton color="primary" to="/artists">Back to Artists</UButton>
     </UCard>
 
@@ -26,7 +26,7 @@
           >
             Back
           </UButton>
-          <h1 class="text-3xl font-bold text-gray-900">{{ artist.name }}</h1>
+          <h1 class="text-3xl font-bold text-default">{{ artist.name }}</h1>
           <UPopover>
             <UButton
               color="neutral"
@@ -68,7 +68,7 @@
             </template>
           </UPopover>
         </div>
-        <p class="text-gray-600">Slug: {{ artist.slug }}</p>
+        <p class="text-muted">Slug: {{ artist.slug }}</p>
       </div>
 
       <!-- Stats Cards -->
@@ -76,32 +76,32 @@
         <UCard>
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm text-gray-600">Total Tracks</p>
-              <p class="text-2xl font-bold text-gray-900">{{ tracks.length }}</p>
+              <p class="text-sm text-muted">Total Tracks</p>
+              <p class="text-2xl font-bold text-default">{{ tracks.length }}</p>
             </div>
-            <UIcon name="i-heroicons-musical-note" class="w-8 h-8 text-blue-500" />
+            <UIcon name="i-heroicons-musical-note" class="w-8 h-8 text-primary" />
           </div>
         </UCard>
         <UCard>
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm text-gray-600">Live Ready</p>
-              <p class="text-2xl font-bold text-gray-900">
+              <p class="text-sm text-muted">Live Ready</p>
+              <p class="text-2xl font-bold text-default">
                 {{ tracks.filter(t => t.live_ready).length }}
               </p>
             </div>
-            <UIcon name="i-heroicons-check-circle" class="w-8 h-8 text-green-500" />
+            <UIcon name="i-heroicons-check-circle" class="w-8 h-8 text-success" />
           </div>
         </UCard>
         <UCard>
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm text-gray-600">Last Updated</p>
-              <p class="text-sm font-semibold text-gray-900">
+              <p class="text-sm text-muted">Last Updated</p>
+              <p class="text-sm font-semibold text-default">
                 {{ formatDate(artist.updated_at) }}
               </p>
             </div>
-            <UIcon name="i-heroicons-clock" class="w-8 h-8 text-gray-500" />
+            <UIcon name="i-heroicons-clock" class="w-8 h-8 text-dimmed" />
           </div>
         </UCard>
       </div>
@@ -110,7 +110,7 @@
       <UCard>
         <template #header>
           <div class="flex justify-between items-center">
-            <h2 class="text-xl font-semibold text-gray-900">Tracks</h2>
+            <h2 class="text-xl font-semibold text-default">Tracks</h2>
             <UButton
               color="primary"
               icon="i-heroicons-plus"
@@ -123,14 +123,14 @@
 
         <!-- Loading Tracks -->
         <div v-if="loadingTracks" class="flex justify-center py-8">
-          <UIcon name="i-heroicons-arrow-path" class="w-6 h-6 text-gray-400 animate-spin" />
+          <UIcon name="i-heroicons-arrow-path" class="w-6 h-6 text-dimmed animate-spin" />
         </div>
 
         <!-- Empty State -->
         <div v-else-if="tracks.length === 0" class="text-center py-12">
-          <UIcon name="i-heroicons-musical-note" class="w-16 h-16 text-gray-400 mx-auto mb-4" />
-          <h3 class="text-lg font-semibold text-gray-900 mb-2">No tracks yet</h3>
-          <p class="text-gray-600 mb-6">Create your first track to get started</p>
+          <UIcon name="i-heroicons-musical-note" class="w-16 h-16 text-dimmed mx-auto mb-4" />
+          <h3 class="text-lg font-semibold text-default mb-2">No tracks yet</h3>
+          <p class="text-muted mb-6">Create your first track to get started</p>
           <UButton color="primary" icon="i-heroicons-plus" @click="showCreateTrackModal = true">
             Create Track
           </UButton>
@@ -146,8 +146,8 @@
           >
             <div class="flex items-center justify-between">
               <div class="flex-1">
-                <h3 class="font-semibold text-gray-900 mb-1">{{ track.name }}</h3>
-                <div class="flex items-center gap-4 text-sm text-gray-600">
+                <h3 class="font-semibold text-default mb-1">{{ track.name }}</h3>
+                <div class="flex items-center gap-4 text-sm text-muted">
                   <span>Key: {{ track.key }}</span>
                   <span v-if="track.tempo">Tempo: {{ track.tempo }} BPM</span>
                   <span v-if="track.minutes !== null && track.seconds !== null">
@@ -156,7 +156,7 @@
                   <UBadge v-if="track.live_ready" color="success">Live Ready</UBadge>
                 </div>
               </div>
-              <UIcon name="i-heroicons-chevron-right" class="w-5 h-5 text-gray-400" />
+              <UIcon name="i-heroicons-chevron-right" class="w-5 h-5 text-dimmed" />
             </div>
           </div>
         </div>
@@ -167,7 +167,7 @@
         <template #body>
           <form id="create-track-form" @submit.prevent="handleCreateTrack" class="space-y-4">
             <div>
-              <label for="track-name" class="block text-sm font-medium text-gray-700 mb-1">
+              <label for="track-name" class="block text-sm font-medium text-default mb-1">
                 Track Name
               </label>
               <UInput
@@ -181,7 +181,7 @@
 
             <div class="grid grid-cols-2 gap-4">
               <div>
-                <label for="track-tempo" class="block text-sm font-medium text-gray-700 mb-1">
+                <label for="track-tempo" class="block text-sm font-medium text-default mb-1">
                   Tempo (BPM)
                 </label>
                 <UInput
@@ -193,7 +193,7 @@
                 />
               </div>
               <div>
-                <label for="track-location" class="block text-sm font-medium text-gray-700 mb-1">
+                <label for="track-location" class="block text-sm font-medium text-default mb-1">
                   Location
                 </label>
                 <UInput

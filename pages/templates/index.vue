@@ -2,8 +2,8 @@
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <div class="mb-8 flex justify-between items-center">
       <div>
-        <h1 class="text-3xl font-bold text-gray-900 mb-2">Workflow Templates</h1>
-        <p class="text-gray-600">Manage your production workflow templates</p>
+        <h1 class="text-3xl font-bold text-default mb-2">Workflow Templates</h1>
+        <p class="text-muted">Manage your production workflow templates</p>
       </div>
       <UButton
         color="primary"
@@ -17,14 +17,14 @@
 
     <!-- Loading State -->
     <div v-if="loading" class="flex justify-center py-12">
-      <UIcon name="i-heroicons-arrow-path" class="w-8 h-8 text-gray-400 animate-spin" />
+      <UIcon name="i-heroicons-arrow-path" class="w-8 h-8 text-dimmed animate-spin" />
     </div>
 
     <!-- Empty State -->
     <UCard v-else-if="templates.length === 0" class="text-center py-12">
-      <UIcon name="i-heroicons-document-text" class="w-16 h-16 text-gray-400 mx-auto mb-4" />
-      <h3 class="text-xl font-semibold text-gray-900 mb-2">No templates yet</h3>
-      <p class="text-gray-600 mb-6">Create your first workflow template to get started</p>
+      <UIcon name="i-heroicons-document-text" class="w-16 h-16 text-dimmed mx-auto mb-4" />
+      <h3 class="text-xl font-semibold text-default mb-2">No templates yet</h3>
+      <p class="text-muted mb-6">Create your first workflow template to get started</p>
       <UButton color="primary" icon="i-heroicons-plus" @click="showCreateModal = true">
         Create Template
       </UButton>
@@ -43,11 +43,11 @@
             class="flex-1"
             @click="() => router.push(`/templates/${template.id}`)"
           >
-            <h3 class="text-xl font-semibold text-gray-900 mb-2">{{ template.name }}</h3>
-            <p v-if="template.description" class="text-sm text-gray-600 mb-4">
+            <h3 class="text-xl font-semibold text-default mb-2">{{ template.name }}</h3>
+            <p v-if="template.description" class="text-sm text-muted mb-4">
               {{ template.description }}
             </p>
-            <div class="flex items-center gap-4 text-sm text-gray-600">
+            <div class="flex items-center gap-4 text-sm text-muted">
               <UBadge v-if="template.published" color="success">Published</UBadge>
               <UBadge v-else color="neutral">Draft</UBadge>
             </div>
@@ -87,7 +87,7 @@
       <template #body>
         <form id="create-template-form" @submit.prevent="handleCreateTemplate" class="space-y-4">
           <div>
-            <label for="template-name" class="block text-sm font-medium text-gray-700 mb-1">
+            <label for="template-name" class="block text-sm font-medium text-default mb-1">
               Template Name
             </label>
             <UInput
@@ -100,7 +100,7 @@
           </div>
 
           <div>
-            <label for="template-description" class="block text-sm font-medium text-gray-700 mb-1">
+            <label for="template-description" class="block text-sm font-medium text-default mb-1">
               Description
             </label>
             <UTextarea

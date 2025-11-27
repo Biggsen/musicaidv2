@@ -1,17 +1,17 @@
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+  <div class="min-h-screen flex items-center justify-center bg-default py-12 px-4 sm:px-6 lg:px-8">
     <div class="max-w-md w-full space-y-8">
       <div>
-        <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">Create your account</h2>
-        <p class="mt-2 text-center text-sm text-gray-600">
+        <h2 class="mt-6 text-center text-3xl font-extrabold text-default">Create your account</h2>
+        <p class="mt-2 text-center text-sm text-muted">
           Or
-          <NuxtLink to="/login" class="font-medium text-blue-600 hover:text-blue-500">
+          <NuxtLink to="/login" class="font-medium text-primary hover:text-primary/80">
             sign in to your existing account
           </NuxtLink>
         </p>
       </div>
 
-      <UCard class="bg-white">
+      <UCard>
         <form class="space-y-6" @submit.prevent="handleRegister">
           <UAlert
             v-if="error"
@@ -28,7 +28,7 @@
           />
 
           <div class="space-y-2">
-            <label for="name" class="block text-sm font-medium text-gray-700">
+            <label for="name" class="block text-sm font-medium text-default">
               Full name
             </label>
             <UInput
@@ -38,12 +38,11 @@
               placeholder="Full name"
               autocomplete="name"
               required
-              class="bg-white"
             />
           </div>
 
           <div class="space-y-2">
-            <label for="email" class="block text-sm font-medium text-gray-700">
+            <label for="email" class="block text-sm font-medium text-default">
               Email address
             </label>
             <UInput
@@ -53,12 +52,11 @@
               placeholder="Email address"
               autocomplete="email"
               required
-              class="bg-white"
             />
           </div>
 
           <div class="space-y-2">
-            <label for="password" class="block text-sm font-medium text-gray-700">
+            <label for="password" class="block text-sm font-medium text-default">
               Password
             </label>
             <UInput
@@ -68,12 +66,11 @@
               placeholder="Password"
               autocomplete="new-password"
               required
-              class="bg-white"
             />
           </div>
 
           <div class="space-y-2">
-            <label for="confirmPassword" class="block text-sm font-medium text-gray-700">
+            <label for="confirmPassword" class="block text-sm font-medium text-default">
               Confirm password
             </label>
             <UInput
@@ -83,7 +80,6 @@
               placeholder="Confirm password"
               autocomplete="new-password"
               required
-              class="bg-white"
               :error="password && confirmPassword && password !== confirmPassword ? 'Passwords do not match' : undefined"
             />
           </div>

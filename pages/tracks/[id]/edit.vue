@@ -2,14 +2,14 @@
   <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <!-- Loading State -->
     <div v-if="loading" class="flex justify-center py-12">
-      <UIcon name="i-heroicons-arrow-path" class="w-8 h-8 text-gray-400 animate-spin" />
+      <UIcon name="i-heroicons-arrow-path" class="w-8 h-8 text-dimmed animate-spin" />
     </div>
 
     <!-- Error State -->
     <UCard v-else-if="error" class="text-center py-12">
-      <UIcon name="i-heroicons-exclamation-triangle" class="w-16 h-16 text-red-400 mx-auto mb-4" />
-      <h3 class="text-xl font-semibold text-gray-900 mb-2">Track Not Found</h3>
-      <p class="text-gray-600 mb-6">{{ error }}</p>
+      <UIcon name="i-heroicons-exclamation-triangle" class="w-16 h-16 text-error mx-auto mb-4" />
+      <h3 class="text-xl font-semibold text-default mb-2">Track Not Found</h3>
+      <p class="text-muted mb-6">{{ error }}</p>
       <UButton color="primary" to="/tracks">Back to Tracks</UButton>
     </UCard>
 
@@ -24,17 +24,17 @@
           >
             Back
           </UButton>
-        <h1 class="text-3xl font-bold text-gray-900 mt-4">Edit Track</h1>
+        <h1 class="text-3xl font-bold text-default mt-4">Edit Track</h1>
       </div>
 
       <UCard>
         <template #header>
-          <h2 class="text-xl font-semibold text-gray-900">Track Information</h2>
+          <h2 class="text-xl font-semibold text-default">Track Information</h2>
         </template>
 
         <form @submit.prevent="handleUpdate" class="space-y-4">
           <div>
-            <label for="track-name" class="block text-sm font-medium text-gray-700 mb-1">
+            <label for="track-name" class="block text-sm font-medium text-default mb-1">
               Track Name
             </label>
             <UInput
@@ -47,7 +47,7 @@
           </div>
 
           <div>
-            <label for="track-key" class="block text-sm font-medium text-gray-700 mb-1">
+            <label for="track-key" class="block text-sm font-medium text-default mb-1">
               Track Key
             </label>
             <UInput
@@ -57,13 +57,13 @@
               required
               :disabled="saving"
             />
-            <p class="mt-1 text-xs text-gray-500">
+            <p class="mt-1 text-xs text-muted">
               Unique identifier. Lowercase letters, numbers, and hyphens only.
             </p>
           </div>
 
           <div>
-            <label for="track-template" class="block text-sm font-medium text-gray-700 mb-1">
+            <label for="track-template" class="block text-sm font-medium text-default mb-1">
               Workflow Template
             </label>
             <USelect
@@ -73,14 +73,14 @@
               placeholder="Select a template (optional)"
               :disabled="saving || loadingTemplates"
             />
-            <p class="mt-1 text-xs text-gray-500">
+            <p class="mt-1 text-xs text-muted">
               Select a workflow template to track production progress.
             </p>
           </div>
 
           <div class="grid grid-cols-2 gap-4">
             <div>
-              <label for="track-tempo" class="block text-sm font-medium text-gray-700 mb-1">
+              <label for="track-tempo" class="block text-sm font-medium text-default mb-1">
                 Tempo (BPM)
               </label>
               <UInput
@@ -92,7 +92,7 @@
               />
             </div>
             <div>
-              <label for="track-location" class="block text-sm font-medium text-gray-700 mb-1">
+              <label for="track-location" class="block text-sm font-medium text-default mb-1">
                 Location
               </label>
               <UInput
@@ -106,7 +106,7 @@
 
           <div class="grid grid-cols-2 gap-4">
             <div>
-              <label for="track-minutes" class="block text-sm font-medium text-gray-700 mb-1">
+              <label for="track-minutes" class="block text-sm font-medium text-default mb-1">
                 Minutes
               </label>
               <UInput
@@ -118,7 +118,7 @@
               />
             </div>
             <div>
-              <label for="track-seconds" class="block text-sm font-medium text-gray-700 mb-1">
+              <label for="track-seconds" class="block text-sm font-medium text-default mb-1">
                 Seconds
               </label>
               <UInput
@@ -132,7 +132,7 @@
           </div>
 
           <div>
-            <label for="track-isrc" class="block text-sm font-medium text-gray-700 mb-1">
+            <label for="track-isrc" class="block text-sm font-medium text-default mb-1">
               ISRC Code
             </label>
             <UInput
@@ -151,7 +151,7 @@
                 :disabled="saving"
                 class="rounded border-gray-300"
               />
-              <span class="text-sm font-medium text-gray-700">Live Ready</span>
+              <span class="text-sm font-medium text-default">Live Ready</span>
             </label>
           </div>
 

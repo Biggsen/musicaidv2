@@ -11,8 +11,8 @@
           Back to Tracks
         </UButton>
       </div>
-      <h1 class="text-3xl font-bold text-gray-900 mb-2">Batch Upload Tracks</h1>
-      <p class="text-gray-600">Upload multiple audio files to create tracks automatically</p>
+      <h1 class="text-3xl font-bold text-default mb-2">Batch Upload Tracks</h1>
+      <p class="text-muted">Upload multiple audio files to create tracks automatically</p>
     </div>
 
     <!-- Configuration Card -->
@@ -22,8 +22,8 @@
       </template>
       <div class="space-y-4">
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">
-            Artist <span class="text-red-500">*</span>
+          <label class="block text-sm font-medium text-default mb-1">
+            Artist <span class="text-error">*</span>
           </label>
           <USelect
             v-model="selectedArtistId"
@@ -35,7 +35,7 @@
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">
+          <label class="block text-sm font-medium text-default mb-1">
             Workflow Template (optional)
           </label>
           <USelect
@@ -45,13 +45,13 @@
             :disabled="uploading"
             @update:model-value="handleTemplateChange"
           />
-          <p class="mt-1 text-xs text-gray-500">
+          <p class="mt-1 text-xs text-muted">
             Select a workflow template to apply to all tracks
           </p>
         </div>
 
         <div v-if="selectedTemplateId && availableStatuses.length > 0">
-          <label class="block text-sm font-medium text-gray-700 mb-1">
+          <label class="block text-sm font-medium text-default mb-1">
             Initial Stage (optional)
           </label>
           <USelect
@@ -60,7 +60,7 @@
             placeholder="Select initial stage (optional)"
             :disabled="uploading"
           />
-          <p class="mt-1 text-xs text-gray-500">
+          <p class="mt-1 text-xs text-muted">
             Set the initial workflow stage for all tracks. If not selected, the first stage of the template will be used.
           </p>
         </div>
@@ -74,8 +74,8 @@
       </template>
       <div class="space-y-4">
         <div
-          class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-gray-400 transition-colors"
-          :class="{ 'border-blue-500 bg-blue-50': isDragging }"
+          class="border-2 border-dashed border-default rounded-lg p-8 text-center hover:border-default/80 transition-colors"
+          :class="{ 'border-primary bg-primary/10': isDragging }"
           @drop.prevent="handleDrop"
           @dragover.prevent="isDragging = true"
           @dragleave.prevent="isDragging = false"
@@ -88,19 +88,19 @@
             class="hidden"
             @change="handleFileSelect"
           />
-          <UIcon name="i-heroicons-musical-note" class="w-12 h-12 text-gray-400 mx-auto mb-3" />
-          <p class="text-sm text-gray-600 mb-2">
+          <UIcon name="i-heroicons-musical-note" class="w-12 h-12 text-dimmed mx-auto mb-3" />
+          <p class="text-sm text-muted mb-2">
             Drag and drop audio files here, or
             <button
               type="button"
-              class="text-blue-600 hover:text-blue-800 font-medium"
+              class="text-primary hover:text-primary/80 font-medium"
               @click="fileInput?.click()"
               :disabled="uploading"
             >
               browse
             </button>
           </p>
-          <p class="text-xs text-gray-500">
+          <p class="text-xs text-muted">
             Supported formats: MP3, WAV, FLAC, M4A (Max 50MB per file)
           </p>
         </div>
@@ -108,7 +108,7 @@
         <!-- Selected Files List -->
         <div v-if="selectedFiles.length > 0" class="space-y-2">
           <div class="flex justify-between items-center">
-            <p class="text-sm font-medium text-gray-700">
+            <p class="text-sm font-medium text-default">
               {{ selectedFiles.length }} file{{ selectedFiles.length !== 1 ? 's' : '' }} selected
             </p>
             <UButton
@@ -125,11 +125,11 @@
             <div
               v-for="(file, index) in selectedFiles"
               :key="index"
-              class="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+              class="flex items-center justify-between p-3 bg-default rounded-lg"
             >
               <div class="flex-1 min-w-0">
-                <p class="font-medium text-gray-900 truncate">{{ file.name }}</p>
-                <p class="text-xs text-gray-500">{{ formatFileSize(file.size) }}</p>
+                <p class="font-medium text-default truncate">{{ file.name }}</p>
+                <p class="text-xs text-muted">{{ formatFileSize(file.size) }}</p>
               </div>
               <UButton
                 v-if="!uploading"
@@ -163,13 +163,13 @@
         >
           <div class="flex items-center justify-between">
             <div class="flex-1 min-w-0">
-              <p class="font-medium text-gray-900 truncate">{{ result.fileName }}</p>
-              <p class="text-xs text-gray-600 mt-1">
+              <p class="font-medium text-default truncate">{{ result.fileName }}</p>
+              <p class="text-xs text-muted mt-1">
                 <span v-if="result.status === 'processing'">Processing...</span>
                 <span v-else-if="result.status === 'success'">
                   Track created: {{ result.trackName }}
                 </span>
-                <span v-else-if="result.status === 'error'" class="text-red-600">
+                <span v-else-if="result.status === 'error'" class="text-error">
                   {{ result.error }}
                 </span>
               </p>
@@ -178,17 +178,17 @@
               <UIcon
                 v-if="result.status === 'processing'"
                 name="i-heroicons-arrow-path"
-                class="w-5 h-5 text-blue-600 animate-spin"
+                class="w-5 h-5 text-primary animate-spin"
               />
               <UIcon
                 v-else-if="result.status === 'success'"
                 name="i-heroicons-check-circle"
-                class="w-5 h-5 text-green-600"
+                class="w-5 h-5 text-success"
               />
               <UIcon
                 v-else-if="result.status === 'error'"
                 name="i-heroicons-x-circle"
-                class="w-5 h-5 text-red-600"
+                class="w-5 h-5 text-error"
               />
             </div>
           </div>

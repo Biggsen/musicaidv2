@@ -2,14 +2,14 @@
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <!-- Loading State -->
     <div v-if="loading" class="flex justify-center py-12">
-      <UIcon name="i-heroicons-arrow-path" class="w-8 h-8 text-gray-400 animate-spin" />
+      <UIcon name="i-heroicons-arrow-path" class="w-8 h-8 text-dimmed animate-spin" />
     </div>
 
     <!-- Error State -->
     <UCard v-else-if="error" class="text-center py-12">
-      <UIcon name="i-heroicons-exclamation-triangle" class="w-16 h-16 text-red-400 mx-auto mb-4" />
-      <h3 class="text-xl font-semibold text-gray-900 mb-2">Template Not Found</h3>
-      <p class="text-gray-600 mb-6">{{ error }}</p>
+      <UIcon name="i-heroicons-exclamation-triangle" class="w-16 h-16 text-error mx-auto mb-4" />
+      <h3 class="text-xl font-semibold text-default mb-2">Template Not Found</h3>
+      <p class="text-muted mb-6">{{ error }}</p>
       <UButton color="primary" to="/templates">Back to Templates</UButton>
     </UCard>
 
@@ -26,11 +26,11 @@
           >
             Back
           </UButton>
-          <h1 class="text-3xl font-bold text-gray-900">{{ template.name }}</h1>
+          <h1 class="text-3xl font-bold text-default">{{ template.name }}</h1>
           <UBadge v-if="template.published" color="success">Published</UBadge>
           <UBadge v-else color="neutral">Draft</UBadge>
         </div>
-        <p v-if="template.description" class="text-gray-600">{{ template.description }}</p>
+        <p v-if="template.description" class="text-muted">{{ template.description }}</p>
       </div>
 
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -40,7 +40,7 @@
           <UCard>
             <template #header>
               <div class="flex justify-between items-center">
-                <h2 class="text-xl font-semibold text-gray-900">Template Information</h2>
+                <h2 class="text-xl font-semibold text-default">Template Information</h2>
                 <UButton
                   color="primary"
                   variant="ghost"
@@ -54,12 +54,12 @@
 
             <div class="space-y-4">
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Name</label>
-                <p class="text-gray-900">{{ template.name }}</p>
+                <label class="block text-sm font-medium text-default mb-1">Name</label>
+                <p class="text-default">{{ template.name }}</p>
               </div>
               <div v-if="template.description">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                <p class="text-gray-900">{{ template.description }}</p>
+                <label class="block text-sm font-medium text-default mb-1">Description</label>
+                <p class="text-default">{{ template.description }}</p>
               </div>
             </div>
           </UCard>
@@ -68,7 +68,7 @@
           <UCard>
             <template #header>
               <div class="flex justify-between items-center">
-                <h2 class="text-xl font-semibold text-gray-900">Workflow Statuses</h2>
+                <h2 class="text-xl font-semibold text-default">Workflow Statuses</h2>
                 <UButton
                   color="primary"
                   size="sm"
@@ -81,8 +81,8 @@
             </template>
 
             <div v-if="statuses.length === 0" class="text-center py-8">
-              <UIcon name="i-heroicons-list-bullet" class="w-12 h-12 text-gray-400 mx-auto mb-3" />
-              <p class="text-gray-600 mb-4">No statuses yet</p>
+              <UIcon name="i-heroicons-list-bullet" class="w-12 h-12 text-dimmed mx-auto mb-3" />
+              <p class="text-muted mb-4">No statuses yet</p>
               <UButton color="primary" size="sm" icon="i-heroicons-plus" @click="showAddStatusModal = true">
                 Add First Status
               </UButton>
@@ -97,13 +97,13 @@
                 <div class="flex items-start justify-between mb-3">
                   <div class="flex-1">
                     <div class="flex items-center gap-2 mb-1">
-                      <span class="text-sm font-medium text-gray-500">#{{ index + 1 }}</span>
-                      <h3 class="text-lg font-semibold text-gray-900">{{ status.name }}</h3>
+                      <span class="text-sm font-medium text-muted">#{{ index + 1 }}</span>
+                      <h3 class="text-lg font-semibold text-default">{{ status.name }}</h3>
                     </div>
-                    <p v-if="status.description" class="text-sm text-gray-600">{{ status.description }}</p>
+                    <p v-if="status.description" class="text-sm text-muted">{{ status.description }}</p>
                     <div class="mt-2 flex items-center gap-2">
                       <UBadge v-if="status.non_linear" color="warning">Non-linear</UBadge>
-                      <span class="text-xs text-gray-500">
+                      <span class="text-xs text-muted">
                         {{ getStepCount(status.id) }} step{{ getStepCount(status.id) !== 1 ? 's' : '' }}
                       </span>
                     </div>
@@ -133,7 +133,7 @@
                 <!-- Steps for this status -->
                 <div v-if="getStepsForStatus(status.id).length > 0" class="mt-3 pl-4 border-l-2 border-gray-200">
                   <div class="flex justify-between items-center mb-2">
-                    <h4 class="text-sm font-medium text-gray-700">Steps</h4>
+                    <h4 class="text-sm font-medium text-default">Steps</h4>
                     <UButton
                       color="primary"
                       variant="ghost"
@@ -151,8 +151,8 @@
                       class="flex items-center justify-between p-2 bg-gray-50 rounded"
                     >
                       <div class="flex items-center gap-2">
-                        <UIcon name="i-heroicons-check-circle" class="w-4 h-4 text-gray-400" />
-                        <span class="text-sm text-gray-900">{{ step.name }}</span>
+                        <UIcon name="i-heroicons-check-circle" class="w-4 h-4 text-dimmed" />
+                        <span class="text-sm text-default">{{ step.name }}</span>
                         <UBadge size="xs" color="neutral">{{ step.type }}</UBadge>
                       </div>
                       <div class="flex items-center gap-1">
@@ -175,7 +175,7 @@
                   </div>
                 </div>
                 <div v-else class="mt-3 pl-4 border-l-2 border-gray-200">
-                  <p class="text-sm text-gray-500 mb-2">No steps yet</p>
+                  <p class="text-sm text-muted mb-2">No steps yet</p>
                   <UButton
                     color="primary"
                     variant="ghost"
@@ -196,7 +196,7 @@
           <!-- Quick Actions -->
           <UCard>
             <template #header>
-              <h3 class="text-lg font-semibold text-gray-900">Quick Actions</h3>
+              <h3 class="text-lg font-semibold text-default">Quick Actions</h3>
             </template>
             <div class="space-y-2">
               <UButton
@@ -223,10 +223,10 @@
           <!-- Available Steps -->
           <UCard>
             <template #header>
-              <h3 class="text-lg font-semibold text-gray-900">Available Steps</h3>
+              <h3 class="text-lg font-semibold text-default">Available Steps</h3>
             </template>
             <div v-if="allSteps.length === 0" class="text-center py-4">
-              <p class="text-sm text-gray-500">No steps created yet</p>
+              <p class="text-sm text-muted">No steps created yet</p>
             </div>
             <div v-else class="space-y-2">
               <div
@@ -234,8 +234,8 @@
                 :key="step.id"
                 class="p-2 border border-gray-200 rounded text-sm"
               >
-                <div class="font-medium text-gray-900">{{ step.name }}</div>
-                <div class="text-xs text-gray-500">{{ step.type }}</div>
+                <div class="font-medium text-default">{{ step.name }}</div>
+                <div class="text-xs text-muted">{{ step.type }}</div>
               </div>
             </div>
           </UCard>
@@ -247,7 +247,7 @@
         <template #body>
           <form id="edit-template-form" @submit.prevent="handleUpdateTemplate" class="space-y-4">
             <div>
-              <label for="edit-template-name" class="block text-sm font-medium text-gray-700 mb-1">
+              <label for="edit-template-name" class="block text-sm font-medium text-default mb-1">
                 Template Name
               </label>
               <UInput
@@ -259,7 +259,7 @@
               />
             </div>
             <div>
-              <label for="edit-template-description" class="block text-sm font-medium text-gray-700 mb-1">
+              <label for="edit-template-description" class="block text-sm font-medium text-default mb-1">
                 Description
               </label>
               <UTextarea
@@ -290,7 +290,7 @@
         <template #body>
           <form id="add-status-form" @submit.prevent="handleAddStatus" class="space-y-4">
             <div>
-              <label for="status-select" class="block text-sm font-medium text-gray-700 mb-1">
+              <label for="status-select" class="block text-sm font-medium text-default mb-1">
                 Select Status
               </label>
               <USelect
@@ -301,7 +301,7 @@
                 required
                 :disabled="addingStatus"
               />
-              <p class="mt-1 text-xs text-gray-500">
+              <p class="mt-1 text-xs text-muted">
                 Select an existing status or create a new one
               </p>
             </div>
@@ -339,7 +339,7 @@
         <template #body>
           <form id="edit-status-form" @submit.prevent="handleUpdateStatus" class="space-y-4">
             <div>
-              <label for="edit-status-name" class="block text-sm font-medium text-gray-700 mb-1">
+              <label for="edit-status-name" class="block text-sm font-medium text-default mb-1">
                 Status Name
               </label>
               <UInput
@@ -351,7 +351,7 @@
               />
             </div>
             <div>
-              <label for="edit-status-key" class="block text-sm font-medium text-gray-700 mb-1">
+              <label for="edit-status-key" class="block text-sm font-medium text-default mb-1">
                 Key
               </label>
               <UInput
@@ -361,10 +361,10 @@
                 required
                 :disabled="editingStatus"
               />
-              <p class="mt-1 text-xs text-gray-500">Lowercase, no spaces (e.g., recording, mixing)</p>
+              <p class="mt-1 text-xs text-muted">Lowercase, no spaces (e.g., recording, mixing)</p>
             </div>
             <div>
-              <label for="edit-status-description" class="block text-sm font-medium text-gray-700 mb-1">
+              <label for="edit-status-description" class="block text-sm font-medium text-default mb-1">
                 Description
               </label>
               <UTextarea
@@ -383,7 +383,7 @@
                   :disabled="editingStatus"
                   class="rounded border-gray-300"
                 />
-                <span class="text-sm font-medium text-gray-700">Non-linear (can skip around)</span>
+                <span class="text-sm font-medium text-default">Non-linear (can skip around)</span>
               </label>
             </div>
             <UAlert v-if="statusError" color="error" variant="soft" :title="statusError" />
@@ -411,7 +411,7 @@
         <template #body>
           <form id="create-status-form" @submit.prevent="handleCreateStatus" class="space-y-4">
             <div>
-              <label for="status-name" class="block text-sm font-medium text-gray-700 mb-1">
+              <label for="status-name" class="block text-sm font-medium text-default mb-1">
                 Status Name
               </label>
               <UInput
@@ -423,7 +423,7 @@
               />
             </div>
             <div>
-              <label for="status-description" class="block text-sm font-medium text-gray-700 mb-1">
+              <label for="status-description" class="block text-sm font-medium text-default mb-1">
                 Description
               </label>
               <UTextarea
@@ -442,7 +442,7 @@
                   :disabled="creatingStatus"
                   class="rounded border-gray-300"
                 />
-                <span class="text-sm font-medium text-gray-700">Non-linear (can skip around)</span>
+                <span class="text-sm font-medium text-default">Non-linear (can skip around)</span>
               </label>
             </div>
             <UAlert v-if="statusError" color="error" variant="soft" :title="statusError" />
@@ -470,7 +470,7 @@
         <template #body>
           <form id="add-step-form" @submit.prevent="handleAddStep" class="space-y-4">
             <div>
-              <label for="step-select" class="block text-sm font-medium text-gray-700 mb-1">
+              <label for="step-select" class="block text-sm font-medium text-default mb-1">
                 Select Step
               </label>
               <USelect
@@ -511,7 +511,7 @@
         <template #body>
           <form id="create-step-form" @submit.prevent="handleCreateStep" class="space-y-4">
             <div>
-              <label for="step-name" class="block text-sm font-medium text-gray-700 mb-1">
+              <label for="step-name" class="block text-sm font-medium text-default mb-1">
                 Step Name
               </label>
               <UInput
@@ -523,7 +523,7 @@
               />
             </div>
             <div>
-              <label for="step-type" class="block text-sm font-medium text-gray-700 mb-1">
+              <label for="step-type" class="block text-sm font-medium text-default mb-1">
                 Step Type
               </label>
               <USelect
@@ -535,7 +535,7 @@
               />
             </div>
             <div>
-              <label for="step-description" class="block text-sm font-medium text-gray-700 mb-1">
+              <label for="step-description" class="block text-sm font-medium text-default mb-1">
                 Description
               </label>
               <UTextarea
@@ -571,7 +571,7 @@
         <template #body>
           <form id="edit-step-form" @submit.prevent="handleUpdateStep" class="space-y-4">
             <div>
-              <label for="edit-step-name" class="block text-sm font-medium text-gray-700 mb-1">
+              <label for="edit-step-name" class="block text-sm font-medium text-default mb-1">
                 Step Name
               </label>
               <UInput
@@ -583,7 +583,7 @@
               />
             </div>
             <div>
-              <label for="edit-step-key" class="block text-sm font-medium text-gray-700 mb-1">
+              <label for="edit-step-key" class="block text-sm font-medium text-default mb-1">
                 Key
               </label>
               <UInput
@@ -593,10 +593,10 @@
                 required
                 :disabled="editingStep"
               />
-              <p class="mt-1 text-xs text-gray-500">Lowercase, no spaces (e.g., record-vocals)</p>
+              <p class="mt-1 text-xs text-muted">Lowercase, no spaces (e.g., record-vocals)</p>
             </div>
             <div>
-              <label for="edit-step-type" class="block text-sm font-medium text-gray-700 mb-1">
+              <label for="edit-step-type" class="block text-sm font-medium text-default mb-1">
                 Step Type
               </label>
               <USelect
@@ -608,7 +608,7 @@
               />
             </div>
             <div>
-              <label for="edit-step-description" class="block text-sm font-medium text-gray-700 mb-1">
+              <label for="edit-step-description" class="block text-sm font-medium text-default mb-1">
                 Description
               </label>
               <UTextarea

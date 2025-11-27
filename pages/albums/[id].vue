@@ -2,14 +2,14 @@
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <!-- Loading State -->
     <div v-if="loading" class="flex justify-center py-12">
-      <UIcon name="i-heroicons-arrow-path" class="w-8 h-8 text-gray-400 animate-spin" />
+      <UIcon name="i-heroicons-arrow-path" class="w-8 h-8 text-dimmed animate-spin" />
     </div>
 
     <!-- Error State -->
     <UCard v-else-if="error" class="text-center py-12">
-      <UIcon name="i-heroicons-exclamation-triangle" class="w-16 h-16 text-red-400 mx-auto mb-4" />
-      <h3 class="text-xl font-semibold text-gray-900 mb-2">Album Not Found</h3>
-      <p class="text-gray-600 mb-6">{{ error }}</p>
+      <UIcon name="i-heroicons-exclamation-triangle" class="w-16 h-16 text-error mx-auto mb-4" />
+      <h3 class="text-xl font-semibold text-default mb-2">Album Not Found</h3>
+      <p class="text-muted mb-6">{{ error }}</p>
       <UButton color="primary" to="/albums">Back to Albums</UButton>
     </UCard>
 
@@ -26,7 +26,7 @@
           >
             Back
           </UButton>
-          <h1 class="text-3xl font-bold text-gray-900">{{ album.name }}</h1>
+          <h1 class="text-3xl font-bold text-default">{{ album.name }}</h1>
           <UPopover>
             <UButton
               color="neutral"
@@ -68,8 +68,8 @@
             </template>
           </UPopover>
         </div>
-        <p v-if="album.description" class="text-gray-600 mb-2">{{ album.description }}</p>
-        <div class="flex items-center gap-4 text-sm text-gray-600">
+        <p v-if="album.description" class="text-muted mb-2">{{ album.description }}</p>
+        <div class="flex items-center gap-4 text-sm text-muted">
           <span>Slug: {{ album.slug }}</span>
           <span v-if="album.release_date">
             Release Date: {{ formatDate(album.release_date) }}
@@ -82,32 +82,32 @@
         <UCard>
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm text-gray-600">Total Tracks</p>
-              <p class="text-2xl font-bold text-gray-900">{{ tracks.length }}</p>
+              <p class="text-sm text-muted">Total Tracks</p>
+              <p class="text-2xl font-bold text-default">{{ tracks.length }}</p>
             </div>
-            <UIcon name="i-heroicons-musical-note" class="w-8 h-8 text-blue-500" />
+            <UIcon name="i-heroicons-musical-note" class="w-8 h-8 text-primary" />
           </div>
         </UCard>
         <UCard>
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm text-gray-600">Live Ready</p>
-              <p class="text-2xl font-bold text-gray-900">
+              <p class="text-sm text-muted">Live Ready</p>
+              <p class="text-2xl font-bold text-default">
                 {{ tracks.filter(t => t.live_ready).length }}
               </p>
             </div>
-            <UIcon name="i-heroicons-check-circle" class="w-8 h-8 text-green-500" />
+            <UIcon name="i-heroicons-check-circle" class="w-8 h-8 text-success" />
           </div>
         </UCard>
         <UCard>
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm text-gray-600">Last Updated</p>
-              <p class="text-sm font-semibold text-gray-900">
+              <p class="text-sm text-muted">Last Updated</p>
+              <p class="text-sm font-semibold text-default">
                 {{ formatDate(album.updated_at) }}
               </p>
             </div>
-            <UIcon name="i-heroicons-clock" class="w-8 h-8 text-gray-500" />
+            <UIcon name="i-heroicons-clock" class="w-8 h-8 text-muted" />
           </div>
         </UCard>
       </div>
@@ -116,7 +116,7 @@
       <UCard>
         <template #header>
           <div class="flex justify-between items-center">
-            <h2 class="text-xl font-semibold text-gray-900">Tracks</h2>
+            <h2 class="text-xl font-semibold text-default">Tracks</h2>
             <UButton
               color="primary"
               icon="i-heroicons-plus"
@@ -129,14 +129,14 @@
 
         <!-- Loading Tracks -->
         <div v-if="loadingTracks" class="flex justify-center py-8">
-          <UIcon name="i-heroicons-arrow-path" class="w-6 h-6 text-gray-400 animate-spin" />
+          <UIcon name="i-heroicons-arrow-path" class="w-6 h-6 text-dimmed animate-spin" />
         </div>
 
         <!-- Empty State -->
         <div v-else-if="tracks.length === 0" class="text-center py-12">
-          <UIcon name="i-heroicons-musical-note" class="w-16 h-16 text-gray-400 mx-auto mb-4" />
-          <h3 class="text-lg font-semibold text-gray-900 mb-2">No tracks in this album</h3>
-          <p class="text-gray-600 mb-6">Add tracks to organize them for release</p>
+          <UIcon name="i-heroicons-musical-note" class="w-16 h-16 text-dimmed mx-auto mb-4" />
+          <h3 class="text-lg font-semibold text-default mb-2">No tracks in this album</h3>
+          <p class="text-muted mb-6">Add tracks to organize them for release</p>
           <UButton color="primary" icon="i-heroicons-plus" @click="showAddTrackModal = true">
             Add Track
           </UButton>
@@ -151,12 +151,12 @@
           >
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-4 flex-1">
-                <span class="text-sm font-medium text-gray-500 w-8">
+                <span class="text-sm font-medium text-muted w-8">
                   {{ track.album_order || '-' }}
                 </span>
                 <div class="flex-1 cursor-pointer" @click="() => router.push(`/tracks/${track.id}`)">
-                  <h3 class="font-semibold text-gray-900 mb-1">{{ track.name }}</h3>
-                  <div class="flex items-center gap-4 text-sm text-gray-600">
+                  <h3 class="font-semibold text-default mb-1">{{ track.name }}</h3>
+                  <div class="flex items-center gap-4 text-sm text-muted">
                     <span>Key: {{ track.key }}</span>
                     <span v-if="track.tempo">Tempo: {{ track.tempo }} BPM</span>
                     <UBadge v-if="track.live_ready" color="success">Live Ready</UBadge>
@@ -198,7 +198,7 @@
         <template #body>
           <form id="add-track-form" @submit.prevent="handleAddTrack" class="space-y-4">
             <div>
-              <label for="track-select" class="block text-sm font-medium text-gray-700 mb-1">
+              <label for="track-select" class="block text-sm font-medium text-default mb-1">
                 Select Track
               </label>
               <USelect
@@ -209,13 +209,13 @@
                 required
                 :disabled="addingTrack"
               />
-              <p class="mt-1 text-xs text-gray-500">
+              <p class="mt-1 text-xs text-muted">
                 Only tracks from the same artist are available
               </p>
             </div>
 
             <div>
-              <label for="track-order" class="block text-sm font-medium text-gray-700 mb-1">
+              <label for="track-order" class="block text-sm font-medium text-default mb-1">
                 Track Order
               </label>
               <UInput
@@ -227,7 +227,7 @@
                 placeholder="Auto"
                 :disabled="addingTrack"
               />
-              <p class="mt-1 text-xs text-gray-500">
+              <p class="mt-1 text-xs text-muted">
                 Leave empty to add at the end
               </p>
             </div>

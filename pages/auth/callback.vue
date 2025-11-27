@@ -5,11 +5,11 @@
         <div
           class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"
         ></div>
-        <p class="text-gray-600">Completing authentication...</p>
+        <p class="text-muted">Completing authentication...</p>
       </div>
       <div v-else-if="error" class="space-y-4">
-        <p class="text-red-600">{{ error }}</p>
-        <NuxtLink to="/login" class="text-blue-600 hover:text-blue-500"> Return to login </NuxtLink>
+        <p class="text-error">{{ error }}</p>
+        <NuxtLink to="/login" class="text-primary hover:text-primary/80"> Return to login </NuxtLink>
       </div>
     </div>
   </div>

@@ -2,8 +2,8 @@
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <div class="mb-8 flex justify-between items-center">
       <div>
-        <h1 class="text-3xl font-bold text-gray-900 mb-2">Albums</h1>
-        <p class="text-gray-600">Organize your tracks into albums</p>
+        <h1 class="text-3xl font-bold text-default mb-2">Albums</h1>
+        <p class="text-muted">Organize your tracks into albums</p>
       </div>
       <UButton
         v-if="artists.length > 0"
@@ -19,7 +19,7 @@
     <!-- Filters -->
     <UCard v-if="artists.length > 0" class="mb-6">
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Filter by Artist</label>
+        <label class="block text-sm font-medium text-default mb-1">Filter by Artist</label>
         <USelect
           v-model="selectedArtistId"
           :items="artistOptions"
@@ -30,16 +30,16 @@
 
     <!-- Loading State -->
     <div v-if="loading" class="flex justify-center py-12">
-      <UIcon name="i-heroicons-arrow-path" class="w-8 h-8 text-gray-400 animate-spin" />
+      <UIcon name="i-heroicons-arrow-path" class="w-8 h-8 text-dimmed animate-spin" />
     </div>
 
     <!-- Empty State -->
     <UCard v-else-if="filteredAlbums.length === 0" class="text-center py-12">
-      <UIcon name="i-heroicons-rectangle-stack" class="w-16 h-16 text-gray-400 mx-auto mb-4" />
-      <h3 class="text-xl font-semibold text-gray-900 mb-2">
+      <UIcon name="i-heroicons-rectangle-stack" class="w-16 h-16 text-dimmed mx-auto mb-4" />
+      <h3 class="text-xl font-semibold text-default mb-2">
         {{ artists.length === 0 ? 'No artists yet' : 'No albums found' }}
       </h3>
-      <p class="text-gray-600 mb-6">
+      <p class="text-muted mb-6">
         {{
           artists.length === 0
             ? 'Create an artist first to add albums'
@@ -69,10 +69,10 @@
       >
         <div class="flex items-start justify-between">
           <div class="flex-1" @click="() => router.push(`/albums/${album.id}`)">
-            <h3 class="text-xl font-semibold text-gray-900 mb-2">{{ album.name }}</h3>
-            <p class="text-sm text-gray-500 mb-2">Slug: {{ album.slug }}</p>
-            <p v-if="album.description" class="text-sm text-gray-600 mb-4">{{ album.description }}</p>
-            <div class="flex items-center gap-4 text-sm text-gray-600">
+            <h3 class="text-xl font-semibold text-default mb-2">{{ album.name }}</h3>
+            <p class="text-sm text-muted mb-2">Slug: {{ album.slug }}</p>
+            <p v-if="album.description" class="text-sm text-muted mb-4">{{ album.description }}</p>
+            <div class="flex items-center gap-4 text-sm text-muted">
               <span class="flex items-center gap-1">
                 <UIcon name="i-heroicons-musical-note" class="w-4 h-4" />
                 {{ getTrackCount(album.id) }} tracks
@@ -82,7 +82,7 @@
                 {{ formatDate(album.release_date) }}
               </span>
             </div>
-            <p class="text-xs text-gray-500 mt-2">{{ getArtistName(album.artist_id) }}</p>
+            <p class="text-xs text-muted mt-2">{{ getArtistName(album.artist_id) }}</p>
           </div>
           <UPopover :content="{ side: 'bottom', align: 'end' }">
             <UButton
@@ -132,7 +132,7 @@
       <template #body>
         <form id="create-album-form" @submit.prevent="handleCreateAlbum" class="space-y-4">
           <div>
-            <label for="album-name" class="block text-sm font-medium text-gray-700 mb-1">
+            <label for="album-name" class="block text-sm font-medium text-default mb-1">
               Album Name
             </label>
             <UInput
@@ -145,7 +145,7 @@
           </div>
 
           <div>
-            <label for="album-artist" class="block text-sm font-medium text-gray-700 mb-1">
+            <label for="album-artist" class="block text-sm font-medium text-default mb-1">
               Artist
             </label>
             <USelect
@@ -159,7 +159,7 @@
           </div>
 
           <div>
-            <label for="album-description" class="block text-sm font-medium text-gray-700 mb-1">
+            <label for="album-description" class="block text-sm font-medium text-default mb-1">
               Description (optional)
             </label>
             <UTextarea
@@ -171,7 +171,7 @@
           </div>
 
           <div>
-            <label for="album-release-date" class="block text-sm font-medium text-gray-700 mb-1">
+            <label for="album-release-date" class="block text-sm font-medium text-default mb-1">
               Release Date (optional)
             </label>
             <UInput
