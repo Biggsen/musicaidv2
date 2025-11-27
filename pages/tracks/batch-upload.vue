@@ -360,7 +360,10 @@ const addFiles = async (files: File[]) => {
 
   for (const file of files) {
     // Validate file type
-    if (!validTypes.some(type => file.type.includes(type.split('/')[1]))) {
+    if (!validTypes.some(type => {
+      const typePart = type.split('/')[1]
+      return typePart && file.type.includes(typePart)
+    })) {
       error.value = `Invalid file type: ${file.name}. Please upload an audio file.`
       continue
     }
@@ -438,12 +441,16 @@ const handleBatchUpload = async () => {
 
   // If template is selected but no status chosen, get first status from template
   if (selectedTemplateId.value && !initialStatusId && templateStatuses.value.length > 0) {
-    initialStatusId = templateStatuses.value[0].id
+    const firstStatus = templateStatuses.value[0]
+    if (firstStatus) {
+      initialStatusId = firstStatus.id
+    }
   }
 
   // Process each file
   for (let i = 0; i < selectedFiles.value.length; i++) {
     const file = selectedFiles.value[i]
+    if (!file) continue
     const trackName = extractTrackName(file.name)
 
     // Add processing result

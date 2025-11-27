@@ -165,10 +165,11 @@ const error = ref('')
 
 const handleFileSelect = (event: Event) => {
   const target = event.target as HTMLInputElement
-  if (target.files && target.files.length > 0) {
-    selectedFile.value = target.files[0]
+  const file = target.files?.[0]
+  if (file) {
+    selectedFile.value = file
     if (!fileName.value) {
-      fileName.value = target.files[0].name
+      fileName.value = file.name
     }
   }
 }

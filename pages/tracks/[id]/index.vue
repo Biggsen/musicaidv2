@@ -910,7 +910,7 @@ const getAudioMenuItems = (audio: AudioFile) => {
           name: audio.name,
           description: audio.description || '',
           version: audio.version || '',
-          mixdown_date: audio.mixdown_date ? new Date(audio.mixdown_date).toISOString().split('T')[0] : '',
+          mixdown_date: audio.mixdown_date ? (new Date(audio.mixdown_date).toISOString().split('T')[0] || '') : '',
         }
         showEditAudioModal.value = true
       },

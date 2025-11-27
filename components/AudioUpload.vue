@@ -115,15 +115,17 @@ const success = ref('')
 
 const handleFileSelect = async (event: Event) => {
   const target = event.target as HTMLInputElement
-  if (target.files && target.files.length > 0) {
-    await processFile(target.files[0])
+  const file = target.files?.[0]
+  if (file) {
+    await processFile(file)
   }
 }
 
 const handleDrop = async (event: DragEvent) => {
   isDragging.value = false
-  if (event.dataTransfer?.files && event.dataTransfer.files.length > 0) {
-    await processFile(event.dataTransfer.files[0])
+  const file = event.dataTransfer?.files?.[0]
+  if (file) {
+    await processFile(file)
   }
 }
 
@@ -133,7 +135,10 @@ const processFile = async (file: File) => {
 
   // Validate file type
   const validTypes = ['audio/mpeg', 'audio/wav', 'audio/flac', 'audio/mp4', 'audio/x-m4a']
-  if (!validTypes.some(type => file.type.includes(type.split('/')[1]))) {
+  if (!validTypes.some(type => {
+    const typePart = type.split('/')[1]
+    return typePart && file.type.includes(typePart)
+  })) {
     error.value = 'Invalid file type. Please upload an audio file.'
     return
   }

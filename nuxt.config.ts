@@ -15,9 +15,9 @@ export default defineNuxtConfig({
     '@nuxtjs/supabase',
   ],
 
-  // UI configuration - disable dark mode
+  // UI configuration - enable dark mode
   colorMode: {
-    preference: 'light',
+    preference: 'system',
     fallback: 'light',
     classSuffix: '',
   },
