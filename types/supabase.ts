@@ -67,7 +67,7 @@ export interface Database {
           tempo: number | null
           minutes: number | null
           seconds: number | null
-          location: string
+          samples: string
           album_id: string | null
           album_order: number | null
           date_created: string | null
@@ -89,7 +89,7 @@ export interface Database {
           tempo?: number | null
           minutes?: number | null
           seconds?: number | null
-          location?: string
+          samples?: string
           album_id?: string | null
           album_order?: number | null
           date_created?: string | null
@@ -111,7 +111,7 @@ export interface Database {
           tempo?: number | null
           minutes?: number | null
           seconds?: number | null
-          location?: string
+          samples?: string
           album_id?: string | null
           album_order?: number | null
           date_created?: string | null

@@ -12,7 +12,7 @@ export interface Track {
   tempo: number | null
   minutes: number | null
   seconds: number | null
-  location: string
+  samples: string
   album_id: string | null
   album_order: number | null
   date_created: string | null
@@ -34,7 +34,7 @@ export interface TrackInsert {
   tempo?: number | null
   minutes?: number | null
   seconds?: number | null
-  location?: string
+  samples?: string
   album_id?: string | null
   album_order?: number | null
   date_created?: string | null
@@ -53,7 +53,7 @@ export interface TrackUpdate {
   tempo?: number | null
   minutes?: number | null
   seconds?: number | null
-  location?: string
+  samples?: string
   album_id?: string | null
   album_order?: number | null
   date_created?: string | null

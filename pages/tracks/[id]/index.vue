@@ -73,8 +73,8 @@
                   </p>
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-default mb-1">Location</label>
-                  <p class="text-default">{{ track.location }}</p>
+                  <label class="block text-sm font-medium text-default mb-1">Samples</label>
+                  <p class="text-default">{{ track.samples }}</p>
                 </div>
               </div>
             </div>

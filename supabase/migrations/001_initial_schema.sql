@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS public.tracks (
   tempo INTEGER,
   minutes INTEGER,
   seconds INTEGER,
-  location TEXT DEFAULT 'Soundation',
+  samples TEXT DEFAULT 'Soundation',
   album_id UUID,
   album_order INTEGER,
   date_created TIMESTAMPTZ,

@@ -92,12 +92,12 @@
               />
             </div>
             <div>
-              <label for="track-location" class="block text-sm font-medium text-default mb-1">
-                Location
+              <label for="track-samples" class="block text-sm font-medium text-default mb-1">
+                Samples
               </label>
               <UInput
-                id="track-location"
-                v-model="formData.location"
+                id="track-samples"
+                v-model="formData.samples"
                 placeholder="Soundation"
                 :disabled="saving"
               />
@@ -199,7 +199,7 @@ const formData = ref<TrackUpdate>({
   tempo: null,
   minutes: null,
   seconds: null,
-  location: '',
+  samples: '',
   isrc_code: null,
 })
 
@@ -223,7 +223,7 @@ const loadTrack = async () => {
         tempo: track.value.tempo,
         minutes: track.value.minutes,
         seconds: track.value.seconds,
-        location: track.value.location,
+        samples: track.value.samples,
         isrc_code: track.value.isrc_code,
       }
     }

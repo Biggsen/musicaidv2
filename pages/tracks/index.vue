@@ -145,6 +145,19 @@
           <p v-if="track.minutes !== null && track.seconds !== null">
             Duration: {{ track.minutes }}:{{ String(track.seconds).padStart(2, '0') }}
           </p>
+          <div v-if="track.template_id" class="mt-3 space-y-2">
+            <div class="flex items-center justify-between text-sm">
+              <span class="text-muted">Progress</span>
+              <span class="font-medium text-default">{{ getTrackProgress(track.id).progress }}%</span>
+            </div>
+            <UProgress :model-value="getTrackProgress(track.id).progress" :max="100" size="xs" />
+            <p v-if="getTrackProgress(track.id).nextStep" class="text-sm text-muted">
+              Next: {{ getTrackProgress(track.id).nextStep?.name }}
+            </p>
+            <p v-else-if="getTrackProgress(track.id).progress === 100" class="text-sm text-success">
+              Complete
+            </p>
+          </div>
           <div class="flex items-center gap-2 mt-3">
             <UBadge color="neutral">{{ getArtistName(track.artist_id) }}</UBadge>
           </div>
@@ -165,6 +178,21 @@
         </template>
         <template #artist-cell="{ row }">
           <UBadge color="neutral">{{ row.original.artist }}</UBadge>
+        </template>
+        <template #progress-cell="{ row }">
+          <div v-if="row.original.template_id" class="space-y-1 min-w-[120px]">
+            <div class="flex items-center justify-between text-sm">
+              <span class="text-muted">{{ getTrackProgress(row.original.id).progress }}%</span>
+            </div>
+            <UProgress :model-value="getTrackProgress(row.original.id).progress" :max="100" size="xs" />
+            <p v-if="getTrackProgress(row.original.id).nextStep" class="text-sm text-muted truncate">
+              {{ getTrackProgress(row.original.id).nextStep?.name }}
+            </p>
+            <p v-else-if="getTrackProgress(row.original.id).progress === 100" class="text-sm text-success">
+              Complete
+            </p>
+          </div>
+          <span v-else class="text-sm text-muted">—</span>
         </template>
         <template #actions-cell="{ row }">
           <UDropdownMenu 
@@ -244,12 +272,12 @@
               />
             </div>
             <div>
-              <label for="track-location" class="block text-sm font-medium text-default mb-1">
-                Location
+              <label for="track-samples" class="block text-sm font-medium text-default mb-1">
+                Samples
               </label>
               <UInput
-                id="track-location"
-                v-model="newTrack.location"
+                id="track-samples"
+                v-model="newTrack.samples"
                 placeholder="Soundation"
                 :disabled="creating"
               />
@@ -344,12 +372,12 @@
               />
             </div>
             <div>
-              <label for="edit-track-location" class="block text-sm font-medium text-default mb-1">
-                Location
+              <label for="edit-track-samples" class="block text-sm font-medium text-default mb-1">
+                Samples
               </label>
               <UInput
-                id="edit-track-location"
-                v-model="editTrack.location"
+                id="edit-track-samples"
+                v-model="editTrack.samples"
                 placeholder="Soundation"
                 :disabled="editing"
               />
@@ -429,12 +457,12 @@ definePageMeta({
 
 import type { Artist } from '~/composables/useArtists'
 import type { Track, TrackInsert, TrackUpdate } from '~/composables/useTracks'
-import type { Template } from '~/composables/useWorkflow'
+import type { Template, TrackStatusWithSteps, Step } from '~/composables/useWorkflow'
 
 const router = useRouter()
 const { getArtists } = useArtists()
 const { getTracks, getTrack, createTrack, updateTrack, deleteTrack } = useTracks()
-const { getTemplates } = useWorkflow()
+const { getTemplates, getTemplateWithStatuses, getTrackStatusWithSteps, getCompletedSteps } = useWorkflow()
 
 const artists = ref<Artist[]>([])
 const allTracks = ref<Track[]>([])
@@ -452,11 +480,18 @@ const searchQuery = ref('')
 const viewMode = ref<'grid' | 'list'>('grid')
 const editingTrackId = ref<string | null>(null)
 
+interface TrackProgress {
+  progress: number
+  nextStep: Step | null
+}
+
+const trackProgressMap = ref<Map<string, TrackProgress>>(new Map())
+
 const newTrack = ref<TrackInsert>({
   name: '',
   artist_id: '',
   template_id: null,
-  location: 'Soundation',
+  samples: 'Soundation',
   tempo: null,
 })
 
@@ -467,7 +502,7 @@ const editTrack = ref<TrackUpdate>({
   tempo: null,
   minutes: null,
   seconds: null,
-  location: '',
+  samples: '',
   isrc_code: null,
 })
 
@@ -519,12 +554,14 @@ interface TableRow {
   artist_id: string
   tempo: number | null
   artist: string
+  template_id: string | null
 }
 
 const tableColumns = [
   { id: 'name', accessorKey: 'name', header: 'Track Name' },
   { id: 'artist', accessorKey: 'artist', header: 'Artist' },
   { id: 'tempo', accessorKey: 'tempo', header: 'Tempo' },
+  { id: 'progress', accessorKey: 'progress', header: 'Progress' },
   { id: 'actions', accessorKey: 'actions', header: '' },
 ]
 
@@ -535,6 +572,7 @@ const tableRows = computed<TableRow[]>(() => {
     artist_id: track.artist_id,
     tempo: track.tempo,
     artist: getArtistName(track.artist_id),
+    template_id: track.template_id,
   }))
 })
 
@@ -570,11 +608,80 @@ const loadTracks = async () => {
     const trackPromises = artists.value.map(artist => getTracks(artist.id))
     const trackArrays = await Promise.all(trackPromises)
     allTracks.value = trackArrays.flat()
+    
+    // Load progress data for tracks with templates
+    await loadTrackProgress()
   } catch (err: any) {
     // Failed to load tracks
   } finally {
     loading.value = false
   }
+}
+
+const loadTrackProgress = async () => {
+  trackProgressMap.value.clear()
+  
+  // Process tracks in parallel batches to avoid overwhelming the API
+  const tracksWithTemplates = allTracks.value.filter(t => t.template_id)
+  
+  for (const track of tracksWithTemplates) {
+    try {
+      const progress = await calculateTrackProgress(track)
+      trackProgressMap.value.set(track.id, progress)
+    } catch (err: any) {
+      // Silently fail for individual tracks
+      trackProgressMap.value.set(track.id, { progress: 0, nextStep: null })
+    }
+  }
+}
+
+const calculateTrackProgress = async (track: Track): Promise<TrackProgress> => {
+  if (!track.template_id) {
+    return { progress: 0, nextStep: null }
+  }
+
+  try {
+    // Get template with statuses
+    const template = await getTemplateWithStatuses(track.template_id)
+    if (!template || !template.statuses || template.statuses.length === 0) {
+      return { progress: 0, nextStep: null }
+    }
+
+    // Get completed steps for this track
+    const completedStepIds = new Set(await getCompletedSteps(track.id))
+
+    // Load steps for each status
+    const allSteps: Step[] = []
+    for (const status of template.statuses) {
+      try {
+        const statusWithSteps = await getTrackStatusWithSteps(status.id)
+        if (statusWithSteps && statusWithSteps.steps) {
+          allSteps.push(...statusWithSteps.steps)
+        }
+      } catch (err) {
+        // Continue with other statuses if one fails
+      }
+    }
+
+    if (allSteps.length === 0) {
+      return { progress: 0, nextStep: null }
+    }
+
+    // Calculate progress
+    const completedCount = allSteps.filter(step => completedStepIds.has(step.id)).length
+    const progress = Math.round((completedCount / allSteps.length) * 100)
+
+    // Find next incomplete step
+    const nextStep = allSteps.find(step => !completedStepIds.has(step.id)) || null
+
+    return { progress, nextStep }
+  } catch (err: any) {
+    return { progress: 0, nextStep: null }
+  }
+}
+
+const getTrackProgress = (trackId: string): TrackProgress => {
+  return trackProgressMap.value.get(trackId) || { progress: 0, nextStep: null }
 }
 
 const filterTracks = () => {
@@ -602,10 +709,11 @@ const handleCreateTrack = async () => {
       name: '',
       artist_id: '',
       template_id: null,
-      location: 'Soundation',
+      samples: 'Soundation',
       tempo: null,
     }
     await loadTracks()
+    await loadTrackProgress()
   } catch (err: any) {
     error.value = err.message || 'Failed to create track'
   } finally {
@@ -673,7 +781,7 @@ const openEditModal = async (trackId: string) => {
         tempo: track.tempo,
         minutes: track.minutes,
         seconds: track.seconds,
-        location: track.location,
+        samples: track.samples,
         isrc_code: track.isrc_code,
       }
       showEditModal.value = true
@@ -701,6 +809,7 @@ const handleUpdateTrack = async () => {
     showEditModal.value = false
     editingTrackId.value = null
     await loadTracks()
+    await loadTrackProgress()
   } catch (err: any) {
     editError.value = err.message || 'Failed to update track'
   } finally {
@@ -715,6 +824,7 @@ const handleDeleteTrack = async (trackId: string, trackName: string) => {
 
   try {
     await deleteTrack(trackId)
+    trackProgressMap.value.delete(trackId)
     await loadTracks()
   } catch (err: any) {
     error.value = err.message || 'Failed to delete track'

@@ -1,7 +1,7 @@
 <template>
   <div class="space-y-4">
     <div>
-      <h3 class="text-lg font-semibold text-gray-900 mb-4">Workflow Status</h3>
+      <h3 class="text-lg font-semibold text-default mb-4">Workflow Status</h3>
       <div class="flex items-center gap-2 mb-4">
         <UBadge
           v-for="status in statuses"
@@ -18,22 +18,33 @@
 
     <!-- Status Steps -->
     <div v-if="currentStatus && currentStatus.steps && currentStatus.steps.length > 0">
-      <h4 class="text-sm font-medium text-gray-700 mb-2">Steps</h4>
+      <div class="flex items-center justify-between mb-2">
+        <h4 class="text-sm font-medium text-default">{{ isExpanded ? 'Steps' : 'Next step' }}</h4>
+        <UButton
+          color="neutral"
+          variant="ghost"
+          size="sm"
+          :icon="isExpanded ? 'i-ph-caret-up' : 'i-ph-caret-down'"
+          @click="isExpanded = !isExpanded"
+        >
+          {{ isExpanded ? 'Show Next Only' : 'Show All' }}
+        </UButton>
+      </div>
       <div class="space-y-2">
         <div
-          v-for="step in currentStatus.steps"
+          v-for="step in displayedSteps"
           :key="step.id"
           class="flex items-center gap-3 p-3 border border-gray-200 rounded-lg"
           :class="{ 'bg-blue-50 border-blue-300': currentStepId === step.id }"
         >
           <UIcon
             :name="step.done ? 'i-ph-check-circle' : 'i-ph-circle-dashed'"
-            :class="step.done ? 'text-green-600' : 'text-gray-400'"
+            :class="step.done ? 'text-success' : 'text-dimmed'"
             class="w-5 h-5"
           />
           <div class="flex-1">
-            <p class="font-medium text-gray-900">{{ step.name }}</p>
-            <p v-if="step.description" class="text-sm text-gray-600">{{ step.description }}</p>
+            <p class="font-medium text-default">{{ step.name }}</p>
+            <p v-if="step.description" class="text-sm text-muted">{{ step.description }}</p>
           </div>
           <UButton
             v-if="!step.done"
@@ -60,7 +71,7 @@
 
     <!-- Progress Bar -->
     <div v-if="hasSteps" class="space-y-2">
-      <div class="flex justify-between text-sm text-gray-600">
+      <div class="flex justify-between text-sm text-muted">
         <span>Overall Progress</span>
         <span>{{ Math.round(progressValue) }}%</span>
       </div>
@@ -145,11 +156,41 @@ const progressPercentage = computed(() => {
 })
 
 const progressValue = ref(0)
+const isExpanded = ref(false)
 
 watch(progressPercentage, (newValue) => {
   const value = typeof newValue === 'number' && !isNaN(newValue) ? newValue : 0
   progressValue.value = Math.max(0, Math.min(100, value))
 }, { immediate: true })
+
+// Find the next incomplete step
+const nextIncompleteStep = computed(() => {
+  if (!currentStatus.value || !currentStatus.value.steps) return null
+  
+  const completedSet = new Set(props.completedStepIds || [])
+  return currentStatus.value.steps.find(step => !completedSet.has(step.id)) || null
+})
+
+// Determine which steps to display
+const displayedSteps = computed<Step[]>(() => {
+  if (!currentStatus.value || !currentStatus.value.steps) return []
+  
+  if (isExpanded.value) {
+    // Show all steps
+    return currentStatus.value.steps
+  } else {
+    // Show only the next incomplete step
+    if (nextIncompleteStep.value) {
+      return [nextIncompleteStep.value]
+    }
+    // If all steps are complete, show the last step
+    if (currentStatus.value.steps.length > 0) {
+      const lastStep = currentStatus.value.steps[currentStatus.value.steps.length - 1]
+      return lastStep ? [lastStep] : []
+    }
+    return []
+  }
+})
 
 const getStatusColor = (status: TrackStatus): 'primary' | 'neutral' => {
   if (status.id === props.currentStatusId) return 'primary'

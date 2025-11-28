@@ -149,12 +149,12 @@
                 />
               </div>
               <div>
-                <label for="track-location" class="block text-sm font-medium text-default mb-1">
-                  Location
+                <label for="track-samples" class="block text-sm font-medium text-default mb-1">
+                  Samples
                 </label>
                 <UInput
-                  id="track-location"
-                  v-model="newTrack.location"
+                  id="track-samples"
+                  v-model="newTrack.samples"
                   placeholder="Soundation"
                   :disabled="creatingTrack"
                 />
@@ -214,7 +214,7 @@ const trackError = ref('')
 const newTrack = ref<TrackInsert>({
   name: '',
   artist_id: '',
-  location: 'Soundation',
+  samples: 'Soundation',
   tempo: null,
 })
 
@@ -265,7 +265,7 @@ const handleCreateTrack = async () => {
     newTrack.value = {
       name: '',
       artist_id: artist.value.id,
-      location: 'Soundation',
+      samples: 'Soundation',
       tempo: null,
     }
     await loadTracks()
