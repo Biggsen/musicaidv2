@@ -67,10 +67,14 @@
       <UCard
         v-for="status in filteredStatuses"
         :key="status.id"
-        class="hover:shadow-lg transition-shadow overflow-visible"
+        class="hover:shadow-lg transition-shadow overflow-visible cursor-pointer"
+        @click.self="() => router.push(`/statuses/${status.id}`)"
       >
         <div class="flex items-start justify-between">
-          <div class="flex-1">
+          <div 
+            class="flex-1"
+            @click="() => router.push(`/statuses/${status.id}`)"
+          >
             <h3 class="text-xl font-semibold text-default mb-2">{{ status.name }}</h3>
             <p v-if="status.description" class="text-sm text-muted mb-4">
               {{ status.description }}
@@ -98,9 +102,9 @@
 
     <!-- Statuses Table -->
     <UCard v-else>
-      <UTable :data="tableRows" :columns="tableColumns as any">
+      <UTable :data="tableRows" :columns="tableColumns as any" @row-click="handleRowClick">
         <template #name-cell="{ row }">
-          <span class="font-semibold text-default">{{ row.original.name }}</span>
+          <span class="font-semibold text-default cursor-pointer hover:text-primary">{{ row.original.name }}</span>
         </template>
         <template #description-cell="{ row }">
           <span class="text-sm text-muted">{{ row.original.description || '—' }}</span>
@@ -143,6 +147,7 @@
               placeholder="e.g., Recording"
               required
               :disabled="creating"
+              class="w-full"
             />
           </div>
 
@@ -223,6 +228,7 @@
               placeholder="e.g., Recording"
               required
               :disabled="editing"
+              class="w-full"
             />
           </div>
 
@@ -312,6 +318,7 @@ definePageMeta({
 
 import type { TrackStatus, TrackStatusInsert, TrackStatusUpdate } from '~/composables/useWorkflow'
 
+const router = useRouter()
 const {
   getTrackStatuses,
   createTrackStatus,
@@ -368,6 +375,10 @@ const tableColumns = [
   { id: 'non_linear', accessorKey: 'non_linear', header: 'Type' },
   { id: 'actions', accessorKey: 'actions', header: '' },
 ]
+
+const handleRowClick = (row: TableRow) => {
+  router.push(`/statuses/${row.id}`)
+}
 
 const tableRows = computed<TableRow[]>(() => {
   return filteredStatuses.value as TableRow[]

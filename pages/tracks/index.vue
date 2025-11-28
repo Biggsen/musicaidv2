@@ -62,7 +62,7 @@
             <UButton
               :color="viewMode === 'list' ? 'primary' : 'neutral'"
               variant="ghost"
-              icon="i-ph-list-bullet"
+              icon="i-ph-table"
               @click="viewMode = 'list'"
             />
           </div>

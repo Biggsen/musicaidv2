@@ -182,6 +182,7 @@ export interface Step {
   title: string | null
   description: string | null
   type: 'NORMAL' | 'TEXT' | 'LIST' | 'RECORD'
+  tags: string[]
   artist_id: string | null
   published: boolean
   created_at: string

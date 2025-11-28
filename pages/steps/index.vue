@@ -85,6 +85,14 @@
               <UBadge v-if="step.published" color="success">Published</UBadge>
               <UBadge v-else color="neutral">Draft</UBadge>
               <UBadge :color="getTypeColor(step.type)">{{ step.type }}</UBadge>
+              <UBadge
+                v-for="tag in (step.tags || [])"
+                :key="tag"
+                size="sm"
+                color="primary"
+              >
+                {{ tag }}
+              </UBadge>
             </div>
           </div>
           <UDropdownMenu 
@@ -106,7 +114,17 @@
     <UCard v-else>
       <UTable :data="tableRows" :columns="tableColumns as any">
         <template #name-cell="{ row }">
-          <span class="font-semibold text-default">{{ row.original.name }}</span>
+          <div class="flex items-center gap-2 flex-wrap">
+            <span class="font-semibold text-default">{{ row.original.name }}</span>
+            <UBadge
+              v-for="tag in (row.original.tags || [])"
+              :key="tag"
+              size="xs"
+              color="primary"
+            >
+              {{ tag }}
+            </UBadge>
+          </div>
         </template>
         <template #type-cell="{ row }">
           <UBadge :color="getTypeColor(row.original.type)">{{ row.original.type }}</UBadge>
@@ -148,6 +166,7 @@
               placeholder="e.g., Record Vocals"
               required
               :disabled="creating"
+              class="w-full"
             />
           </div>
 
@@ -176,6 +195,21 @@
               class="w-full"
               :disabled="creating"
             />
+          </div>
+
+          <div>
+            <label for="step-tags" class="block text-sm font-medium text-default mb-1">
+              Tags
+            </label>
+            <USelectMenu
+              id="step-tags"
+              v-model="newStep.tags"
+              :items="tagOptions"
+              placeholder="Select or search tags..."
+              multiple
+              :disabled="creating"
+            />
+            <p class="mt-1 text-xs text-muted">Search and select from existing tags</p>
           </div>
 
           <div>
@@ -229,6 +263,7 @@
               placeholder="e.g., Record Vocals"
               required
               :disabled="editing"
+              class="w-full"
             />
           </div>
 
@@ -271,6 +306,21 @@
               class="w-full"
               :disabled="editing"
             />
+          </div>
+
+          <div>
+            <label for="edit-step-tags" class="block text-sm font-medium text-default mb-1">
+              Tags
+            </label>
+            <USelectMenu
+              id="edit-step-tags"
+              v-model="editStepForm.tags"
+              :items="tagOptions"
+              placeholder="Select or search tags..."
+              multiple
+              :disabled="editing"
+            />
+            <p class="mt-1 text-xs text-muted">Search and select from existing tags</p>
           </div>
 
           <div>
@@ -342,6 +392,7 @@ const newStep = ref<StepInsert>({
   name: '',
   type: 'NORMAL',
   description: null,
+  tags: [] as string[],
   published: false,
 })
 
@@ -350,6 +401,7 @@ const editStepForm = ref<StepUpdate>({
   key: '',
   type: 'NORMAL',
   description: null,
+  tags: [] as string[],
   published: false,
 })
 
@@ -367,6 +419,21 @@ const typeFilterOptions = [
   { label: 'List', value: 'LIST' },
   { label: 'Record', value: 'RECORD' },
 ]
+
+// Collect all unique tags from existing steps for autocomplete
+const tagOptions = computed<string[]>(() => {
+  const tagSet = new Set<string>()
+  steps.value.forEach(step => {
+    if (step.tags && step.tags.length > 0) {
+      step.tags.forEach(tag => {
+        if (tag && tag.trim()) {
+          tagSet.add(tag.trim())
+        }
+      })
+    }
+  })
+  return Array.from(tagSet).sort()
+})
 
 const getTypeColor = (type: string): 'primary' | 'secondary' | 'success' | 'info' | 'warning' | 'error' | 'neutral' => {
   switch (type) {
@@ -392,7 +459,8 @@ const filteredSteps = computed(() => {
     filtered = filtered.filter(step =>
       step.name.toLowerCase().includes(query) ||
       step.type.toLowerCase().includes(query) ||
-      (step.description && step.description.toLowerCase().includes(query))
+      (step.description && step.description.toLowerCase().includes(query)) ||
+      (step.tags && step.tags.some(tag => tag.toLowerCase().includes(query)))
     )
   }
 
@@ -444,7 +512,7 @@ const handleCreateStep = async () => {
   try {
     await createStep(newStep.value)
     showCreateModal.value = false
-    newStep.value = { name: '', type: 'NORMAL', description: null, published: false }
+    newStep.value = { name: '', type: 'NORMAL', description: null, tags: [] as string[], published: false }
     await loadSteps()
   } catch (err: any) {
     error.value = err.message || 'Failed to create step'
@@ -500,6 +568,7 @@ const editStep = (step: Step) => {
     key: step.key,
     type: step.type,
     description: step.description,
+    tags: (step.tags || []) as string[],
     published: step.published,
   }
   showEditModal.value = true
@@ -530,7 +599,7 @@ const handleUpdateStep = async () => {
 const closeEditModal = () => {
   showEditModal.value = false
   editingStepId.value = null
-  editStepForm.value = { name: '', key: '', type: 'NORMAL', description: null, published: false }
+  editStepForm.value = { name: '', key: '', type: 'NORMAL', description: null, tags: [] as string[], published: false }
   error.value = ''
 }
 

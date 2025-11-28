@@ -82,6 +82,7 @@
               id="template-name"
               v-model="newTemplate.name"
               placeholder="e.g., Standard Production"
+              class="w-full"
               required
               :disabled="creating"
             />
