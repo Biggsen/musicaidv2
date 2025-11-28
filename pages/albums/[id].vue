@@ -157,7 +157,6 @@
                 <div class="flex-1 cursor-pointer" @click="() => router.push(`/tracks/${track.id}`)">
                   <h3 class="font-semibold text-default mb-1">{{ track.name }}</h3>
                   <div class="flex items-center gap-4 text-sm text-muted">
-                    <span>Key: {{ track.key }}</span>
                     <span v-if="track.tempo">Tempo: {{ track.tempo }} BPM</span>
                     <UBadge v-if="track.live_ready" color="success">Live Ready</UBadge>
                   </div>

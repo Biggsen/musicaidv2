@@ -106,7 +106,6 @@ const formData = ref<ArtistUpdate>({
 
 // Load artist
 onMounted(async () => {
-  console.log('Edit page mounted, route:', route.path, 'params:', route.params)
   await loadArtist()
 })
 

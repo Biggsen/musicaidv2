@@ -17,7 +17,7 @@
     <div v-else-if="template">
       <!-- Header -->
       <div class="mb-8">
-        <div class="flex items-center gap-4 mb-4">
+        <div class="mb-4">
           <UButton
             color="neutral"
             variant="ghost"
@@ -26,44 +26,32 @@
           >
             Back
           </UButton>
-          <h1 class="text-3xl font-bold text-default">{{ template.name }}</h1>
-          <UBadge v-if="template.published" color="success">Published</UBadge>
-          <UBadge v-else color="neutral">Draft</UBadge>
         </div>
-        <p v-if="template.description" class="text-muted">{{ template.description }}</p>
+        <UPageHeader
+          headline="Template"
+          :title="template.name"
+          :description="template.description || undefined"
+          :ui="{ description: 'max-w-[60ch]' }"
+        >
+          <template #links>
+            <div class="flex items-center gap-3">
+              <UBadge v-if="template.published" color="success">Published</UBadge>
+              <UBadge v-else color="neutral">Draft</UBadge>
+              <UDropdownMenu :items="getTemplateMenuItems()" :content="{ align: 'end' }">
+                <UButton
+                  color="neutral"
+                  variant="outline"
+                  icon="i-heroicons-bars-3"
+                />
+              </UDropdownMenu>
+            </div>
+          </template>
+        </UPageHeader>
       </div>
 
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <!-- Main Content -->
         <div class="lg:col-span-2 space-y-6">
-          <!-- Template Info -->
-          <UCard>
-            <template #header>
-              <div class="flex justify-between items-center">
-                <h2 class="text-xl font-semibold text-default">Template Information</h2>
-                <UButton
-                  color="primary"
-                  variant="ghost"
-                  icon="i-heroicons-pencil"
-                  @click="showEditModal = true"
-                >
-                  Edit
-                </UButton>
-              </div>
-            </template>
-
-            <div class="space-y-4">
-              <div>
-                <label class="block text-sm font-medium text-default mb-1">Name</label>
-                <p class="text-default">{{ template.name }}</p>
-              </div>
-              <div v-if="template.description">
-                <label class="block text-sm font-medium text-default mb-1">Description</label>
-                <p class="text-default">{{ template.description }}</p>
-              </div>
-            </div>
-          </UCard>
-
           <!-- Statuses Section -->
           <UCard>
             <template #header>
@@ -223,19 +211,53 @@
           <!-- Available Steps -->
           <UCard>
             <template #header>
-              <h3 class="text-lg font-semibold text-default">Available Steps</h3>
+              <div class="flex justify-between items-center">
+                <h3 class="text-lg font-semibold text-default">Available Steps</h3>
+                <USelect
+                  v-model="stepSortBy"
+                  :items="stepSortOptions"
+                  size="sm"
+                  class="w-32"
+                />
+              </div>
             </template>
+            <div class="mb-4">
+              <UInput
+                v-model="stepSearchQuery"
+                placeholder="Search steps..."
+                icon="i-heroicons-magnifying-glass"
+                clearable
+              />
+            </div>
             <div v-if="allSteps.length === 0" class="text-center py-4">
               <p class="text-sm text-muted">No steps created yet</p>
             </div>
+            <div v-else-if="filteredSteps.length === 0" class="text-center py-4">
+              <p class="text-sm text-muted">No steps match your search</p>
+            </div>
             <div v-else class="space-y-2">
               <div
-                v-for="step in allSteps"
+                v-for="step in filteredSteps"
                 :key="step.id"
-                class="p-2 border border-gray-200 rounded text-sm"
+                class="p-2 border border-gray-200 rounded text-sm flex items-start justify-between"
               >
-                <div class="font-medium text-default">{{ step.name }}</div>
-                <div class="text-xs text-muted">{{ step.type }}</div>
+                <div class="flex-1">
+                  <div class="font-medium text-default">{{ step.name }}</div>
+                  <div v-if="step.description" class="text-xs text-muted mt-1">{{ step.description }}</div>
+                  <div class="text-xs text-muted mt-1">{{ step.type }}</div>
+                </div>
+                <UDropdownMenu 
+                  :items="getStepMenuItems(step)" 
+                  :content="{ align: 'end' }"
+                >
+                  <UButton
+                    color="neutral"
+                    variant="ghost"
+                    icon="i-heroicons-bars-3"
+                    size="sm"
+                    @click.stop
+                  />
+                </UDropdownMenu>
               </div>
             </div>
           </UCard>
@@ -266,7 +288,8 @@
                 id="edit-template-description"
                 v-model="editForm.description"
                 placeholder="Description..."
-                :rows="3"
+                :rows="5"
+                class="w-full"
                 :disabled="saving"
               />
             </div>
@@ -371,7 +394,8 @@
                 id="edit-status-description"
                 v-model="editStatusForm.description"
                 placeholder="Describe this status..."
-                :rows="2"
+                :rows="5"
+                class="w-full"
                 :disabled="editingStatus"
               />
             </div>
@@ -430,7 +454,8 @@
                 id="status-description"
                 v-model="newStatus.description"
                 placeholder="Describe this status..."
-                :rows="2"
+                :rows="5"
+                class="w-full"
                 :disabled="creatingStatus"
               />
             </div>
@@ -507,7 +532,7 @@
       </UModal>
 
       <!-- Create Step Modal -->
-      <UModal v-model:open="showCreateStepModal" title="Create New Step">
+      <UModal v-model:open="showCreateStepModal" title="Create New Step" :dismissible="false">
         <template #body>
           <form id="create-step-form" @submit.prevent="handleCreateStep" class="space-y-4">
             <div>
@@ -542,7 +567,8 @@
                 id="step-description"
                 v-model="newStep.description"
                 placeholder="Describe this step..."
-                :rows="2"
+                :rows="5"
+                class="w-full"
                 :disabled="creatingStep"
               />
             </div>
@@ -567,7 +593,7 @@
       </UModal>
 
       <!-- Edit Step Modal -->
-      <UModal v-model:open="showEditStepModal" title="Edit Step">
+      <UModal v-model:open="showEditStepModal" title="Edit Step" :dismissible="false">
         <template #body>
           <form id="edit-step-form" @submit.prevent="handleUpdateStep" class="space-y-4">
             <div>
@@ -615,7 +641,8 @@
                 id="edit-step-description"
                 v-model="editStepForm.description"
                 placeholder="Describe this step..."
-                :rows="2"
+                :rows="5"
+                class="w-full"
                 :disabled="editingStep"
               />
             </div>
@@ -663,6 +690,7 @@ const router = useRouter()
 const {
   getTemplateWithStatuses,
   updateTemplate,
+  deleteTemplate,
   getTrackStatuses,
   getTrackStatusWithSteps,
   createTrackStatus,
@@ -670,6 +698,7 @@ const {
   getSteps,
   createStep,
   updateStep,
+  deleteStep,
   addStatusToTemplate,
   removeStatusFromTemplate: removeStatusFromTemplateFunc,
   addStepToTrackStatus,
@@ -710,6 +739,14 @@ const selectedStatusId = ref<string | undefined>(undefined)
 const selectedStepId = ref<string | undefined>(undefined)
 const editingStatusId = ref<string | null>(null)
 const editingStepId = ref<string | null>(null)
+const stepSearchQuery = ref('')
+const stepSortBy = ref<'name' | 'type' | 'created'>('name')
+
+const stepSortOptions = [
+  { label: 'Name', value: 'name' },
+  { label: 'Type', value: 'type' },
+  { label: 'Created', value: 'created' },
+]
 
 const editForm = ref<TemplateUpdate>({
   name: '',
@@ -810,7 +847,7 @@ const loadAllStatuses = async () => {
   try {
     allStatuses.value = await getTrackStatuses()
   } catch (err: any) {
-    console.error('Failed to load statuses:', err)
+    // Failed to load statuses
   }
 }
 
@@ -818,9 +855,39 @@ const loadAllSteps = async () => {
   try {
     allSteps.value = await getSteps()
   } catch (err: any) {
-    console.error('Failed to load steps:', err)
+    // Failed to load steps
   }
 }
+
+const filteredSteps = computed(() => {
+  let steps = allSteps.value
+
+  // Apply search filter
+  if (stepSearchQuery.value.trim()) {
+    const query = stepSearchQuery.value.toLowerCase().trim()
+    steps = steps.filter(step => 
+      step.name.toLowerCase().includes(query) ||
+      step.type.toLowerCase().includes(query) ||
+      (step.description && step.description.toLowerCase().includes(query))
+    )
+  }
+
+  // Apply sorting
+  const sorted = [...steps].sort((a, b) => {
+    switch (stepSortBy.value) {
+      case 'name':
+        return a.name.localeCompare(b.name)
+      case 'type':
+        return a.type.localeCompare(b.type)
+      case 'created':
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      default:
+        return 0
+    }
+  })
+
+  return sorted
+})
 
 const getStepsForStatus = (statusId: string): Step[] => {
   return stepStatusMap.value.get(statusId) || []
@@ -828,6 +895,43 @@ const getStepsForStatus = (statusId: string): Step[] => {
 
 const getStepCount = (statusId: string): number => {
   return getStepsForStatus(statusId).length
+}
+
+const getTemplateMenuItems = () => {
+  if (!template.value) return []
+  return [
+    [
+      {
+        label: 'Edit',
+        icon: 'i-heroicons-pencil',
+        click: () => showEditModal.value = true
+      }
+    ],
+    [
+      {
+        label: 'Delete',
+        icon: 'i-heroicons-trash',
+        color: 'error' as const,
+        click: () => handleDeleteTemplate()
+      }
+    ]
+  ]
+}
+
+const handleDeleteTemplate = async () => {
+  if (!template.value) return
+
+  if (!confirm(`Are you sure you want to delete "${template.value.name}"? This action cannot be undone and will remove the template from all tracks using it.`)) {
+    return
+  }
+
+  try {
+    await deleteTemplate(template.value.id)
+    router.push('/templates')
+  } catch (err: any) {
+    error.value = err.message || 'Failed to delete template'
+    // Failed to delete template
+  }
 }
 
 const handleUpdateTemplate = async () => {
@@ -895,7 +999,7 @@ const removeStatusFromTemplate = async (statusId: string) => {
     await removeStatusFromTemplateFunc(template.value.id, statusId)
     await loadTemplate()
   } catch (err: any) {
-    console.error('Failed to remove status:', err)
+    // Failed to remove status
   }
 }
 
@@ -983,6 +1087,54 @@ const handleCreateStep = async () => {
   }
 }
 
+const getStepMenuItems = (step: Step) => {
+  // Create stable references to avoid closure issues
+  const stepId = step.id
+  const stepName = step.name
+  const stepData = step
+  
+  const handleEdit = () => {
+    editStep(stepData)
+  }
+  
+  const handleDelete = () => {
+    handleDeleteStep(stepId, stepName)
+  }
+  
+  return [
+    [
+      {
+        label: 'Edit',
+        icon: 'i-heroicons-pencil',
+        onSelect: handleEdit
+      }
+    ],
+    [
+      {
+        label: 'Delete',
+        icon: 'i-heroicons-trash',
+        color: 'error' as const,
+        onSelect: handleDelete
+      }
+    ]
+  ]
+}
+
+const handleDeleteStep = async (stepId: string, stepName: string) => {
+  if (!confirm(`Are you sure you want to delete "${stepName}"? This action cannot be undone.`)) {
+    return
+  }
+
+  try {
+    await deleteStep(stepId)
+    await loadAllSteps()
+    await loadTemplate()
+  } catch (err: any) {
+    stepError.value = err.message || 'Failed to delete step'
+    // Failed to delete step
+  }
+}
+
 const editStep = (step: Step) => {
   editingStepId.value = step.id
   editStepForm.value = {
@@ -1031,7 +1183,7 @@ const removeStepFromStatus = async (statusId: string, stepId: string) => {
     await removeStepFromTrackStatus(statusId, stepId)
     await loadTemplate()
   } catch (err: any) {
-    console.error('Failed to remove step:', err)
+    // Failed to remove step
   }
 }
 

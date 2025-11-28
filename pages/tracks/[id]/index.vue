@@ -55,7 +55,6 @@
             </template>
           </UPopover>
         </div>
-        <p class="text-muted">Key: {{ track.key }}</p>
       </div>
 
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -72,10 +71,6 @@
                 <div>
                   <label class="block text-sm font-medium text-default mb-1">Track Name</label>
                   <p class="text-default">{{ track.name }}</p>
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-default mb-1">Key</label>
-                  <p class="text-default">{{ track.key }}</p>
                 </div>
                 <div v-if="track.tempo">
                   <label class="block text-sm font-medium text-default mb-1">Tempo</label>
@@ -366,7 +361,8 @@
                 id="audio-description"
                 v-model="newAudioDescription"
                 placeholder="File description"
-                :rows="2"
+                :rows="5"
+                class="w-full"
                 :disabled="uploadingAudio"
               />
             </div>
@@ -439,7 +435,8 @@
                 id="note-text"
                 v-model="newNote.note"
                 placeholder="Enter your note..."
-                :rows="4"
+                :rows="5"
+                class="w-full"
                 required
                 :disabled="addingNote"
               />
@@ -481,7 +478,8 @@
                 id="edit-note-text"
                 v-model="editNote.note"
                 placeholder="Enter your note..."
-                :rows="4"
+                :rows="5"
+                class="w-full"
                 required
                 :disabled="editingNote"
               />
@@ -540,7 +538,8 @@
                 id="edit-audio-description"
                 v-model="editAudio.description"
                 placeholder="File description"
-                :rows="2"
+                :rows="5"
+                class="w-full"
                 :disabled="editingAudio"
               />
             </div>

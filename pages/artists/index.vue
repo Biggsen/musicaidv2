@@ -1,18 +1,21 @@
 <template>
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <div class="mb-8 flex justify-between items-center">
-      <div>
-        <h1 class="text-3xl font-bold text-default mb-2">Artists</h1>
-        <p class="text-muted">Manage your artists and their music</p>
-      </div>
-      <UButton
-        color="primary"
-        size="lg"
-        icon="i-heroicons-plus"
-        @click="showCreateModal = true"
+    <div class="mb-8">
+      <UPageHeader
+        title="Artists"
+        description="Manage your artists and their music"
       >
-        Create Artist
-      </UButton>
+        <template #links>
+          <UButton
+            color="primary"
+            size="lg"
+            icon="i-heroicons-plus"
+            @click="showCreateModal = true"
+          >
+            Create Artist
+          </UButton>
+        </template>
+      </UPageHeader>
     </div>
 
     <!-- Loading State -->
@@ -44,7 +47,6 @@
             @click="() => router.push(`/artists/${artist.id}`)"
           >
             <h3 class="text-xl font-semibold text-default mb-2">{{ artist.name }}</h3>
-            <p class="text-sm text-muted mb-4">Slug: {{ artist.slug }}</p>
             <div class="flex items-center gap-4 text-sm text-muted">
               <span class="flex items-center gap-1">
                 <UIcon name="i-heroicons-musical-note" class="w-4 h-4" />
@@ -52,45 +54,14 @@
               </span>
             </div>
           </div>
-          <UPopover :content="{ side: 'bottom', align: 'end' }">
+          <UDropdownMenu :items="getArtistMenuItems(artist)" :content="{ align: 'end' }">
             <UButton
               color="neutral"
               variant="ghost"
-              icon="i-heroicons-ellipsis-vertical"
+              icon="i-heroicons-bars-3"
               @click.stop
             />
-            <template #content="slotProps">
-              <div class="p-1">
-                <UButton
-                  variant="ghost"
-                  icon="i-heroicons-pencil"
-                  block
-                  @click.stop="() => { 
-                    if (slotProps && 'close' in slotProps && typeof slotProps.close === 'function') {
-                      slotProps.close();
-                    }
-                    router.push({ path: `/artists/${artist.id}/edit` });
-                  }"
-                >
-                  Edit
-                </UButton>
-                <UButton
-                  variant="ghost"
-                  icon="i-heroicons-trash"
-                  block
-                  color="error"
-                  @click.stop="() => {
-                    if (slotProps && 'close' in slotProps && typeof slotProps.close === 'function') {
-                      slotProps.close();
-                    }
-                    handleDeleteArtist(artist.id, artist.name);
-                  }"
-                >
-                  Delete
-                </UButton>
-              </div>
-            </template>
-          </UPopover>
+          </UDropdownMenu>
         </div>
       </UCard>
     </div>
@@ -201,6 +172,26 @@ const loadArtists = async () => {
 
 const getTrackCount = (artistId: string): number => {
   return tracks.value.get(artistId) || 0
+}
+
+const getArtistMenuItems = (artist: Artist) => {
+  return [
+    [
+      {
+        label: 'Edit',
+        icon: 'i-heroicons-pencil',
+        to: `/artists/${artist.id}/edit`
+      }
+    ],
+    [
+      {
+        label: 'Delete',
+        icon: 'i-heroicons-trash',
+        color: 'error' as const,
+        click: () => handleDeleteArtist(artist.id, artist.name)
+      }
+    ]
+  ]
 }
 
 const handleCreateArtist = async () => {

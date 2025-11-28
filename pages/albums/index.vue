@@ -1,19 +1,22 @@
 <template>
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <div class="mb-8 flex justify-between items-center">
-      <div>
-        <h1 class="text-3xl font-bold text-default mb-2">Albums</h1>
-        <p class="text-muted">Organize your tracks into albums</p>
-      </div>
-      <UButton
-        v-if="artists.length > 0"
-        color="primary"
-        size="lg"
-        icon="i-heroicons-plus"
-        @click="showCreateModal = true"
+    <div class="mb-8">
+      <UPageHeader
+        title="Albums"
+        description="Organize your tracks into albums"
       >
-        Create Album
-      </UButton>
+        <template #links>
+          <UButton
+            v-if="artists.length > 0"
+            color="primary"
+            size="lg"
+            icon="i-heroicons-plus"
+            @click="showCreateModal = true"
+          >
+            Create Album
+          </UButton>
+        </template>
+      </UPageHeader>
     </div>
 
     <!-- Filters -->
@@ -166,6 +169,8 @@
               id="album-description"
               v-model="newAlbum.description"
               placeholder="Album description"
+              :rows="5"
+              class="w-full"
               :disabled="creating"
             />
           </div>

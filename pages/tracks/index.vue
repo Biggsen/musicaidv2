@@ -1,29 +1,32 @@
 <template>
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <div class="mb-8 flex justify-between items-center">
-      <div>
-        <h1 class="text-3xl font-bold text-default mb-2">Tracks</h1>
-        <p class="text-muted">Manage all your tracks</p>
-      </div>
-      <div v-if="artists.length > 0" class="flex gap-3">
-        <UButton
-          color="primary"
-          size="lg"
-          icon="i-heroicons-plus"
-          @click="showCreateModal = true"
-        >
-          Create Track
-        </UButton>
-        <UButton
-          color="primary"
-          variant="outline"
-          size="lg"
-          icon="i-heroicons-arrow-up-tray"
-          to="/tracks/batch-upload"
-        >
-          Batch Upload
-        </UButton>
-      </div>
+    <div class="mb-8">
+      <UPageHeader
+        title="Tracks"
+        description="Manage all your tracks"
+      >
+        <template #links>
+          <UButton
+            v-if="artists.length > 0"
+            color="primary"
+            size="lg"
+            icon="i-heroicons-plus"
+            @click="showCreateModal = true"
+          >
+            Create Track
+          </UButton>
+          <UButton
+            v-if="artists.length > 0"
+            color="primary"
+            variant="outline"
+            size="lg"
+            icon="i-heroicons-arrow-up-tray"
+            to="/tracks/batch-upload"
+          >
+            Batch Upload
+          </UButton>
+        </template>
+      </UPageHeader>
     </div>
 
     <!-- Filters -->
@@ -122,40 +125,22 @@
           >
             <h3 class="text-lg font-semibold text-default">{{ track.name }}</h3>
           </div>
-          <UPopover :content="{ side: 'bottom', align: 'end' }">
+          <UDropdownMenu 
+            :items="getTrackMenuItemsForCard(track)" 
+            :content="{ align: 'end' }"
+          >
             <UButton
               color="neutral"
               variant="ghost"
-              icon="i-heroicons-ellipsis-vertical"
+              icon="i-heroicons-bars-3"
               @click.stop
             />
-            <template #content="slotProps">
-              <div class="p-1">
-                <UButton
-                  v-for="item in getTrackMenuItemsForCard(track)"
-                  :key="item.label"
-                  variant="ghost"
-                  :icon="item.icon"
-                  :color="item.color"
-                  block
-                  @click.stop="() => {
-                    if (slotProps && 'close' in slotProps && typeof slotProps.close === 'function') {
-                      slotProps.close();
-                    }
-                    item.click();
-                  }"
-                >
-                  {{ item.label }}
-                </UButton>
-              </div>
-            </template>
-          </UPopover>
+          </UDropdownMenu>
         </div>
         <div
           class="space-y-2 text-sm text-muted"
           @click="() => router.push(`/tracks/${track.id}`)"
         >
-          <p>Key: {{ track.key }}</p>
           <p v-if="track.tempo">Tempo: {{ track.tempo }} BPM</p>
           <p v-if="track.minutes !== null && track.seconds !== null">
             Duration: {{ track.minutes }}:{{ String(track.seconds).padStart(2, '0') }}
@@ -187,34 +172,17 @@
           <span v-else class="text-dimmed">In Progress</span>
         </template>
         <template #actions-cell="{ row }">
-          <UPopover :content="{ side: 'bottom', align: 'end' }">
+          <UDropdownMenu 
+            :items="getTrackMenuItems(row.original)" 
+            :content="{ align: 'end' }"
+          >
             <UButton
               color="neutral"
               variant="ghost"
-              icon="i-heroicons-ellipsis-vertical"
+              icon="i-heroicons-bars-3"
               size="sm"
             />
-            <template #content="slotProps">
-              <div class="p-1">
-                <UButton
-                  v-for="item in getTrackMenuItems(row.original)"
-                  :key="item.label"
-                  variant="ghost"
-                  :icon="item.icon"
-                  block
-                  size="sm"
-                  @click.stop="() => {
-                    if (slotProps && 'close' in slotProps && typeof slotProps.close === 'function') {
-                      slotProps.close();
-                    }
-                    item.click();
-                  }"
-                >
-                  {{ item.label }}
-                </UButton>
-              </div>
-            </template>
-          </UPopover>
+          </UDropdownMenu>
         </template>
       </UTable>
     </UCard>
@@ -317,6 +285,157 @@
         </div>
       </template>
     </UModal>
+
+    <!-- Edit Track Modal -->
+    <UModal v-model:open="showEditModal" title="Edit Track">
+      <template #body>
+        <form id="edit-track-form" @submit.prevent="handleUpdateTrack" class="space-y-4">
+          <div>
+            <label for="edit-track-name" class="block text-sm font-medium text-default mb-1">
+              Track Name
+            </label>
+            <UInput
+              id="edit-track-name"
+              v-model="editTrack.name"
+              placeholder="Enter track name"
+              required
+              :disabled="editing"
+            />
+          </div>
+
+          <div>
+            <label for="edit-track-key" class="block text-sm font-medium text-default mb-1">
+              Track Key
+            </label>
+            <UInput
+              id="edit-track-key"
+              v-model="editTrack.key"
+              placeholder="track-key"
+              required
+              :disabled="editing"
+            />
+            <p class="mt-1 text-xs text-muted">
+              Unique identifier. Lowercase letters, numbers, and hyphens only.
+            </p>
+          </div>
+
+          <div>
+            <label for="edit-track-template" class="block text-sm font-medium text-default mb-1">
+              Workflow Template
+            </label>
+            <USelect
+              id="edit-track-template"
+              v-model="editTrack.template_id"
+              :items="templateOptions"
+              placeholder="Select a template (optional)"
+              :disabled="editing || loadingTemplates"
+            />
+            <p class="mt-1 text-xs text-muted">
+              Select a workflow template to track production progress.
+            </p>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label for="edit-track-tempo" class="block text-sm font-medium text-default mb-1">
+                Tempo (BPM)
+              </label>
+              <UInput
+                id="edit-track-tempo"
+                v-model.number="editTrack.tempo"
+                type="number"
+                placeholder="120"
+                :disabled="editing"
+              />
+            </div>
+            <div>
+              <label for="edit-track-location" class="block text-sm font-medium text-default mb-1">
+                Location
+              </label>
+              <UInput
+                id="edit-track-location"
+                v-model="editTrack.location"
+                placeholder="Soundation"
+                :disabled="editing"
+              />
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label for="edit-track-minutes" class="block text-sm font-medium text-default mb-1">
+                Minutes
+              </label>
+              <UInput
+                id="edit-track-minutes"
+                v-model.number="editTrack.minutes"
+                type="number"
+                placeholder="3"
+                :disabled="editing"
+              />
+            </div>
+            <div>
+              <label for="edit-track-seconds" class="block text-sm font-medium text-default mb-1">
+                Seconds
+              </label>
+              <UInput
+                id="edit-track-seconds"
+                v-model.number="editTrack.seconds"
+                type="number"
+                placeholder="45"
+                :disabled="editing"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label for="edit-track-isrc" class="block text-sm font-medium text-default mb-1">
+              ISRC Code
+            </label>
+            <UInput
+              id="edit-track-isrc"
+              v-model="editTrack.isrc_code"
+              placeholder="USRC17607839"
+              :disabled="editing"
+            />
+          </div>
+
+          <div>
+            <label class="flex items-center gap-2">
+              <input
+                type="checkbox"
+                v-model="editTrack.live_ready"
+                :disabled="editing"
+                class="rounded border-gray-300"
+              />
+              <span class="text-sm font-medium text-default">Live Ready</span>
+            </label>
+          </div>
+
+          <UAlert v-if="editError" color="error" variant="soft" :title="editError" />
+        </form>
+      </template>
+      <template #footer>
+        <div class="flex justify-end gap-3">
+          <UButton
+            color="neutral"
+            variant="ghost"
+            @click="showEditModal = false"
+            :disabled="editing"
+          >
+            Cancel
+          </UButton>
+          <UButton
+            type="submit"
+            form="edit-track-form"
+            color="primary"
+            :loading="editing"
+          >
+            Save Changes
+          </UButton>
+        </div>
+      </template>
+    </UModal>
   </div>
 </template>
 
@@ -326,24 +445,29 @@ definePageMeta({
 })
 
 import type { Artist } from '~/composables/useArtists'
-import type { Track, TrackInsert } from '~/composables/useTracks'
+import type { Track, TrackInsert, TrackUpdate } from '~/composables/useTracks'
 import type { Template } from '~/composables/useWorkflow'
 
 const router = useRouter()
 const { getArtists } = useArtists()
-const { getTracks, createTrack, deleteTrack } = useTracks()
+const { getTracks, getTrack, createTrack, updateTrack, deleteTrack } = useTracks()
 const { getTemplates } = useWorkflow()
 
 const artists = ref<Artist[]>([])
 const allTracks = ref<Track[]>([])
 const templates = ref<Template[]>([])
 const loading = ref(true)
+const loadingTemplates = ref(false)
 const creating = ref(false)
+const editing = ref(false)
 const showCreateModal = ref(false)
+const showEditModal = ref(false)
 const error = ref('')
+const editError = ref('')
 const selectedArtistId = ref('all')
 const searchQuery = ref('')
 const viewMode = ref<'grid' | 'list'>('grid')
+const editingTrackId = ref<string | null>(null)
 
 const newTrack = ref<TrackInsert>({
   name: '',
@@ -351,6 +475,18 @@ const newTrack = ref<TrackInsert>({
   template_id: null,
   location: 'Soundation',
   tempo: null,
+})
+
+const editTrack = ref<TrackUpdate>({
+  name: '',
+  key: '',
+  template_id: null,
+  tempo: null,
+  minutes: null,
+  seconds: null,
+  location: '',
+  isrc_code: null,
+  live_ready: false,
 })
 
 const artistOptions = computed(() => [
@@ -388,7 +524,6 @@ const filteredTracks = computed(() => {
     filtered = filtered.filter(
       t =>
         t.name.toLowerCase().includes(query) ||
-        t.key.toLowerCase().includes(query) ||
         getArtistName(t.artist_id).toLowerCase().includes(query)
     )
   }
@@ -399,7 +534,6 @@ const filteredTracks = computed(() => {
 interface TableRow {
   id: string
   name: string
-  key: string
   artist_id: string
   tempo: number | null
   live_ready: boolean
@@ -410,7 +544,6 @@ interface TableRow {
 const tableColumns = [
   { id: 'name', accessorKey: 'name', header: 'Track Name' },
   { id: 'artist', accessorKey: 'artist', header: 'Artist' },
-  { id: 'key', accessorKey: 'key', header: 'Key' },
   { id: 'tempo', accessorKey: 'tempo', header: 'Tempo' },
   { id: 'status', accessorKey: 'status', header: 'Status' },
   { id: 'actions', accessorKey: 'actions', header: '' },
@@ -420,7 +553,6 @@ const tableRows = computed<TableRow[]>(() => {
   return filteredTracks.value.map(track => ({
     id: track.id,
     name: track.name,
-    key: track.key,
     artist_id: track.artist_id,
     tempo: track.tempo,
     live_ready: track.live_ready,
@@ -439,16 +571,18 @@ const loadArtists = async () => {
   try {
     artists.value = await getArtists()
   } catch (err: any) {
-    console.error('Failed to load artists:', err)
+    // Failed to load artists
   }
 }
 
 const loadTemplates = async () => {
+  loadingTemplates.value = true
   try {
     templates.value = await getTemplates()
   } catch (err: any) {
-    console.error('Failed to load templates:', err)
     templates.value = []
+  } finally {
+    loadingTemplates.value = false
   }
 }
 
@@ -460,7 +594,7 @@ const loadTracks = async () => {
     const trackArrays = await Promise.all(trackPromises)
     allTracks.value = trackArrays.flat()
   } catch (err: any) {
-    console.error('Failed to load tracks:', err)
+    // Failed to load tracks
   } finally {
     loading.value = false
   }
@@ -504,42 +638,98 @@ const handleCreateTrack = async () => {
 
 const getTrackMenuItems = (row: TableRow) => {
   return [
-    {
-      label: 'View Details',
-      icon: 'i-heroicons-eye',
-      click: () => {
-        router.push(`/tracks/${row.id}`)
+    [
+      {
+        label: 'View Details',
+        icon: 'i-heroicons-eye',
+        onSelect: () => {
+          router.push(`/tracks/${row.id}`)
+        },
       },
-    },
-    {
-      label: 'Edit',
-      icon: 'i-heroicons-pencil',
-      click: () => {
-        router.push(`/tracks/${row.id}/edit`)
+      {
+        label: 'Edit',
+        icon: 'i-heroicons-pencil',
+        onSelect: () => {
+          router.push(`/tracks/${row.id}/edit`)
+        },
       },
-    },
+    ]
   ]
 }
 
 const getTrackMenuItemsForCard = (track: Track) => {
   return [
-    {
-      label: 'Edit',
-      icon: 'i-heroicons-pencil',
-      color: undefined as 'error' | 'primary' | 'secondary' | 'success' | 'info' | 'warning' | 'neutral' | undefined,
-      click: () => {
-        router.push(`/tracks/${track.id}/edit`)
-      },
-    },
-    {
-      label: 'Delete',
-      icon: 'i-heroicons-trash',
-      color: 'error' as const,
-      click: () => {
-        handleDeleteTrack(track.id, track.name)
-      },
-    },
+    [
+      {
+        label: 'Edit',
+        icon: 'i-heroicons-pencil',
+        onSelect: () => {
+          openEditModal(track.id)
+        },
+      }
+    ],
+    [
+      {
+        label: 'Delete',
+        icon: 'i-heroicons-trash',
+        color: 'error' as const,
+        onSelect: () => {
+          handleDeleteTrack(track.id, track.name)
+        },
+      }
+    ]
   ]
+}
+
+const openEditModal = async (trackId: string) => {
+  editingTrackId.value = trackId
+  editError.value = ''
+  editing.value = true
+  
+  try {
+    const track = await getTrack(trackId)
+    if (track) {
+      editTrack.value = {
+        name: track.name,
+        key: track.key,
+        template_id: track.template_id,
+        tempo: track.tempo,
+        minutes: track.minutes,
+        seconds: track.seconds,
+        location: track.location,
+        isrc_code: track.isrc_code,
+        live_ready: track.live_ready,
+      }
+      showEditModal.value = true
+    }
+  } catch (err: any) {
+    editError.value = err.message || 'Failed to load track'
+  } finally {
+    editing.value = false
+  }
+}
+
+const handleUpdateTrack = async () => {
+  if (!editingTrackId.value) return
+
+  editError.value = ''
+  editing.value = true
+
+  try {
+    if (!/^[a-z0-9-]+$/.test(editTrack.value.key || '')) {
+      editError.value = 'Key must contain only lowercase letters, numbers, and hyphens'
+      return
+    }
+
+    await updateTrack(editingTrackId.value, editTrack.value)
+    showEditModal.value = false
+    editingTrackId.value = null
+    await loadTracks()
+  } catch (err: any) {
+    editError.value = err.message || 'Failed to update track'
+  } finally {
+    editing.value = false
+  }
 }
 
 const handleDeleteTrack = async (trackId: string, trackName: string) => {
@@ -552,7 +742,6 @@ const handleDeleteTrack = async (trackId: string, trackName: string) => {
     await loadTracks()
   } catch (err: any) {
     error.value = err.message || 'Failed to delete track'
-    console.error('Failed to delete track:', err)
   }
 }
 

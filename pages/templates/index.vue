@@ -1,18 +1,21 @@
 <template>
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <div class="mb-8 flex justify-between items-center">
-      <div>
-        <h1 class="text-3xl font-bold text-default mb-2">Workflow Templates</h1>
-        <p class="text-muted">Manage your production workflow templates</p>
-      </div>
-      <UButton
-        color="primary"
-        size="lg"
-        icon="i-heroicons-plus"
-        @click="showCreateModal = true"
+    <div class="mb-8">
+      <UPageHeader
+        title="Workflow Templates"
+        description="Manage your production workflow templates"
       >
-        Create Template
-      </UButton>
+        <template #links>
+          <UButton
+            color="primary"
+            size="lg"
+            icon="i-heroicons-plus"
+            @click="showCreateModal = true"
+          >
+            Create Template
+          </UButton>
+        </template>
+      </UPageHeader>
     </div>
 
     <!-- Loading State -->
@@ -52,32 +55,17 @@
               <UBadge v-else color="neutral">Draft</UBadge>
             </div>
           </div>
-          <UPopover :content="{ side: 'bottom', align: 'end' }">
+          <UDropdownMenu 
+            :items="getTemplateMenuItems(template)" 
+            :content="{ align: 'end' }"
+          >
             <UButton
               color="neutral"
               variant="ghost"
-              icon="i-heroicons-ellipsis-vertical"
+              icon="i-heroicons-bars-3"
               @click.stop
             />
-            <template #content="slotProps">
-              <div class="p-1">
-                <UButton
-                  variant="ghost"
-                  icon="i-heroicons-trash"
-                  block
-                  color="error"
-                  @click.stop="() => {
-                    if (slotProps && 'close' in slotProps && typeof slotProps.close === 'function') {
-                      slotProps.close();
-                    }
-                    handleDeleteTemplate(template.id, template.name);
-                  }"
-                >
-                  Delete
-                </UButton>
-              </div>
-            </template>
-          </UPopover>
+          </UDropdownMenu>
         </div>
       </UCard>
     </div>
@@ -107,7 +95,8 @@
               id="template-description"
               v-model="newTemplate.description"
               placeholder="Describe this workflow template..."
-              :rows="3"
+              :rows="5"
+              class="w-full"
               :disabled="creating"
             />
           </div>
@@ -170,7 +159,6 @@ const loadTemplates = async () => {
   try {
     templates.value = await getTemplates()
   } catch (err: any) {
-    console.error('Failed to load templates:', err)
     templates.value = []
   } finally {
     loading.value = false
@@ -195,6 +183,21 @@ const handleCreateTemplate = async () => {
   }
 }
 
+const getTemplateMenuItems = (template: Template) => {
+  return [
+    [
+      {
+        label: 'Delete',
+        icon: 'i-heroicons-trash',
+        color: 'error' as const,
+        onSelect: () => {
+          handleDeleteTemplate(template.id, template.name)
+        },
+      }
+    ]
+  ]
+}
+
 const handleDeleteTemplate = async (templateId: string, templateName: string) => {
   if (
     !confirm(
@@ -209,7 +212,6 @@ const handleDeleteTemplate = async (templateId: string, templateName: string) =>
     await loadTemplates()
   } catch (err: any) {
     error.value = err.message || 'Failed to delete template'
-    console.error('Failed to delete template:', err)
   }
 }
 

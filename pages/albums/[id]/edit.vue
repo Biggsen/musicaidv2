@@ -54,7 +54,8 @@
             id="album-description"
             v-model="formData.description"
             placeholder="Album description"
-            :rows="3"
+            :rows="5"
+            class="w-full"
             :disabled="saving"
           />
         </div>

@@ -58,6 +58,16 @@ const navItems = computed<NavigationMenuItem[]>(() => {
         label: 'Templates',
         to: '/templates',
         active: route.path.startsWith('/templates')
+      },
+      {
+        label: 'Statuses',
+        to: '/statuses',
+        active: route.path.startsWith('/statuses')
+      },
+      {
+        label: 'Steps',
+        to: '/steps',
+        active: route.path.startsWith('/steps')
       }
     )
   }

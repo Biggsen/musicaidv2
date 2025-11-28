@@ -17,7 +17,7 @@
     <div v-else-if="artist">
       <!-- Header -->
       <div class="mb-8">
-        <div class="flex items-center gap-4 mb-4">
+        <div class="mb-4">
           <UButton
             color="neutral"
             variant="ghost"
@@ -26,49 +26,18 @@
           >
             Back
           </UButton>
-          <h1 class="text-3xl font-bold text-default">{{ artist.name }}</h1>
-          <UPopover>
-            <UButton
-              color="neutral"
-              variant="ghost"
-              icon="i-heroicons-ellipsis-vertical"
-            />
-            <template #content="slotProps">
-              <div class="p-1">
-                <UButton
-                  variant="ghost"
-                  icon="i-heroicons-pencil"
-                  block
-                  @click.stop.prevent="() => { 
-                    if (slotProps && 'close' in slotProps && typeof slotProps.close === 'function') {
-                      slotProps.close();
-                    }
-                    if (artist) {
-                      router.push({ path: `/artists/${artist.id}/edit` });
-                    }
-                  }"
-                >
-                  Edit
-                </UButton>
-                <UButton
-                  variant="ghost"
-                  icon="i-heroicons-trash"
-                  block
-                  color="error"
-                  @click.stop.prevent="() => {
-                    if (slotProps && 'close' in slotProps && typeof slotProps.close === 'function') {
-                      slotProps.close();
-                    }
-                    handleDeleteArtist();
-                  }"
-                >
-                  Delete
-                </UButton>
-              </div>
-            </template>
-          </UPopover>
         </div>
-        <p class="text-muted">Slug: {{ artist.slug }}</p>
+        <UPageHeader headline="Artist" :title="artist.name">
+          <template #links>
+            <UDropdownMenu :items="getArtistMenuItems()" :content="{ align: 'end' }">
+              <UButton
+                color="neutral"
+                variant="outline"
+                icon="i-heroicons-bars-3"
+              />
+            </UDropdownMenu>
+          </template>
+        </UPageHeader>
       </div>
 
       <!-- Stats Cards -->
@@ -148,7 +117,6 @@
               <div class="flex-1">
                 <h3 class="font-semibold text-default mb-1">{{ track.name }}</h3>
                 <div class="flex items-center gap-4 text-sm text-muted">
-                  <span>Key: {{ track.key }}</span>
                   <span v-if="track.tempo">Tempo: {{ track.tempo }} BPM</span>
                   <span v-if="track.minutes !== null && track.seconds !== null">
                     Duration: {{ track.minutes }}:{{ String(track.seconds).padStart(2, '0') }}
@@ -334,6 +302,27 @@ const handleDeleteArtist = async () => {
     error.value = err.message || 'Failed to delete artist'
     console.error('Failed to delete artist:', err)
   }
+}
+
+const getArtistMenuItems = () => {
+  if (!artist.value) return []
+  return [
+    [
+      {
+        label: 'Edit',
+        icon: 'i-heroicons-pencil',
+        to: `/artists/${artist.value.id}/edit`
+      }
+    ],
+    [
+      {
+        label: 'Delete',
+        icon: 'i-heroicons-trash',
+        color: 'error' as const,
+        click: () => handleDeleteArtist()
+      }
+    ]
+  ]
 }
 
 const formatDate = (dateString: string): string => {

@@ -44,7 +44,8 @@
             id="file-description"
             v-model="description"
             placeholder="File description"
-            :rows="2"
+            :rows="5"
+            class="w-full"
             :disabled="uploading"
           />
         </div>
