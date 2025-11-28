@@ -9,7 +9,7 @@
           <UButton
             color="primary"
             size="lg"
-            icon="i-heroicons-plus"
+            icon="i-ph-plus"
             @click="showCreateModal = true"
           >
             Create Template
@@ -20,15 +20,15 @@
 
     <!-- Loading State -->
     <div v-if="loading" class="flex justify-center py-12">
-      <UIcon name="i-heroicons-arrow-path" class="w-8 h-8 text-dimmed animate-spin" />
+      <UIcon name="i-ph-arrow-clockwise" class="w-8 h-8 text-dimmed animate-spin" />
     </div>
 
     <!-- Empty State -->
     <UCard v-else-if="templates.length === 0" class="text-center py-12">
-      <UIcon name="i-heroicons-document-text" class="w-16 h-16 text-dimmed mx-auto mb-4" />
+      <UIcon name="i-ph-document-text" class="w-16 h-16 text-dimmed mx-auto mb-4" />
       <h3 class="text-xl font-semibold text-default mb-2">No templates yet</h3>
       <p class="text-muted mb-6">Create your first workflow template to get started</p>
-      <UButton color="primary" icon="i-heroicons-plus" @click="showCreateModal = true">
+      <UButton color="primary" icon="i-ph-plus" @click="showCreateModal = true">
         Create Template
       </UButton>
     </UCard>
@@ -62,7 +62,7 @@
             <UButton
               color="neutral"
               variant="ghost"
-              icon="i-heroicons-bars-3"
+              icon="i-ph-list"
               @click.stop
             />
           </UDropdownMenu>
@@ -188,7 +188,7 @@ const getTemplateMenuItems = (template: Template) => {
     [
       {
         label: 'Delete',
-        icon: 'i-heroicons-trash',
+        icon: 'i-ph-trash',
         color: 'error' as const,
         onSelect: () => {
           handleDeleteTemplate(template.id, template.name)

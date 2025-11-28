@@ -22,7 +22,7 @@
         >
           <template #icon>
             <ClientOnly>
-              <UIcon name="i-heroicons-bolt" class="w-6 h-6 text-primary" />
+              <UIcon name="i-ph-bolt" class="w-6 h-6 text-primary" />
               <template #fallback>
                 <span class="text-primary text-xl">⚡</span>
               </template>
@@ -36,7 +36,7 @@
         >
           <template #icon>
             <ClientOnly>
-              <UIcon name="i-heroicons-users" class="w-6 h-6 text-success" />
+              <UIcon name="i-ph-users" class="w-6 h-6 text-success" />
               <template #fallback>
                 <span class="text-success text-xl">👥</span>
               </template>
@@ -50,7 +50,7 @@
         >
           <template #icon>
             <ClientOnly>
-              <UIcon name="i-heroicons-musical-note" class="w-6 h-6 text-primary" />
+              <UIcon name="i-ph-music-note" class="w-6 h-6 text-primary" />
               <template #fallback>
                 <span class="text-primary text-xl">🎵</span>
               </template>

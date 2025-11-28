@@ -9,7 +9,7 @@
           <UButton
             color="primary"
             size="lg"
-            icon="i-heroicons-plus"
+            icon="i-ph-plus"
             @click="showCreateModal = true"
           >
             Create Status
@@ -23,7 +23,7 @@
       <UInput
         v-model="searchQuery"
         placeholder="Search statuses..."
-        icon="i-heroicons-magnifying-glass"
+        icon="i-ph-magnifying-glass"
         clearable
         class="max-w-md"
       />
@@ -31,13 +31,13 @@
         <UButton
           :color="viewMode === 'grid' ? 'primary' : 'neutral'"
           variant="ghost"
-          icon="i-heroicons-squares-2x2"
+          icon="i-ph-grid-four"
           @click="viewMode = 'grid'"
         />
         <UButton
           :color="viewMode === 'table' ? 'primary' : 'neutral'"
           variant="ghost"
-          icon="i-heroicons-table-cells"
+          icon="i-ph-table"
           @click="viewMode = 'table'"
         />
       </div>
@@ -45,19 +45,19 @@
 
     <!-- Loading State -->
     <div v-if="loading" class="flex justify-center py-12">
-      <UIcon name="i-heroicons-arrow-path" class="w-8 h-8 text-dimmed animate-spin" />
+      <UIcon name="i-ph-arrow-clockwise" class="w-8 h-8 text-dimmed animate-spin" />
     </div>
 
     <!-- Empty State -->
     <UCard v-else-if="filteredStatuses.length === 0" class="text-center py-12">
-      <UIcon name="i-heroicons-list-bullet" class="w-16 h-16 text-dimmed mx-auto mb-4" />
+      <UIcon name="i-ph-list-bullet" class="w-16 h-16 text-dimmed mx-auto mb-4" />
       <h3 class="text-xl font-semibold text-default mb-2">
         {{ searchQuery ? 'No statuses match your search' : 'No statuses yet' }}
       </h3>
       <p class="text-muted mb-6">
         {{ searchQuery ? 'Try a different search term' : 'Create your first workflow status to get started' }}
       </p>
-      <UButton v-if="!searchQuery" color="primary" icon="i-heroicons-plus" @click="showCreateModal = true">
+      <UButton v-if="!searchQuery" color="primary" icon="i-ph-plus" @click="showCreateModal = true">
         Create Status
       </UButton>
     </UCard>
@@ -88,7 +88,7 @@
             <UButton
               color="neutral"
               variant="ghost"
-              icon="i-heroicons-bars-3"
+              icon="i-ph-list"
               @click.stop
             />
           </UDropdownMenu>
@@ -121,7 +121,7 @@
             <UButton
               color="neutral"
               variant="ghost"
-              icon="i-heroicons-bars-3"
+              icon="i-ph-list"
               size="sm"
             />
           </UDropdownMenu>
@@ -411,14 +411,14 @@ const getStatusMenuItems = (status: TrackStatus) => {
     [
       {
         label: 'Edit',
-        icon: 'i-heroicons-pencil',
+        icon: 'i-ph-pencil',
         onSelect: () => editStatus(status)
       }
     ],
     [
       {
         label: 'Delete',
-        icon: 'i-heroicons-trash',
+        icon: 'i-ph-trash',
         color: 'error' as const,
         onSelect: () => handleDeleteStatus(status.id, status.name)
       }
@@ -431,14 +431,14 @@ const getStatusMenuItemsForTable = (status: TrackStatus) => {
     [
       {
         label: 'Edit',
-        icon: 'i-heroicons-pencil',
+        icon: 'i-ph-pencil',
         onSelect: () => editStatus(status)
       }
     ],
     [
       {
         label: 'Delete',
-        icon: 'i-heroicons-trash',
+        icon: 'i-ph-trash',
         color: 'error' as const,
         onSelect: () => handleDeleteStatus(status.id, status.name)
       }

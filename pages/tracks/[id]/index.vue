@@ -2,12 +2,12 @@
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <!-- Loading State -->
     <div v-if="loading" class="flex justify-center py-12">
-      <UIcon name="i-heroicons-arrow-path" class="w-8 h-8 text-dimmed animate-spin" />
+      <UIcon name="i-ph-arrow-clockwise" class="w-8 h-8 text-dimmed animate-spin" />
     </div>
 
     <!-- Error State -->
     <UCard v-else-if="error" class="text-center py-12">
-      <UIcon name="i-heroicons-exclamation-triangle" class="w-16 h-16 text-error mx-auto mb-4" />
+      <UIcon name="i-ph-warning" class="w-16 h-16 text-error mx-auto mb-4" />
       <h3 class="text-xl font-semibold text-default mb-2">Track Not Found</h3>
       <p class="text-muted mb-6">{{ error }}</p>
       <UButton color="primary" to="/tracks">Back to Tracks</UButton>
@@ -17,44 +17,32 @@
     <div v-else-if="track">
       <!-- Header -->
       <div class="mb-8">
-        <div class="flex items-center gap-4 mb-4">
-            <UButton
-              color="neutral"
-              variant="ghost"
-              icon="i-heroicons-arrow-left"
-              to="/tracks"
-            >
-              Back
-            </UButton>
-          <h1 class="text-3xl font-bold text-default">{{ track.name }}</h1>
-          <UBadge v-if="track.live_ready" color="success">Live Ready</UBadge>
-          <UPopover :content="{ side: 'bottom', align: 'end' }">
-            <UButton
-              color="neutral"
-              variant="ghost"
-              icon="i-heroicons-ellipsis-vertical"
-            />
-            <template #content="slotProps">
-              <div class="p-1">
-                <UButton
-                  v-for="item in menuItems"
-                  :key="item.label"
-                  variant="ghost"
-                  :icon="item.icon"
-                  block
-                  @click.stop="() => {
-                    if (slotProps && 'close' in slotProps && typeof slotProps.close === 'function') {
-                      slotProps.close();
-                    }
-                    item.click();
-                  }"
-                >
-                  {{ item.label }}
-                </UButton>
-              </div>
-            </template>
-          </UPopover>
+        <div class="mb-4">
+          <UButton
+            color="neutral"
+            variant="ghost"
+            icon="i-ph-arrow-left"
+            to="/tracks"
+          >
+            Back
+          </UButton>
         </div>
+        <UPageHeader
+          :headline="artist?.name"
+          :title="track.name"
+        >
+          <template #links>
+            <div class="flex items-center gap-3">
+              <UDropdownMenu :items="getTemplateMenuItems()" :content="{ align: 'end' }">
+                <UButton
+                  color="neutral"
+                  variant="outline"
+                  icon="i-ph-list"
+                />
+              </UDropdownMenu>
+            </div>
+          </template>
+        </UPageHeader>
       </div>
 
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -68,16 +56,18 @@
 
             <div class="space-y-4">
               <div class="grid grid-cols-2 gap-4">
-                <div>
-                  <label class="block text-sm font-medium text-default mb-1">Track Name</label>
-                  <p class="text-default">{{ track.name }}</p>
-                </div>
                 <div v-if="track.tempo">
-                  <label class="block text-sm font-medium text-default mb-1">Tempo</label>
+                  <label class="flex items-center gap-2 text-sm font-medium text-default mb-1">
+                    <UIcon name="i-ph-metronome" class="w-4 h-4" />
+                    Tempo
+                  </label>
                   <p class="text-default">{{ track.tempo }} BPM</p>
                 </div>
                 <div v-if="track.minutes !== null && track.seconds !== null">
-                  <label class="block text-sm font-medium text-default mb-1">Duration</label>
+                  <label class="flex items-center gap-2 text-sm font-medium text-default mb-1">
+                    <UIcon name="i-ph-timer" class="w-4 h-4" />
+                    Duration
+                  </label>
                   <p class="text-default">
                     {{ track.minutes }}:{{ String(track.seconds).padStart(2, '0') }}
                   </p>
@@ -85,12 +75,6 @@
                 <div>
                   <label class="block text-sm font-medium text-default mb-1">Location</label>
                   <p class="text-default">{{ track.location }}</p>
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-default mb-1">Live Ready</label>
-                  <UBadge :color="track.live_ready ? 'success' : 'neutral'">
-                    {{ track.live_ready ? 'Yes' : 'No' }}
-                  </UBadge>
                 </div>
               </div>
             </div>
@@ -104,7 +88,7 @@
                 <UButton
                   color="primary"
                   size="sm"
-                  icon="i-heroicons-plus"
+                  icon="i-ph-plus"
                   @click="showUploadModal = true"
                 >
                   Upload
@@ -113,9 +97,9 @@
             </template>
 
             <div v-if="audioFiles.length === 0" class="text-center py-8">
-              <UIcon name="i-heroicons-musical-note" class="w-12 h-12 text-dimmed mx-auto mb-3" />
+              <UIcon name="i-ph-music-note" class="w-12 h-12 text-dimmed mx-auto mb-3" />
               <p class="text-muted mb-4">No audio files yet</p>
-              <UButton color="primary" size="sm" icon="i-heroicons-plus" @click="showUploadModal = true">
+              <UButton color="primary" size="sm" icon="i-ph-plus" @click="showUploadModal = true">
                 Upload Audio File
               </UButton>
             </div>
@@ -142,7 +126,7 @@
                       </span>
                       <span v-if="audio.file_size_bytes">{{ formatFileSize(audio.file_size_bytes) }}</span>
                       <span v-if="audio.mixdown_date" class="flex items-center gap-1">
-                        <UIcon name="i-heroicons-calendar" class="w-3 h-3" />
+                        <UIcon name="i-ph-calendar" class="w-3 h-3" />
                         {{ formatDateOnly(audio.mixdown_date) }}
                       </span>
                       <span v-if="audio.bitrate">{{ audio.bitrate }} kbps</span>
@@ -154,7 +138,7 @@
                       v-if="audio.file_url"
                       color="primary"
                       variant="ghost"
-                      icon="i-heroicons-play"
+                      icon="i-ph-play"
                       size="sm"
                       @click="playAudio(audio)"
                     >
@@ -164,7 +148,7 @@
                       <UButton
                         color="neutral"
                         variant="ghost"
-                        icon="i-heroicons-ellipsis-vertical"
+                        icon="i-ph-dots-three-vertical"
                         size="sm"
                       />
                       <template #content="slotProps">
@@ -216,7 +200,7 @@
                 <UButton
                   color="primary"
                   size="sm"
-                  icon="i-heroicons-plus"
+                  icon="i-ph-plus"
                   @click="showNoteModal = true"
                 >
                   Add Note
@@ -225,7 +209,7 @@
             </template>
 
             <div v-if="notes.length === 0" class="text-center py-8">
-              <UIcon name="i-heroicons-document-text" class="w-12 h-12 text-dimmed mx-auto mb-3" />
+              <UIcon name="i-ph-document-text" class="w-12 h-12 text-dimmed mx-auto mb-3" />
               <p class="text-muted">No notes yet</p>
             </div>
 
@@ -247,7 +231,7 @@
               <UButton
                 :color="note.done ? 'success' : 'neutral'"
                 variant="ghost"
-                :icon="note.done ? 'i-heroicons-check-circle' : 'i-heroicons-circle-stack'"
+                :icon="note.done ? 'i-ph-check-circle' : 'i-ph-circle-dashed'"
                 size="sm"
                 @click="toggleNoteDone(note)"
               />
@@ -255,7 +239,7 @@
                       <UButton
                         color="neutral"
                         variant="ghost"
-                        icon="i-heroicons-ellipsis-vertical"
+                        icon="i-ph-dots-three-vertical"
                         size="sm"
                       />
                       <template #content="slotProps">
@@ -298,19 +282,10 @@
                 color="primary"
                 variant="outline"
                 block
-                icon="i-heroicons-pencil"
+                icon="i-ph-pencil"
                 @click="router.push(`/tracks/${track.id}/edit`)"
               >
                 Edit Track
-              </UButton>
-              <UButton
-                :color="track.live_ready ? 'neutral' : 'success'"
-                variant="outline"
-                block
-                :icon="track.live_ready ? 'i-heroicons-x-circle' : 'i-heroicons-check-circle'"
-                @click="toggleLiveReady"
-              >
-                {{ track.live_ready ? 'Mark Not Ready' : 'Mark Live Ready' }}
               </UButton>
             </div>
           </UCard>
@@ -602,6 +577,7 @@ definePageMeta({
 })
 
 import type { Track } from '~/composables/useTracks'
+import type { Artist } from '~/composables/useArtists'
 import type { Note, NoteInsert, NoteUpdate } from '~/composables/useNotes'
 import type { AudioFile } from '~/composables/useAudio'
 import type { TrackStatusWithSteps, TemplateWithStatuses } from '~/composables/useWorkflow'
@@ -609,6 +585,7 @@ import type { TrackStatusWithSteps, TemplateWithStatuses } from '~/composables/u
 const route = useRoute()
 const router = useRouter()
 const { getTrack, updateTrack, deleteTrack } = useTracks()
+const { getArtist } = useArtists()
 const { getNotes, createNote, updateNote, deleteNote } = useNotes()
 const { getAudioFiles, createAudioFile, updateAudioFile, deleteAudioFile } = useAudio()
 const {
@@ -620,6 +597,7 @@ const {
 } = useWorkflow()
 
 const track = ref<Track | null>(null)
+const artist = ref<Artist | null>(null)
 const audioFiles = ref<AudioFile[]>([])
 const notes = ref<Note[]>([])
 const workflowStatuses = ref<TrackStatusWithSteps[]>([])
@@ -665,23 +643,6 @@ const editNote = ref<NoteUpdate>({
   note: '',
 })
 
-const menuItems = computed(() => [
-  {
-    label: 'Edit Track',
-    icon: 'i-heroicons-pencil',
-    click: async () => {
-      if (track.value) {
-        await router.push(`/tracks/${track.value.id}/edit`)
-      }
-    },
-  },
-  {
-    label: 'Delete Track',
-    icon: 'i-heroicons-trash',
-    click: handleDeleteTrack,
-  },
-])
-
 // Load track data
 onMounted(async () => {
   await loadTrack()
@@ -701,6 +662,14 @@ const loadTrack = async () => {
       error.value = 'Track not found'
     } else {
       newNote.value.track_id = track.value.id
+      // Load artist information
+      if (track.value.artist_id) {
+        try {
+          artist.value = await getArtist(track.value.artist_id)
+        } catch (err: any) {
+          console.error('Failed to load artist:', err)
+        }
+      }
     }
   } catch (err: any) {
     error.value = err.message || 'Failed to load track'
@@ -838,19 +807,6 @@ const handleStepUncompleted = async (stepId: string) => {
   }
 }
 
-const toggleLiveReady = async () => {
-  if (!track.value) return
-
-  try {
-    await updateTrack(track.value.id, {
-      live_ready: !track.value.live_ready,
-    })
-    track.value.live_ready = !track.value.live_ready
-  } catch (err: any) {
-    console.error('Failed to update track:', err)
-  }
-}
-
 const handleAddNote = async () => {
   if (!track.value) return
 
@@ -898,11 +854,36 @@ const handleDeleteTrack = async () => {
   }
 }
 
+const getTemplateMenuItems = () => {
+  if (!track.value) return []
+  return [
+    [
+      {
+        label: 'Edit Track',
+        icon: 'i-ph-pencil',
+        click: async () => {
+          if (track.value) {
+            await router.push(`/tracks/${track.value.id}/edit`)
+          }
+        },
+      },
+    ],
+    [
+      {
+        label: 'Delete Track',
+        icon: 'i-ph-trash',
+        color: 'error' as const,
+        click: handleDeleteTrack,
+      },
+    ],
+  ]
+}
+
 const getAudioMenuItems = (audio: AudioFile) => {
   return [
     {
       label: 'Edit',
-      icon: 'i-heroicons-pencil',
+      icon: 'i-ph-pencil',
       click: () => {
         editingAudioId.value = audio.id
         editAudio.value = {
@@ -916,7 +897,7 @@ const getAudioMenuItems = (audio: AudioFile) => {
     },
     {
       label: 'Download',
-      icon: 'i-heroicons-arrow-down-tray',
+      icon: 'i-ph-download',
       click: () => {
         if (audio.file_url) {
           window.open(audio.file_url, '_blank')
@@ -925,7 +906,7 @@ const getAudioMenuItems = (audio: AudioFile) => {
     },
     {
       label: 'Delete',
-      icon: 'i-heroicons-trash',
+      icon: 'i-ph-trash',
       click: async () => {
         if (confirm('Are you sure you want to delete this audio file? This will remove it from R2 storage and cannot be undone.')) {
           try {
@@ -945,7 +926,7 @@ const getNoteMenuItems = (note: Note) => {
   return [
     {
       label: 'Edit',
-      icon: 'i-heroicons-pencil',
+      icon: 'i-ph-pencil',
       click: () => {
         editingNoteId.value = note.id
         editNote.value = { note: note.note }
@@ -954,7 +935,7 @@ const getNoteMenuItems = (note: Note) => {
     },
     {
       label: 'Delete',
-      icon: 'i-heroicons-trash',
+      icon: 'i-ph-trash',
       click: async () => {
         if (confirm('Are you sure you want to delete this note?')) {
           try {

@@ -9,7 +9,7 @@
           <UButton
             color="primary"
             size="lg"
-            icon="i-heroicons-plus"
+            icon="i-ph-plus"
             @click="showCreateModal = true"
           >
             Create Step
@@ -23,7 +23,7 @@
       <UInput
         v-model="searchQuery"
         placeholder="Search steps..."
-        icon="i-heroicons-magnifying-glass"
+        icon="i-ph-magnifying-glass"
         clearable
         class="max-w-md"
       />
@@ -37,13 +37,13 @@
         <UButton
           :color="viewMode === 'grid' ? 'primary' : 'neutral'"
           variant="ghost"
-          icon="i-heroicons-squares-2x2"
+          icon="i-ph-grid-four"
           @click="viewMode = 'grid'"
         />
         <UButton
           :color="viewMode === 'table' ? 'primary' : 'neutral'"
           variant="ghost"
-          icon="i-heroicons-table-cells"
+          icon="i-ph-table"
           @click="viewMode = 'table'"
         />
       </div>
@@ -51,19 +51,19 @@
 
     <!-- Loading State -->
     <div v-if="loading" class="flex justify-center py-12">
-      <UIcon name="i-heroicons-arrow-path" class="w-8 h-8 text-dimmed animate-spin" />
+      <UIcon name="i-ph-arrow-clockwise" class="w-8 h-8 text-dimmed animate-spin" />
     </div>
 
     <!-- Empty State -->
     <UCard v-else-if="filteredSteps.length === 0" class="text-center py-12">
-      <UIcon name="i-heroicons-check-circle" class="w-16 h-16 text-dimmed mx-auto mb-4" />
+      <UIcon name="i-ph-check-circle" class="w-16 h-16 text-dimmed mx-auto mb-4" />
       <h3 class="text-xl font-semibold text-default mb-2">
         {{ searchQuery || typeFilter ? 'No steps match your filters' : 'No steps yet' }}
       </h3>
       <p class="text-muted mb-6">
         {{ searchQuery || typeFilter ? 'Try adjusting your search or filters' : 'Create your first workflow step to get started' }}
       </p>
-      <UButton v-if="!searchQuery && !typeFilter" color="primary" icon="i-heroicons-plus" @click="showCreateModal = true">
+      <UButton v-if="!searchQuery && !typeFilter" color="primary" icon="i-ph-plus" @click="showCreateModal = true">
         Create Step
       </UButton>
     </UCard>
@@ -94,7 +94,7 @@
             <UButton
               color="neutral"
               variant="ghost"
-              icon="i-heroicons-bars-3"
+              icon="i-ph-list"
               @click.stop
             />
           </UDropdownMenu>
@@ -126,7 +126,7 @@
             <UButton
               color="neutral"
               variant="ghost"
-              icon="i-heroicons-bars-3"
+              icon="i-ph-list"
               size="sm"
             />
           </UDropdownMenu>
@@ -458,14 +458,14 @@ const getStepMenuItems = (step: Step) => {
     [
       {
         label: 'Edit',
-        icon: 'i-heroicons-pencil',
+        icon: 'i-ph-pencil',
         onSelect: () => editStep(step)
       }
     ],
     [
       {
         label: 'Delete',
-        icon: 'i-heroicons-trash',
+        icon: 'i-ph-trash',
         color: 'error' as const,
         onSelect: () => handleDeleteStep(step.id, step.name)
       }
@@ -478,14 +478,14 @@ const getStepMenuItemsForTable = (step: Step) => {
     [
       {
         label: 'Edit',
-        icon: 'i-heroicons-pencil',
+        icon: 'i-ph-pencil',
         onSelect: () => editStep(step)
       }
     ],
     [
       {
         label: 'Delete',
-        icon: 'i-heroicons-trash',
+        icon: 'i-ph-trash',
         color: 'error' as const,
         onSelect: () => handleDeleteStep(step.id, step.name)
       }

@@ -4,7 +4,7 @@
       <UButton
         color="neutral"
         variant="ghost"
-        icon="i-heroicons-arrow-left"
+        icon="i-ph-arrow-left"
         :to="`/albums/${route.params.id}`"
       >
         Back to Album

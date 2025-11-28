@@ -18,7 +18,7 @@
           class="hidden"
           @change="handleFileSelect"
         />
-        <UIcon name="i-heroicons-musical-note" class="w-12 h-12 text-gray-400 mx-auto mb-3" />
+        <UIcon name="i-ph-music-note" class="w-12 h-12 text-gray-400 mx-auto mb-3" />
         <p class="text-sm text-gray-600 mb-2">
           Drag and drop an audio file here, or
           <button
@@ -50,7 +50,7 @@
           <UButton
             color="neutral"
             variant="ghost"
-            icon="i-heroicons-x-mark"
+            icon="i-ph-x"
             size="sm"
             @click="clearFile"
           />

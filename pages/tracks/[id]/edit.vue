@@ -2,12 +2,12 @@
   <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <!-- Loading State -->
     <div v-if="loading" class="flex justify-center py-12">
-      <UIcon name="i-heroicons-arrow-path" class="w-8 h-8 text-dimmed animate-spin" />
+      <UIcon name="i-ph-arrow-clockwise" class="w-8 h-8 text-dimmed animate-spin" />
     </div>
 
     <!-- Error State -->
     <UCard v-else-if="error" class="text-center py-12">
-      <UIcon name="i-heroicons-exclamation-triangle" class="w-16 h-16 text-error mx-auto mb-4" />
+      <UIcon name="i-ph-exclamation-triangle" class="w-16 h-16 text-error mx-auto mb-4" />
       <h3 class="text-xl font-semibold text-default mb-2">Track Not Found</h3>
       <p class="text-muted mb-6">{{ error }}</p>
       <UButton color="primary" to="/tracks">Back to Tracks</UButton>
@@ -19,7 +19,7 @@
           <UButton
             color="neutral"
             variant="ghost"
-            icon="i-heroicons-arrow-left"
+            icon="i-ph-arrow-left"
             :to="`/tracks/${track.id}`"
           >
             Back
@@ -143,18 +143,6 @@
             />
           </div>
 
-          <div>
-            <label class="flex items-center gap-2">
-              <input
-                type="checkbox"
-                v-model="formData.live_ready"
-                :disabled="saving"
-                class="rounded border-gray-300"
-              />
-              <span class="text-sm font-medium text-default">Live Ready</span>
-            </label>
-          </div>
-
           <UAlert v-if="saveError" color="error" variant="soft" :title="saveError" />
 
           <div class="flex justify-end gap-3 pt-4">
@@ -213,7 +201,6 @@ const formData = ref<TrackUpdate>({
   seconds: null,
   location: '',
   isrc_code: null,
-  live_ready: false,
 })
 
 // Load track and templates
@@ -238,7 +225,6 @@ const loadTrack = async () => {
         seconds: track.value.seconds,
         location: track.value.location,
         isrc_code: track.value.isrc_code,
-        live_ready: track.value.live_ready,
       }
     }
   } catch (err: any) {

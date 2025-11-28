@@ -9,7 +9,7 @@
           <UButton
             color="primary"
             size="lg"
-            icon="i-heroicons-plus"
+            icon="i-ph-plus"
             @click="showCreateModal = true"
           >
             Create Artist
@@ -20,15 +20,15 @@
 
     <!-- Loading State -->
     <div v-if="loading" class="flex justify-center py-12">
-      <UIcon name="i-heroicons-arrow-path" class="w-8 h-8 text-dimmed animate-spin" />
+      <UIcon name="i-ph-arrow-clockwise" class="w-8 h-8 text-dimmed animate-spin" />
     </div>
 
     <!-- Empty State -->
     <UCard v-else-if="artists.length === 0" class="text-center py-12">
-      <UIcon name="i-heroicons-musical-note" class="w-16 h-16 text-dimmed mx-auto mb-4" />
+      <UIcon name="i-ph-music-note" class="w-16 h-16 text-dimmed mx-auto mb-4" />
       <h3 class="text-xl font-semibold text-default mb-2">No artists yet</h3>
       <p class="text-muted mb-6">Get started by creating your first artist</p>
-      <UButton color="primary" icon="i-heroicons-plus" @click="showCreateModal = true">
+      <UButton color="primary" icon="i-ph-plus" @click="showCreateModal = true">
         Create Artist
       </UButton>
     </UCard>
@@ -49,7 +49,7 @@
             <h3 class="text-xl font-semibold text-default mb-2">{{ artist.name }}</h3>
             <div class="flex items-center gap-4 text-sm text-muted">
               <span class="flex items-center gap-1">
-                <UIcon name="i-heroicons-musical-note" class="w-4 h-4" />
+                <UIcon name="i-ph-music-note" class="w-4 h-4" />
                 {{ getTrackCount(artist.id) }} tracks
               </span>
             </div>
@@ -58,7 +58,7 @@
             <UButton
               color="neutral"
               variant="ghost"
-              icon="i-heroicons-bars-3"
+              icon="i-ph-list"
               @click.stop
             />
           </UDropdownMenu>
@@ -179,14 +179,14 @@ const getArtistMenuItems = (artist: Artist) => {
     [
       {
         label: 'Edit',
-        icon: 'i-heroicons-pencil',
+        icon: 'i-ph-pencil',
         to: `/artists/${artist.id}/edit`
       }
     ],
     [
       {
         label: 'Delete',
-        icon: 'i-heroicons-trash',
+        icon: 'i-ph-trash',
         color: 'error' as const,
         click: () => handleDeleteArtist(artist.id, artist.name)
       }

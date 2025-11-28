@@ -2,12 +2,12 @@
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <!-- Loading State -->
     <div v-if="loading" class="flex justify-center py-12">
-      <UIcon name="i-heroicons-arrow-path" class="w-8 h-8 text-dimmed animate-spin" />
+      <UIcon name="i-ph-arrow-clockwise" class="w-8 h-8 text-dimmed animate-spin" />
     </div>
 
     <!-- Error State -->
     <UCard v-else-if="error" class="text-center py-12">
-      <UIcon name="i-heroicons-exclamation-triangle" class="w-16 h-16 text-error mx-auto mb-4" />
+      <UIcon name="i-ph-exclamation-triangle" class="w-16 h-16 text-error mx-auto mb-4" />
       <h3 class="text-xl font-semibold text-default mb-2">Album Not Found</h3>
       <p class="text-muted mb-6">{{ error }}</p>
       <UButton color="primary" to="/albums">Back to Albums</UButton>
@@ -21,7 +21,7 @@
           <UButton
             color="neutral"
             variant="ghost"
-            icon="i-heroicons-arrow-left"
+            icon="i-ph-arrow-left"
             to="/albums"
           >
             Back
@@ -31,13 +31,13 @@
             <UButton
               color="neutral"
               variant="ghost"
-              icon="i-heroicons-ellipsis-vertical"
+              icon="i-ph-dots-three-vertical"
             />
             <template #content="slotProps">
               <div class="p-1">
                 <UButton
                   variant="ghost"
-                  icon="i-heroicons-pencil"
+                  icon="i-ph-pencil"
                   block
                   @click.stop.prevent="() => {
                     if (slotProps && 'close' in slotProps && typeof slotProps.close === 'function') {
@@ -52,7 +52,7 @@
                 </UButton>
                 <UButton
                   variant="ghost"
-                  icon="i-heroicons-trash"
+                  icon="i-ph-trash"
                   block
                   color="error"
                   @click.stop.prevent="() => {
@@ -85,18 +85,7 @@
               <p class="text-sm text-muted">Total Tracks</p>
               <p class="text-2xl font-bold text-default">{{ tracks.length }}</p>
             </div>
-            <UIcon name="i-heroicons-musical-note" class="w-8 h-8 text-primary" />
-          </div>
-        </UCard>
-        <UCard>
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-sm text-muted">Live Ready</p>
-              <p class="text-2xl font-bold text-default">
-                {{ tracks.filter(t => t.live_ready).length }}
-              </p>
-            </div>
-            <UIcon name="i-heroicons-check-circle" class="w-8 h-8 text-success" />
+            <UIcon name="i-ph-music-note" class="w-8 h-8 text-primary" />
           </div>
         </UCard>
         <UCard>
@@ -107,7 +96,7 @@
                 {{ formatDate(album.updated_at) }}
               </p>
             </div>
-            <UIcon name="i-heroicons-clock" class="w-8 h-8 text-muted" />
+            <UIcon name="i-ph-clock" class="w-8 h-8 text-muted" />
           </div>
         </UCard>
       </div>
@@ -119,7 +108,7 @@
             <h2 class="text-xl font-semibold text-default">Tracks</h2>
             <UButton
               color="primary"
-              icon="i-heroicons-plus"
+              icon="i-ph-plus"
               @click="showAddTrackModal = true"
             >
               Add Track
@@ -129,15 +118,15 @@
 
         <!-- Loading Tracks -->
         <div v-if="loadingTracks" class="flex justify-center py-8">
-          <UIcon name="i-heroicons-arrow-path" class="w-6 h-6 text-dimmed animate-spin" />
+          <UIcon name="i-ph-arrow-clockwise" class="w-6 h-6 text-dimmed animate-spin" />
         </div>
 
         <!-- Empty State -->
         <div v-else-if="tracks.length === 0" class="text-center py-12">
-          <UIcon name="i-heroicons-musical-note" class="w-16 h-16 text-dimmed mx-auto mb-4" />
+          <UIcon name="i-ph-music-note" class="w-16 h-16 text-dimmed mx-auto mb-4" />
           <h3 class="text-lg font-semibold text-default mb-2">No tracks in this album</h3>
           <p class="text-muted mb-6">Add tracks to organize them for release</p>
-          <UButton color="primary" icon="i-heroicons-plus" @click="showAddTrackModal = true">
+          <UButton color="primary" icon="i-ph-plus" @click="showAddTrackModal = true">
             Add Track
           </UButton>
         </div>
@@ -158,7 +147,6 @@
                   <h3 class="font-semibold text-default mb-1">{{ track.name }}</h3>
                   <div class="flex items-center gap-4 text-sm text-muted">
                     <span v-if="track.tempo">Tempo: {{ track.tempo }} BPM</span>
-                    <UBadge v-if="track.live_ready" color="success">Live Ready</UBadge>
                   </div>
                 </div>
               </div>
@@ -167,7 +155,7 @@
                   color="neutral"
                   variant="ghost"
                   size="sm"
-                  icon="i-heroicons-arrow-up"
+                  icon="i-ph-arrow-up"
                   :disabled="track.album_order === 1"
                   @click="moveTrackUp(track.id, track.album_order)"
                 />
@@ -175,7 +163,7 @@
                   color="neutral"
                   variant="ghost"
                   size="sm"
-                  icon="i-heroicons-arrow-down"
+                  icon="i-ph-arrow-down"
                   :disabled="track.album_order === tracks.length"
                   @click="moveTrackDown(track.id, track.album_order)"
                 />
@@ -183,7 +171,7 @@
                   color="error"
                   variant="ghost"
                   size="sm"
-                  icon="i-heroicons-x-mark"
+                  icon="i-ph-x"
                   @click="removeTrackFromAlbum(track.id)"
                 />
               </div>

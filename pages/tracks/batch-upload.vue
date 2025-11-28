@@ -5,7 +5,7 @@
         <UButton
           color="neutral"
           variant="ghost"
-          icon="i-heroicons-arrow-left"
+          icon="i-ph-arrow-left"
           @click="router.push('/tracks')"
         >
           Back to Tracks
@@ -88,7 +88,7 @@
             class="hidden"
             @change="handleFileSelect"
           />
-          <UIcon name="i-heroicons-musical-note" class="w-12 h-12 text-dimmed mx-auto mb-3" />
+          <UIcon name="i-ph-music-note" class="w-12 h-12 text-dimmed mx-auto mb-3" />
           <p class="text-sm text-muted mb-2">
             Drag and drop audio files here, or
             <button
@@ -135,7 +135,7 @@
                 v-if="!uploading"
                 color="neutral"
                 variant="ghost"
-                icon="i-heroicons-x-mark"
+                icon="i-ph-x"
                 size="sm"
                 @click="removeFile(index)"
               />
@@ -177,17 +177,17 @@
             <div class="ml-4">
               <UIcon
                 v-if="result.status === 'processing'"
-                name="i-heroicons-arrow-path"
+                name="i-ph-arrow-clockwise"
                 class="w-5 h-5 text-primary animate-spin"
               />
               <UIcon
                 v-else-if="result.status === 'success'"
-                name="i-heroicons-check-circle"
+                name="i-ph-check-circle"
                 class="w-5 h-5 text-success"
               />
               <UIcon
                 v-else-if="result.status === 'error'"
-                name="i-heroicons-x-circle"
+                name="i-ph-x-circle"
                 class="w-5 h-5 text-error"
               />
             </div>

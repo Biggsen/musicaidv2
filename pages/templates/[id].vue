@@ -2,12 +2,12 @@
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <!-- Loading State -->
     <div v-if="loading" class="flex justify-center py-12">
-      <UIcon name="i-heroicons-arrow-path" class="w-8 h-8 text-dimmed animate-spin" />
+      <UIcon name="i-ph-arrow-clockwise" class="w-8 h-8 text-dimmed animate-spin" />
     </div>
 
     <!-- Error State -->
     <UCard v-else-if="error" class="text-center py-12">
-      <UIcon name="i-heroicons-exclamation-triangle" class="w-16 h-16 text-error mx-auto mb-4" />
+      <UIcon name="i-ph-exclamation-triangle" class="w-16 h-16 text-error mx-auto mb-4" />
       <h3 class="text-xl font-semibold text-default mb-2">Template Not Found</h3>
       <p class="text-muted mb-6">{{ error }}</p>
       <UButton color="primary" to="/templates">Back to Templates</UButton>
@@ -21,7 +21,7 @@
           <UButton
             color="neutral"
             variant="ghost"
-            icon="i-heroicons-arrow-left"
+            icon="i-ph-arrow-left"
             to="/templates"
           >
             Back
@@ -41,7 +41,7 @@
                 <UButton
                   color="neutral"
                   variant="outline"
-                  icon="i-heroicons-bars-3"
+                  icon="i-ph-list"
                 />
               </UDropdownMenu>
             </div>
@@ -60,7 +60,7 @@
                 <UButton
                   color="primary"
                   size="sm"
-                  icon="i-heroicons-plus"
+                  icon="i-ph-plus"
                   @click="showAddStatusModal = true"
                 >
                   Add Status
@@ -69,9 +69,9 @@
             </template>
 
             <div v-if="statuses.length === 0" class="text-center py-8">
-              <UIcon name="i-heroicons-list-bullet" class="w-12 h-12 text-dimmed mx-auto mb-3" />
+              <UIcon name="i-ph-list-bullet" class="w-12 h-12 text-dimmed mx-auto mb-3" />
               <p class="text-muted mb-4">No statuses yet</p>
-              <UButton color="primary" size="sm" icon="i-heroicons-plus" @click="showAddStatusModal = true">
+              <UButton color="primary" size="sm" icon="i-ph-plus" @click="showAddStatusModal = true">
                 Add First Status
               </UButton>
             </div>
@@ -101,7 +101,7 @@
                       color="primary"
                       variant="ghost"
                       size="sm"
-                      icon="i-heroicons-pencil"
+                      icon="i-ph-pencil"
                       @click="editStatus(status)"
                     >
                       Edit
@@ -110,7 +110,7 @@
                       color="error"
                       variant="ghost"
                       size="sm"
-                      icon="i-heroicons-trash"
+                      icon="i-ph-trash"
                       @click="removeStatusFromTemplate(status.id)"
                     >
                       Remove
@@ -126,7 +126,7 @@
                       color="primary"
                       variant="ghost"
                       size="xs"
-                      icon="i-heroicons-plus"
+                      icon="i-ph-plus"
                       @click="showAddStepModal = true; selectedStatusId = status.id"
                     >
                       Add Step
@@ -139,7 +139,7 @@
                       class="flex items-center justify-between p-2 bg-gray-50 rounded"
                     >
                       <div class="flex items-center gap-2">
-                        <UIcon name="i-heroicons-check-circle" class="w-4 h-4 text-dimmed" />
+                        <UIcon name="i-ph-check-circle" class="w-4 h-4 text-dimmed" />
                         <span class="text-sm text-default">{{ step.name }}</span>
                         <UBadge size="xs" color="neutral">{{ step.type }}</UBadge>
                       </div>
@@ -148,14 +148,14 @@
                           color="primary"
                           variant="ghost"
                           size="xs"
-                          icon="i-heroicons-pencil"
+                          icon="i-ph-pencil"
                           @click="editStep(step)"
                         />
                         <UButton
                           color="error"
                           variant="ghost"
                           size="xs"
-                          icon="i-heroicons-x-mark"
+                          icon="i-ph-x"
                           @click="removeStepFromStatus(status.id, step.id)"
                         />
                       </div>
@@ -168,7 +168,7 @@
                     color="primary"
                     variant="ghost"
                     size="sm"
-                    icon="i-heroicons-plus"
+                    icon="i-ph-plus"
                     @click="showAddStepModal = true; selectedStatusId = status.id"
                   >
                     Add Step
@@ -191,7 +191,7 @@
                 color="primary"
                 variant="outline"
                 block
-                icon="i-heroicons-plus"
+                icon="i-ph-plus"
                 @click="showAddStatusModal = true"
               >
                 Add Status
@@ -200,7 +200,7 @@
                 color="primary"
                 variant="outline"
                 block
-                icon="i-heroicons-plus"
+                icon="i-ph-plus"
                 @click="showCreateStepModal = true"
               >
                 Create Step
@@ -225,7 +225,7 @@
               <UInput
                 v-model="stepSearchQuery"
                 placeholder="Search steps..."
-                icon="i-heroicons-magnifying-glass"
+                icon="i-ph-magnifying-glass"
                 clearable
               />
             </div>
@@ -253,7 +253,7 @@
                   <UButton
                     color="neutral"
                     variant="ghost"
-                    icon="i-heroicons-bars-3"
+                    icon="i-ph-list"
                     size="sm"
                     @click.stop
                   />
@@ -332,7 +332,7 @@
               color="primary"
               variant="outline"
               block
-              icon="i-heroicons-plus"
+              icon="i-ph-plus"
               @click="showCreateStatusModal = true"
             >
               Create New Status
@@ -498,20 +498,21 @@
               <label for="step-select" class="block text-sm font-medium text-default mb-1">
                 Select Step
               </label>
-              <USelect
+              <USelectMenu
                 id="step-select"
                 v-model="selectedStepId"
                 :items="availableStepOptions"
                 placeholder="Select a step"
-                required
+                value-key="value"
                 :disabled="addingStep"
+                class="w-full"
               />
             </div>
             <UButton
               color="primary"
               variant="outline"
               block
-              icon="i-heroicons-plus"
+              icon="i-ph-plus"
               @click="showCreateStepModal = true"
             >
               Create New Step
@@ -903,14 +904,14 @@ const getTemplateMenuItems = () => {
     [
       {
         label: 'Edit',
-        icon: 'i-heroicons-pencil',
+        icon: 'i-ph-pencil',
         click: () => showEditModal.value = true
       }
     ],
     [
       {
         label: 'Delete',
-        icon: 'i-heroicons-trash',
+        icon: 'i-ph-trash',
         color: 'error' as const,
         click: () => handleDeleteTemplate()
       }
@@ -1105,14 +1106,14 @@ const getStepMenuItems = (step: Step) => {
     [
       {
         label: 'Edit',
-        icon: 'i-heroicons-pencil',
+        icon: 'i-ph-pencil',
         onSelect: handleEdit
       }
     ],
     [
       {
         label: 'Delete',
-        icon: 'i-heroicons-trash',
+        icon: 'i-ph-trash',
         color: 'error' as const,
         onSelect: handleDelete
       }

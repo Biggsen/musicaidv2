@@ -2,12 +2,12 @@
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <!-- Loading State -->
     <div v-if="loading" class="flex justify-center py-12">
-      <UIcon name="i-heroicons-arrow-path" class="w-8 h-8 text-dimmed animate-spin" />
+      <UIcon name="i-ph-arrow-clockwise" class="w-8 h-8 text-dimmed animate-spin" />
     </div>
 
     <!-- Error State -->
     <UCard v-else-if="error" class="text-center py-12">
-      <UIcon name="i-heroicons-exclamation-triangle" class="w-16 h-16 text-error mx-auto mb-4" />
+      <UIcon name="i-ph-exclamation-triangle" class="w-16 h-16 text-error mx-auto mb-4" />
       <h3 class="text-xl font-semibold text-default mb-2">Artist Not Found</h3>
       <p class="text-muted mb-6">{{ error }}</p>
       <UButton color="primary" to="/artists">Back to Artists</UButton>
@@ -21,7 +21,7 @@
           <UButton
             color="neutral"
             variant="ghost"
-            icon="i-heroicons-arrow-left"
+            icon="i-ph-arrow-left"
             to="/artists"
           >
             Back
@@ -33,7 +33,7 @@
               <UButton
                 color="neutral"
                 variant="outline"
-                icon="i-heroicons-bars-3"
+                icon="i-ph-bars-3"
               />
             </UDropdownMenu>
           </template>
@@ -48,18 +48,7 @@
               <p class="text-sm text-muted">Total Tracks</p>
               <p class="text-2xl font-bold text-default">{{ tracks.length }}</p>
             </div>
-            <UIcon name="i-heroicons-musical-note" class="w-8 h-8 text-primary" />
-          </div>
-        </UCard>
-        <UCard>
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-sm text-muted">Live Ready</p>
-              <p class="text-2xl font-bold text-default">
-                {{ tracks.filter(t => t.live_ready).length }}
-              </p>
-            </div>
-            <UIcon name="i-heroicons-check-circle" class="w-8 h-8 text-success" />
+            <UIcon name="i-ph-music-note" class="w-8 h-8 text-primary" />
           </div>
         </UCard>
         <UCard>
@@ -70,7 +59,7 @@
                 {{ formatDate(artist.updated_at) }}
               </p>
             </div>
-            <UIcon name="i-heroicons-clock" class="w-8 h-8 text-dimmed" />
+            <UIcon name="i-ph-clock" class="w-8 h-8 text-dimmed" />
           </div>
         </UCard>
       </div>
@@ -82,7 +71,7 @@
             <h2 class="text-xl font-semibold text-default">Tracks</h2>
             <UButton
               color="primary"
-              icon="i-heroicons-plus"
+              icon="i-ph-plus"
               @click="showCreateTrackModal = true"
             >
               Add Track
@@ -92,15 +81,15 @@
 
         <!-- Loading Tracks -->
         <div v-if="loadingTracks" class="flex justify-center py-8">
-          <UIcon name="i-heroicons-arrow-path" class="w-6 h-6 text-dimmed animate-spin" />
+          <UIcon name="i-ph-arrow-clockwise" class="w-6 h-6 text-dimmed animate-spin" />
         </div>
 
         <!-- Empty State -->
         <div v-else-if="tracks.length === 0" class="text-center py-12">
-          <UIcon name="i-heroicons-musical-note" class="w-16 h-16 text-dimmed mx-auto mb-4" />
+          <UIcon name="i-ph-music-note" class="w-16 h-16 text-dimmed mx-auto mb-4" />
           <h3 class="text-lg font-semibold text-default mb-2">No tracks yet</h3>
           <p class="text-muted mb-6">Create your first track to get started</p>
-          <UButton color="primary" icon="i-heroicons-plus" @click="showCreateTrackModal = true">
+          <UButton color="primary" icon="i-ph-plus" @click="showCreateTrackModal = true">
             Create Track
           </UButton>
         </div>
@@ -121,10 +110,9 @@
                   <span v-if="track.minutes !== null && track.seconds !== null">
                     Duration: {{ track.minutes }}:{{ String(track.seconds).padStart(2, '0') }}
                   </span>
-                  <UBadge v-if="track.live_ready" color="success">Live Ready</UBadge>
                 </div>
               </div>
-              <UIcon name="i-heroicons-chevron-right" class="w-5 h-5 text-dimmed" />
+              <UIcon name="i-ph-caret-right" class="w-5 h-5 text-dimmed" />
             </div>
           </div>
         </div>
@@ -310,14 +298,14 @@ const getArtistMenuItems = () => {
     [
       {
         label: 'Edit',
-        icon: 'i-heroicons-pencil',
+        icon: 'i-ph-pencil',
         to: `/artists/${artist.value.id}/edit`
       }
     ],
     [
       {
         label: 'Delete',
-        icon: 'i-heroicons-trash',
+        icon: 'i-ph-trash',
         color: 'error' as const,
         click: () => handleDeleteArtist()
       }

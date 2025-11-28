@@ -10,7 +10,7 @@
             v-if="artists.length > 0"
             color="primary"
             size="lg"
-            icon="i-heroicons-plus"
+            icon="i-ph-plus"
             @click="showCreateModal = true"
           >
             Create Album
@@ -33,12 +33,12 @@
 
     <!-- Loading State -->
     <div v-if="loading" class="flex justify-center py-12">
-      <UIcon name="i-heroicons-arrow-path" class="w-8 h-8 text-dimmed animate-spin" />
+      <UIcon name="i-ph-arrow-clockwise" class="w-8 h-8 text-dimmed animate-spin" />
     </div>
 
     <!-- Empty State -->
     <UCard v-else-if="filteredAlbums.length === 0" class="text-center py-12">
-      <UIcon name="i-heroicons-rectangle-stack" class="w-16 h-16 text-dimmed mx-auto mb-4" />
+      <UIcon name="i-ph-stack" class="w-16 h-16 text-dimmed mx-auto mb-4" />
       <h3 class="text-xl font-semibold text-default mb-2">
         {{ artists.length === 0 ? 'No artists yet' : 'No albums found' }}
       </h3>
@@ -54,7 +54,7 @@
       <UButton
         v-if="artists.length > 0"
         color="primary"
-        icon="i-heroicons-plus"
+        icon="i-ph-plus"
         @click="showCreateModal = true"
       >
         Create Album
@@ -77,11 +77,11 @@
             <p v-if="album.description" class="text-sm text-muted mb-4">{{ album.description }}</p>
             <div class="flex items-center gap-4 text-sm text-muted">
               <span class="flex items-center gap-1">
-                <UIcon name="i-heroicons-musical-note" class="w-4 h-4" />
+                <UIcon name="i-ph-music-note" class="w-4 h-4" />
                 {{ getTrackCount(album.id) }} tracks
               </span>
               <span v-if="album.release_date" class="flex items-center gap-1">
-                <UIcon name="i-heroicons-calendar" class="w-4 h-4" />
+                <UIcon name="i-ph-calendar" class="w-4 h-4" />
                 {{ formatDate(album.release_date) }}
               </span>
             </div>
@@ -91,14 +91,14 @@
             <UButton
               color="neutral"
               variant="ghost"
-              icon="i-heroicons-ellipsis-vertical"
+              icon="i-ph-dots-three-vertical"
               @click.stop
             />
             <template #content="slotProps">
               <div class="p-1">
                 <UButton
                   variant="ghost"
-                  icon="i-heroicons-pencil"
+                  icon="i-ph-pencil"
                   block
                   @click.stop="() => {
                     if (slotProps && 'close' in slotProps && typeof slotProps.close === 'function') {
@@ -111,7 +111,7 @@
                 </UButton>
                 <UButton
                   variant="ghost"
-                  icon="i-heroicons-trash"
+                  icon="i-ph-trash"
                   block
                   color="error"
                   @click.stop="() => {

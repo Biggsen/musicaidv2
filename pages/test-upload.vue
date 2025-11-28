@@ -98,7 +98,7 @@
               color="primary"
               variant="ghost"
               size="sm"
-              icon="i-heroicons-clipboard"
+              icon="i-ph-clipboard-text-text"
               @click="copyToClipboard(uploadResult.fileUrl)"
             >
               Copy

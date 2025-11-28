@@ -120,8 +120,8 @@ const handleLogout = async () => {
           <ClientOnly>
             <USwitch
               v-model="isDarkMode"
-              unchecked-icon="i-heroicons-sun"
-              checked-icon="i-heroicons-moon"
+              unchecked-icon="i-ph-sun"
+              checked-icon="i-ph-moon"
             />
             <template #fallback>
               <div class="w-9 h-9"></div>
@@ -167,8 +167,8 @@ const handleLogout = async () => {
             <ClientOnly>
               <USwitch
                 v-model="isDarkMode"
-                unchecked-icon="i-heroicons-sun"
-                checked-icon="i-heroicons-moon"
+                unchecked-icon="i-ph-sun"
+                checked-icon="i-ph-moon"
               />
               <template #fallback>
                 <div class="w-9 h-9"></div>

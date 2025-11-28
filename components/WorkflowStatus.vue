@@ -27,7 +27,7 @@
           :class="{ 'bg-blue-50 border-blue-300': currentStepId === step.id }"
         >
           <UIcon
-            :name="step.done ? 'i-heroicons-check-circle' : 'i-heroicons-circle-stack'"
+            :name="step.done ? 'i-ph-check-circle' : 'i-ph-circle-dashed'"
             :class="step.done ? 'text-green-600' : 'text-gray-400'"
             class="w-5 h-5"
           />
@@ -49,7 +49,7 @@
             color="neutral"
             size="sm"
             variant="ghost"
-            icon="i-heroicons-x-mark"
+            icon="i-ph-x"
             @click="uncompleteStep(step)"
           >
             Undo

@@ -27,23 +27,23 @@
           <h3 class="text-xl font-semibold text-default mb-4">Technology Stack</h3>
           <ul class="space-y-3">
             <li class="flex items-center">
-              <UIcon name="i-heroicons-check-circle" class="w-5 h-5 text-success mr-3" />
+              <UIcon name="i-ph-check-circle" class="w-5 h-5 text-success mr-3" />
               <span>Nuxt 3 with TypeScript</span>
             </li>
             <li class="flex items-center">
-              <UIcon name="i-heroicons-check-circle" class="w-5 h-5 text-success mr-3" />
+              <UIcon name="i-ph-check-circle" class="w-5 h-5 text-success mr-3" />
               <span>TailwindCSS & Nuxt UI</span>
             </li>
             <li class="flex items-center">
-              <UIcon name="i-heroicons-check-circle" class="w-5 h-5 text-success mr-3" />
+              <UIcon name="i-ph-check-circle" class="w-5 h-5 text-success mr-3" />
               <span>Pinia State Management</span>
             </li>
             <li class="flex items-center">
-              <UIcon name="i-heroicons-check-circle" class="w-5 h-5 text-success mr-3" />
+              <UIcon name="i-ph-check-circle" class="w-5 h-5 text-success mr-3" />
               <span>ESLint & Prettier</span>
             </li>
             <li class="flex items-center">
-              <UIcon name="i-heroicons-check-circle" class="w-5 h-5 text-success mr-3" />
+              <UIcon name="i-ph-check-circle" class="w-5 h-5 text-success mr-3" />
               <span>Full-Stack Capabilities</span>
             </li>
           </ul>

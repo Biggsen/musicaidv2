@@ -10,7 +10,7 @@
             v-if="artists.length > 0"
             color="primary"
             size="lg"
-            icon="i-heroicons-plus"
+            icon="i-ph-plus"
             @click="showCreateModal = true"
           >
             Create Track
@@ -20,7 +20,7 @@
             color="primary"
             variant="outline"
             size="lg"
-            icon="i-heroicons-arrow-up-tray"
+            icon="i-ph-upload"
             to="/tracks/batch-upload"
           >
             Batch Upload
@@ -46,7 +46,7 @@
           <UInput
             v-model="searchQuery"
             placeholder="Search tracks..."
-            icon="i-heroicons-magnifying-glass"
+            icon="i-ph-magnifying-glass"
             @input="filterTracks"
           />
         </div>
@@ -56,13 +56,13 @@
             <UButton
               :color="viewMode === 'grid' ? 'primary' : 'neutral'"
               variant="ghost"
-              icon="i-heroicons-squares-2x2"
+              icon="i-ph-grid-four"
               @click="viewMode = 'grid'"
             />
             <UButton
               :color="viewMode === 'list' ? 'primary' : 'neutral'"
               variant="ghost"
-              icon="i-heroicons-list-bullet"
+              icon="i-ph-list-bullet"
               @click="viewMode = 'list'"
             />
           </div>
@@ -72,12 +72,12 @@
 
     <!-- Loading State -->
     <div v-if="loading" class="flex justify-center py-12">
-      <UIcon name="i-heroicons-arrow-path" class="w-8 h-8 text-dimmed animate-spin" />
+      <UIcon name="i-ph-arrow-clockwise" class="w-8 h-8 text-dimmed animate-spin" />
     </div>
 
     <!-- Empty State -->
     <UCard v-else-if="filteredTracks.length === 0" class="text-center py-12">
-      <UIcon name="i-heroicons-musical-note" class="w-16 h-16 text-dimmed mx-auto mb-4" />
+      <UIcon name="i-ph-music-note" class="w-16 h-16 text-dimmed mx-auto mb-4" />
       <h3 class="text-xl font-semibold text-default mb-2">
         {{ artists.length === 0 ? 'No artists yet' : 'No tracks found' }}
       </h3>
@@ -93,7 +93,7 @@
       <div v-if="artists.length > 0" class="flex gap-3">
         <UButton
           color="primary"
-          icon="i-heroicons-plus"
+          icon="i-ph-plus"
           @click="showCreateModal = true"
         >
           Create Track
@@ -101,7 +101,7 @@
         <UButton
           color="primary"
           variant="outline"
-          icon="i-heroicons-arrow-up-tray"
+          icon="i-ph-upload"
           to="/tracks/batch-upload"
         >
           Batch Upload
@@ -132,7 +132,7 @@
             <UButton
               color="neutral"
               variant="ghost"
-              icon="i-heroicons-bars-3"
+              icon="i-ph-list"
               @click.stop
             />
           </UDropdownMenu>
@@ -146,7 +146,6 @@
             Duration: {{ track.minutes }}:{{ String(track.seconds).padStart(2, '0') }}
           </p>
           <div class="flex items-center gap-2 mt-3">
-            <UBadge v-if="track.live_ready" color="success">Live Ready</UBadge>
             <UBadge color="neutral">{{ getArtistName(track.artist_id) }}</UBadge>
           </div>
         </div>
@@ -167,10 +166,6 @@
         <template #artist-cell="{ row }">
           <UBadge color="neutral">{{ row.original.artist }}</UBadge>
         </template>
-        <template #status-cell="{ row }">
-          <UBadge v-if="row.original.live_ready" color="success">Live Ready</UBadge>
-          <span v-else class="text-dimmed">In Progress</span>
-        </template>
         <template #actions-cell="{ row }">
           <UDropdownMenu 
             :items="getTrackMenuItems(row.original)" 
@@ -179,7 +174,7 @@
             <UButton
               color="neutral"
               variant="ghost"
-              icon="i-heroicons-bars-3"
+              icon="i-ph-list"
               size="sm"
             />
           </UDropdownMenu>
@@ -400,18 +395,6 @@
             />
           </div>
 
-          <div>
-            <label class="flex items-center gap-2">
-              <input
-                type="checkbox"
-                v-model="editTrack.live_ready"
-                :disabled="editing"
-                class="rounded border-gray-300"
-              />
-              <span class="text-sm font-medium text-default">Live Ready</span>
-            </label>
-          </div>
-
           <UAlert v-if="editError" color="error" variant="soft" :title="editError" />
         </form>
       </template>
@@ -486,7 +469,6 @@ const editTrack = ref<TrackUpdate>({
   seconds: null,
   location: '',
   isrc_code: null,
-  live_ready: false,
 })
 
 const artistOptions = computed(() => [
@@ -536,16 +518,13 @@ interface TableRow {
   name: string
   artist_id: string
   tempo: number | null
-  live_ready: boolean
   artist: string
-  status: string
 }
 
 const tableColumns = [
   { id: 'name', accessorKey: 'name', header: 'Track Name' },
   { id: 'artist', accessorKey: 'artist', header: 'Artist' },
   { id: 'tempo', accessorKey: 'tempo', header: 'Tempo' },
-  { id: 'status', accessorKey: 'status', header: 'Status' },
   { id: 'actions', accessorKey: 'actions', header: '' },
 ]
 
@@ -555,9 +534,7 @@ const tableRows = computed<TableRow[]>(() => {
     name: track.name,
     artist_id: track.artist_id,
     tempo: track.tempo,
-    live_ready: track.live_ready,
     artist: getArtistName(track.artist_id),
-    status: track.live_ready ? 'Live Ready' : 'In Progress',
   }))
 })
 
@@ -641,14 +618,14 @@ const getTrackMenuItems = (row: TableRow) => {
     [
       {
         label: 'View Details',
-        icon: 'i-heroicons-eye',
+        icon: 'i-ph-eye',
         onSelect: () => {
           router.push(`/tracks/${row.id}`)
         },
       },
       {
         label: 'Edit',
-        icon: 'i-heroicons-pencil',
+        icon: 'i-ph-pencil',
         onSelect: () => {
           router.push(`/tracks/${row.id}/edit`)
         },
@@ -662,7 +639,7 @@ const getTrackMenuItemsForCard = (track: Track) => {
     [
       {
         label: 'Edit',
-        icon: 'i-heroicons-pencil',
+        icon: 'i-ph-pencil',
         onSelect: () => {
           openEditModal(track.id)
         },
@@ -671,7 +648,7 @@ const getTrackMenuItemsForCard = (track: Track) => {
     [
       {
         label: 'Delete',
-        icon: 'i-heroicons-trash',
+        icon: 'i-ph-trash',
         color: 'error' as const,
         onSelect: () => {
           handleDeleteTrack(track.id, track.name)
@@ -698,7 +675,6 @@ const openEditModal = async (trackId: string) => {
         seconds: track.seconds,
         location: track.location,
         isrc_code: track.isrc_code,
-        live_ready: track.live_ready,
       }
       showEditModal.value = true
     }
