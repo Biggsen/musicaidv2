@@ -145,6 +145,7 @@
           <p v-if="track.minutes !== null && track.seconds !== null">
             Duration: {{ track.minutes }}:{{ String(track.seconds).padStart(2, '0') }}
           </p>
+          <p v-if="track.samples">Samples: {{ track.samples }}</p>
           <div v-if="track.template_id" class="mt-3 space-y-2">
             <div class="flex items-center justify-between text-sm">
               <span class="text-muted">Progress</span>
@@ -168,6 +169,66 @@
     <!-- List View -->
     <UCard v-else>
       <UTable :data="tableRows" :columns="tableColumns as any">
+        <template #name-header>
+          <div class="flex items-center gap-2 cursor-pointer" @click="handleSort('name')">
+            <span>Track Name</span>
+            <UIcon 
+              v-if="sortColumn === 'name'" 
+              :name="sortDirection === 'asc' ? 'i-ph-caret-up' : 'i-ph-caret-down'" 
+              class="w-4 h-4"
+            />
+          </div>
+        </template>
+        <template #artist-header>
+          <div class="flex items-center gap-2 cursor-pointer" @click="handleSort('artist')">
+            <span>Artist</span>
+            <UIcon 
+              v-if="sortColumn === 'artist'" 
+              :name="sortDirection === 'asc' ? 'i-ph-caret-up' : 'i-ph-caret-down'" 
+              class="w-4 h-4"
+            />
+          </div>
+        </template>
+        <template #tempo-header>
+          <div class="flex items-center gap-2 cursor-pointer" @click="handleSort('tempo')">
+            <span>Tempo</span>
+            <UIcon 
+              v-if="sortColumn === 'tempo'" 
+              :name="sortDirection === 'asc' ? 'i-ph-caret-up' : 'i-ph-caret-down'" 
+              class="w-4 h-4"
+            />
+          </div>
+        </template>
+        <template #samples-header>
+          <div class="flex items-center gap-2 cursor-pointer" @click="handleSort('samples')">
+            <span>Samples</span>
+            <UIcon 
+              v-if="sortColumn === 'samples'" 
+              :name="sortDirection === 'asc' ? 'i-ph-caret-up' : 'i-ph-caret-down'" 
+              class="w-4 h-4"
+            />
+          </div>
+        </template>
+        <template #duration-header>
+          <div class="flex items-center gap-2 cursor-pointer" @click="handleSort('duration')">
+            <span>Duration</span>
+            <UIcon 
+              v-if="sortColumn === 'duration'" 
+              :name="sortDirection === 'asc' ? 'i-ph-caret-up' : 'i-ph-caret-down'" 
+              class="w-4 h-4"
+            />
+          </div>
+        </template>
+        <template #progress-header>
+          <div class="flex items-center gap-2 cursor-pointer" @click="handleSort('progress')">
+            <span>Progress</span>
+            <UIcon 
+              v-if="sortColumn === 'progress'" 
+              :name="sortDirection === 'asc' ? 'i-ph-caret-up' : 'i-ph-caret-down'" 
+              class="w-4 h-4"
+            />
+          </div>
+        </template>
         <template #name-cell="{ row }">
           <NuxtLink
             :to="`/tracks/${row.original.id}`"
@@ -179,18 +240,27 @@
         <template #artist-cell="{ row }">
           <UBadge color="neutral">{{ row.original.artist }}</UBadge>
         </template>
+        <template #duration-cell="{ row }">
+          <span v-if="row.original.minutes !== null && row.original.seconds !== null" class="text-sm text-muted">
+            {{ row.original.minutes }}:{{ String(row.original.seconds).padStart(2, '0') }}
+          </span>
+          <span v-else class="text-sm text-muted">—</span>
+        </template>
         <template #progress-cell="{ row }">
-          <div v-if="row.original.template_id" class="space-y-1 min-w-[120px]">
-            <div class="flex items-center justify-between text-sm">
-              <span class="text-muted">{{ getTrackProgress(row.original.id).progress }}%</span>
-            </div>
-            <UProgress :model-value="getTrackProgress(row.original.id).progress" :max="100" size="xs" />
+          <div v-if="row.original.template_id" class="text-sm">
+            <span class="text-muted">{{ getTrackProgress(row.original.id).progress }}%</span>
+          </div>
+          <span v-else class="text-sm text-muted">—</span>
+        </template>
+        <template #nextStep-cell="{ row }">
+          <div v-if="row.original.template_id">
             <p v-if="getTrackProgress(row.original.id).nextStep" class="text-sm text-muted truncate">
               {{ getTrackProgress(row.original.id).nextStep?.name }}
             </p>
             <p v-else-if="getTrackProgress(row.original.id).progress === 100" class="text-sm text-success">
               Complete
             </p>
+            <span v-else class="text-sm text-muted">—</span>
           </div>
           <span v-else class="text-sm text-muted">—</span>
         </template>
@@ -479,6 +549,8 @@ const selectedArtistId = ref('all')
 const searchQuery = ref('')
 const viewMode = ref<'grid' | 'list'>('grid')
 const editingTrackId = ref<string | null>(null)
+const sortColumn = ref<string | null>(null)
+const sortDirection = ref<'asc' | 'desc'>('asc')
 
 interface TrackProgress {
   progress: number
@@ -553,27 +625,71 @@ interface TableRow {
   name: string
   artist_id: string
   tempo: number | null
+  samples: string
+  minutes: number | null
+  seconds: number | null
   artist: string
   template_id: string | null
 }
 
 const tableColumns = [
-  { id: 'name', accessorKey: 'name', header: 'Track Name' },
-  { id: 'artist', accessorKey: 'artist', header: 'Artist' },
-  { id: 'tempo', accessorKey: 'tempo', header: 'Tempo' },
-  { id: 'progress', accessorKey: 'progress', header: 'Progress' },
-  { id: 'actions', accessorKey: 'actions', header: '' },
+  { id: 'name', accessorKey: 'name', header: 'Track Name', sortable: true },
+  { id: 'artist', accessorKey: 'artist', header: 'Artist', sortable: true },
+  { id: 'tempo', accessorKey: 'tempo', header: 'Tempo', sortable: true },
+  { id: 'samples', accessorKey: 'samples', header: 'Samples', sortable: true },
+  { id: 'duration', accessorKey: 'duration', header: 'Duration', sortable: true },
+  { id: 'progress', accessorKey: 'progress', header: 'Progress', sortable: true },
+  { id: 'nextStep', accessorKey: 'nextStep', header: 'Next Step', sortable: false },
+  { id: 'actions', accessorKey: 'actions', header: '', sortable: false },
 ]
 
 const tableRows = computed<TableRow[]>(() => {
-  return filteredTracks.value.map(track => ({
+  let rows = filteredTracks.value.map(track => ({
     id: track.id,
     name: track.name,
     artist_id: track.artist_id,
     tempo: track.tempo,
+    samples: track.samples,
+    minutes: track.minutes,
+    seconds: track.seconds,
     artist: getArtistName(track.artist_id),
     template_id: track.template_id,
   }))
+
+  // Apply sorting
+  if (sortColumn.value) {
+    rows = [...rows].sort((a, b) => {
+      let aVal: any = a[sortColumn.value as keyof TableRow]
+      let bVal: any = b[sortColumn.value as keyof TableRow]
+
+      // Handle null/undefined values
+      if (aVal === null || aVal === undefined) aVal = ''
+      if (bVal === null || bVal === undefined) bVal = ''
+
+      // Handle duration (calculate total seconds)
+      if (sortColumn.value === 'duration') {
+        aVal = (a.minutes || 0) * 60 + (a.seconds || 0)
+        bVal = (b.minutes || 0) * 60 + (b.seconds || 0)
+      }
+
+      // Handle progress (get from progress map)
+      if (sortColumn.value === 'progress') {
+        aVal = getTrackProgress(a.id).progress
+        bVal = getTrackProgress(b.id).progress
+      }
+
+      // Compare values
+      if (typeof aVal === 'string' && typeof bVal === 'string') {
+        const comparison = aVal.localeCompare(bVal)
+        return sortDirection.value === 'asc' ? comparison : -comparison
+      } else {
+        const comparison = aVal < bVal ? -1 : aVal > bVal ? 1 : 0
+        return sortDirection.value === 'asc' ? comparison : -comparison
+      }
+    })
+  }
+
+  return rows
 })
 
 // Load data
@@ -686,6 +802,17 @@ const getTrackProgress = (trackId: string): TrackProgress => {
 
 const filterTracks = () => {
   // Reactive filtering handled by computed property
+}
+
+const handleSort = (column: string) => {
+  if (sortColumn.value === column) {
+    // Toggle direction if same column
+    sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc'
+  } else {
+    // New column, default to ascending
+    sortColumn.value = column
+    sortDirection.value = 'asc'
+  }
 }
 
 const getArtistName = (artistId: string): string => {

@@ -4,14 +4,21 @@
       <h3 class="text-lg font-semibold text-default mb-4">Workflow Status</h3>
       <div class="flex items-center gap-2 mb-4">
         <UBadge
-          v-for="status in statuses"
+          v-for="status in displayedStatuses"
           :key="status.id"
           :color="getStatusColor(status)"
           :variant="currentStatusId === status.id ? 'solid' : 'soft'"
-          class="cursor-pointer"
-          @click="selectStatus(status)"
+          :class="{ 'cursor-pointer': isClickableStatus(status) }"
+          @click="handleStatusClick(status)"
         >
-          {{ status.name }}
+          <div class="flex items-center gap-1.5">
+            <span>{{ status.name }}</span>
+            <UIcon
+              v-if="isStatusComplete(status)"
+              name="i-ph-check-circle"
+              class="w-4 h-4"
+            />
+          </div>
         </UBadge>
       </div>
     </div>
@@ -92,6 +99,7 @@ interface TrackStatus {
   id: string
   name: string
   key: string
+  non_linear?: boolean
   steps?: Step[]
 }
 
@@ -114,6 +122,37 @@ const emit = defineEmits<{
 const currentStatus = computed(() => {
   if (!props.currentStatusId) return null
   return props.statuses.find(s => s.id === props.currentStatusId) || null
+})
+
+// Determine which statuses to display
+const displayedStatuses = computed<TrackStatus[]>(() => {
+  // When in "next step" state (not expanded), show completed statuses + current status
+  if (!isExpanded.value && currentStatus.value) {
+    const currentStatusIndex = props.statuses.findIndex(s => s.id === currentStatus.value!.id)
+    if (currentStatusIndex === -1) {
+      return [currentStatus.value]
+    }
+    
+    // Get all statuses up to and including the current one
+    const statusesToShow: TrackStatus[] = []
+    for (let i = 0; i <= currentStatusIndex; i++) {
+      const status = props.statuses[i]
+      if (status) {
+        // Only include completed statuses before the current one, or the current one itself
+        if (i < currentStatusIndex) {
+          if (isStatusComplete(status)) {
+            statusesToShow.push(status)
+          }
+        } else {
+          // Always include the current status
+          statusesToShow.push(status)
+        }
+      }
+    }
+    return statusesToShow
+  }
+  // When expanded, show all statuses
+  return props.statuses
 })
 
 const hasSteps = computed(() => {
@@ -197,8 +236,36 @@ const getStatusColor = (status: TrackStatus): 'primary' | 'neutral' => {
   return 'neutral'
 }
 
+// Check if all steps in a status are completed
+const isStatusComplete = (status: TrackStatus): boolean => {
+  if (!status.steps || status.steps.length === 0) {
+    return false
+  }
+  
+  const completedSet = new Set(props.completedStepIds || [])
+  return status.steps.every(step => completedSet.has(step.id))
+}
+
 const selectStatus = (status: TrackStatus) => {
   emit('status-selected', status.id)
+}
+
+// Check if a status is clickable
+const isClickableStatus = (status: TrackStatus): boolean => {
+  // Only clickable when expanded, and not if it's a completed status in next step view
+  if (!isExpanded.value) {
+    // In next step view, only the current status should be clickable (but it's not clickable in next step view)
+    return false
+  }
+  // When expanded, all statuses are clickable
+  return true
+}
+
+const handleStatusClick = (status: TrackStatus) => {
+  // Only allow status selection when expanded and status is clickable
+  if (isClickableStatus(status)) {
+    selectStatus(status)
+  }
 }
 
 const completeStep = (step: Step) => {

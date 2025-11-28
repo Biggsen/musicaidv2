@@ -782,9 +782,98 @@ const handleStepCompleted = async (stepId: string) => {
   if (!track.value) return
 
   try {
-    // Mark step as completed in track_steps table
-    await completeStep(track.value.id, stepId)
-    // Also update track's current step_id
+    // Find the current status and the step being completed
+    const currentStatus = workflowStatuses.value.find(
+      status => status.id === track.value?.track_status_id
+    )
+    
+    if (!currentStatus || !currentStatus.steps) {
+      // Fallback to original behavior if status not found
+      await completeStep(track.value.id, stepId)
+      await updateTrack(track.value.id, { step_id: stepId })
+      track.value.step_id = stepId
+      await loadWorkflow()
+      return
+    }
+
+    // Find the step index in the steps array (steps are already sorted by order_index)
+    const stepIndex = currentStatus.steps.findIndex(step => step.id === stepId)
+    
+    if (stepIndex === -1) {
+      // Step not found, fallback to original behavior
+      await completeStep(track.value.id, stepId)
+      await updateTrack(track.value.id, { step_id: stepId })
+      track.value.step_id = stepId
+      await loadWorkflow()
+      return
+    }
+
+    // Check if status is linear (non_linear is false or undefined by default)
+    const isLinear = currentStatus.non_linear !== true
+
+    // Steps to complete: the clicked step + all previous steps if linear
+    const stepsToComplete: string[] = []
+    
+    if (isLinear) {
+      // Find the current status index in the workflowStatuses array
+      const currentStatusIndex = workflowStatuses.value.findIndex(
+        status => status.id === currentStatus.id
+      )
+      
+      // If there's a previous status, complete its last step
+      if (currentStatusIndex > 0) {
+        const previousStatus = workflowStatuses.value[currentStatusIndex - 1]
+        if (previousStatus && previousStatus.steps && previousStatus.steps.length > 0) {
+          const lastStepOfPreviousStatus = previousStatus.steps[previousStatus.steps.length - 1]
+          if (lastStepOfPreviousStatus && !completedStepIds.value.has(lastStepOfPreviousStatus.id)) {
+            stepsToComplete.push(lastStepOfPreviousStatus.id)
+          }
+        }
+      }
+      
+      // Complete all previous steps in current status (from index 0 to stepIndex)
+      for (let i = 0; i <= stepIndex; i++) {
+        const step = currentStatus.steps[i]
+        if (step && !completedStepIds.value.has(step.id)) {
+          stepsToComplete.push(step.id)
+        }
+      }
+    } else {
+      // Non-linear: only complete the clicked step
+      stepsToComplete.push(stepId)
+    }
+
+    // Complete all steps in parallel
+    await Promise.all(
+      stepsToComplete.map(stepIdToComplete => completeStep(track.value!.id, stepIdToComplete))
+    )
+
+    // Check if this was the last step in the current status
+    const isLastStep = stepIndex === currentStatus.steps.length - 1
+    const currentStatusIndex = workflowStatuses.value.findIndex(
+      status => status.id === currentStatus.id
+    )
+    
+    // If this was the last step and there's a next status, advance to it
+    if (isLastStep && currentStatusIndex >= 0 && currentStatusIndex < workflowStatuses.value.length - 1) {
+      const nextStatus = workflowStatuses.value[currentStatusIndex + 1]
+      if (nextStatus && nextStatus.steps && nextStatus.steps.length > 0) {
+        // Move to the first step of the next status
+        const firstStepOfNextStatus = nextStatus.steps[0]
+        if (firstStepOfNextStatus) {
+          await updateTrack(track.value.id, {
+            track_status_id: nextStatus.id,
+            step_id: firstStepOfNextStatus.id,
+          })
+          track.value.track_status_id = nextStatus.id
+          track.value.step_id = firstStepOfNextStatus.id
+          await loadWorkflow()
+          return
+        }
+      }
+    }
+
+    // Update track's current step_id to the clicked step
     await updateTrack(track.value.id, {
       step_id: stepId,
     })
