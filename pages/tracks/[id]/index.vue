@@ -138,11 +138,11 @@
                       v-if="audio.file_url"
                       color="primary"
                       variant="ghost"
-                      icon="i-ph-play"
+                      :icon="currentlyPlayingId === audio.id ? 'i-ph-pause' : 'i-ph-play'"
                       size="sm"
-                      @click="playAudio(audio)"
+                      @click="toggleAudio(audio)"
                     >
-                      Play
+                      {{ currentlyPlayingId === audio.id ? 'Pause' : 'Play' }}
                     </UButton>
                     <UPopover :content="{ side: 'bottom', align: 'end' }">
                       <UButton
@@ -173,6 +173,17 @@
                       </template>
                     </UPopover>
                   </div>
+                </div>
+                <!-- Inline Audio Player -->
+                <div v-if="audio.file_url && currentlyPlayingId === audio.id" class="mt-4 pt-4 border-t border-gray-200">
+                  <audio
+                    :ref="(el) => { if (el) audioPlayers.set(audio.id, el as HTMLAudioElement) }"
+                    :src="audio.file_url"
+                    controls
+                    class="w-full"
+                    @ended="handleAudioEnded"
+                    @pause="handleAudioPause(audio.id)"
+                  />
                 </div>
               </div>
             </div>
@@ -622,6 +633,8 @@ const newAudioName = ref('')
 const newAudioDescription = ref('')
 const newAudioVersion = ref('')
 const newAudioMixdownDate = ref('')
+const currentlyPlayingId = ref<string | null>(null)
+const audioPlayers = ref<Map<string, HTMLAudioElement>>(new Map())
 const editAudio = ref<{
   name: string
   description: string
@@ -923,9 +936,45 @@ const toggleNoteDone = async (note: Note) => {
   }
 }
 
-const playAudio = (audio: AudioFile) => {
-  if (audio.file_url) {
-    window.open(audio.file_url, '_blank')
+const toggleAudio = (audio: AudioFile) => {
+  if (!audio.file_url) return
+  
+  if (currentlyPlayingId.value === audio.id) {
+    // Pause and hide player
+    const player = audioPlayers.value.get(audio.id)
+    if (player) {
+      player.pause()
+    }
+    currentlyPlayingId.value = null
+  } else {
+    // Stop any currently playing audio
+    if (currentlyPlayingId.value) {
+      const currentPlayer = audioPlayers.value.get(currentlyPlayingId.value)
+      if (currentPlayer) {
+        currentPlayer.pause()
+      }
+    }
+    // Show player for this audio
+    currentlyPlayingId.value = audio.id
+    // Wait for next tick to ensure audio element is rendered
+    nextTick(() => {
+      const player = audioPlayers.value.get(audio.id)
+      if (player) {
+        player.play().catch((err) => {
+          console.error('Failed to play audio:', err)
+        })
+      }
+    })
+  }
+}
+
+const handleAudioEnded = () => {
+  currentlyPlayingId.value = null
+}
+
+const handleAudioPause = (audioId: string) => {
+  if (currentlyPlayingId.value === audioId) {
+    currentlyPlayingId.value = null
   }
 }
 
