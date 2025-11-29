@@ -140,40 +140,24 @@
                       v-if="audio.file_url"
                       color="primary"
                       variant="ghost"
-                      :icon="currentlyPlayingId === audio.id ? 'i-ph-pause' : 'i-ph-play'"
+                      :icon="isAudioPlaying(audio.id) ? 'i-ph-pause' : 'i-ph-play'"
                       size="sm"
                       @click="toggleAudio(audio)"
                     >
-                      {{ currentlyPlayingId === audio.id ? 'Pause' : 'Play' }}
+                      {{ isAudioPlaying(audio.id) ? 'Pause' : 'Play' }}
                     </UButton>
-                    <UPopover :content="{ side: 'bottom', align: 'end' }">
+                    <UDropdownMenu 
+                      :items="getAudioMenuItems(audio)" 
+                      :content="{ align: 'end' }"
+                    >
                       <UButton
                         color="neutral"
                         variant="ghost"
                         icon="i-ph-dots-three-vertical"
                         size="sm"
+                        @click.stop
                       />
-                      <template #content="slotProps">
-                        <div class="p-1">
-                          <UButton
-                            v-for="item in getAudioMenuItems(audio)"
-                            :key="item.label"
-                            variant="ghost"
-                            :icon="item.icon"
-                            block
-                            size="sm"
-                            @click.stop="() => {
-                              if (slotProps && 'close' in slotProps && typeof slotProps.close === 'function') {
-                                slotProps.close();
-                              }
-                              item.click();
-                            }"
-                          >
-                            {{ item.label }}
-                          </UButton>
-                        </div>
-                      </template>
-                    </UPopover>
+                    </UDropdownMenu>
                   </div>
                 </div>
                 <!-- Inline Audio Player -->
@@ -185,6 +169,7 @@
                     class="w-full"
                     @ended="handleAudioEnded"
                     @pause="handleAudioPause(audio.id)"
+                    @play="handleAudioPlay(audio.id)"
                   />
                 </div>
               </div>
@@ -942,12 +927,19 @@ const toggleAudio = (audio: AudioFile) => {
   if (!audio.file_url) return
   
   if (currentlyPlayingId.value === audio.id) {
-    // Pause and hide player
+    // Pause but keep player visible
     const player = audioPlayers.value.get(audio.id)
     if (player) {
-      player.pause()
+      if (player.paused) {
+        // If paused, resume playing
+        player.play().catch((err) => {
+          console.error('Failed to play audio:', err)
+        })
+      } else {
+        // If playing, pause
+        player.pause()
+      }
     }
-    currentlyPlayingId.value = null
   } else {
     // Stop any currently playing audio
     if (currentlyPlayingId.value) {
@@ -974,10 +966,22 @@ const handleAudioEnded = () => {
   currentlyPlayingId.value = null
 }
 
-const handleAudioPause = (audioId: string) => {
-  if (currentlyPlayingId.value === audioId) {
-    currentlyPlayingId.value = null
+const isAudioPlaying = (audioId: string): boolean => {
+  if (currentlyPlayingId.value !== audioId) return false
+  const player = audioPlayers.value.get(audioId)
+  return player ? !player.paused && !player.ended : false
+}
+
+const handleAudioPlay = (audioId: string) => {
+  // Ensure player stays visible when audio resumes (e.g., after seeking)
+  if (currentlyPlayingId.value !== audioId) {
+    currentlyPlayingId.value = audioId
   }
+}
+
+const handleAudioPause = (audioId: string) => {
+  // Don't hide the player on pause - keep it visible so user can resume
+  // The player will only close when track ends or user explicitly closes it
 }
 
 const handleDeleteTrack = async () => {
@@ -1001,7 +1005,7 @@ const getTemplateMenuItems = () => {
       {
         label: 'Edit Track',
         icon: 'i-ph-pencil',
-        click: async () => {
+        onSelect: async () => {
           if (track.value) {
             await router.push(`/tracks/${track.value.id}/edit`)
           }
@@ -1013,7 +1017,7 @@ const getTemplateMenuItems = () => {
         label: 'Delete Track',
         icon: 'i-ph-trash',
         color: 'error' as const,
-        click: handleDeleteTrack,
+        onSelect: handleDeleteTrack,
       },
     ],
   ]
@@ -1021,44 +1025,55 @@ const getTemplateMenuItems = () => {
 
 const getAudioMenuItems = (audio: AudioFile) => {
   return [
-    {
-      label: 'Edit',
-      icon: 'i-ph-pencil',
-      click: () => {
-        editingAudioId.value = audio.id
-        editAudio.value = {
-          name: audio.name,
-          description: audio.description || '',
-          version: audio.version || '',
-          mixdown_date: audio.mixdown_date ? (new Date(audio.mixdown_date).toISOString().split('T')[0] || '') : '',
-        }
-        showEditAudioModal.value = true
-      },
-    },
-    {
-      label: 'Download',
-      icon: 'i-ph-download',
-      click: () => {
-        if (audio.file_url) {
-          window.open(audio.file_url, '_blank')
-        }
-      },
-    },
-    {
-      label: 'Delete',
-      icon: 'i-ph-trash',
-      click: async () => {
-        if (confirm('Are you sure you want to delete this audio file? This will remove it from R2 storage and cannot be undone.')) {
-          try {
-            await deleteAudioFile(audio.id)
-            await loadAudioFiles()
-          } catch (err: any) {
-            console.error('Failed to delete audio file:', err)
-            alert(err.message || 'Failed to delete audio file')
+    [
+      {
+        label: 'Edit',
+        icon: 'i-ph-pencil',
+        onSelect: () => {
+          editingAudioId.value = audio.id
+          editAudio.value = {
+            name: audio.name,
+            description: audio.description || '',
+            version: audio.version || '',
+            mixdown_date: audio.mixdown_date
+              ? (new Date(audio.mixdown_date).toISOString().split('T')[0] || '')
+              : '',
           }
-        }
+          showEditAudioModal.value = true
+        },
       },
-    },
+      {
+        label: 'Download',
+        icon: 'i-ph-download',
+        onSelect: () => {
+          if (audio.file_url) {
+            window.open(audio.file_url, '_blank')
+          }
+        },
+      },
+    ],
+    [
+      {
+        label: 'Delete',
+        icon: 'i-ph-trash',
+        color: 'error' as const,
+        onSelect: async () => {
+          if (
+            confirm(
+              'Are you sure you want to delete this audio file? This will remove it from R2 storage and cannot be undone.'
+            )
+          ) {
+            try {
+              await deleteAudioFile(audio.id)
+              await loadAudioFiles()
+            } catch (err: any) {
+              console.error('Failed to delete audio file:', err)
+              alert(err.message || 'Failed to delete audio file')
+            }
+          }
+        },
+      },
+    ],
   ]
 }
 
