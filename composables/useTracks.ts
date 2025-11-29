@@ -18,6 +18,7 @@ export interface Track {
   date_created: string | null
   isrc_code: string | null
   live_ready: boolean
+  description: string | null
   created_at: string
   updated_at: string
   created_by: string | null
@@ -40,6 +41,7 @@ export interface TrackInsert {
   date_created?: string | null
   isrc_code?: string | null
   live_ready?: boolean
+  description?: string | null
   created_by?: string | null
 }
 
@@ -59,6 +61,7 @@ export interface TrackUpdate {
   date_created?: string | null
   isrc_code?: string | null
   live_ready?: boolean
+  description?: string | null
   updated_by?: string | null
 }
 

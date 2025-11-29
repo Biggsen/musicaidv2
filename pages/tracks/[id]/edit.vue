@@ -63,6 +63,20 @@
           </div>
 
           <div>
+            <label for="track-description" class="block text-sm font-medium text-default mb-1">
+              Description
+            </label>
+            <UTextarea
+              id="track-description"
+              v-model="formData.description"
+              placeholder="Enter track description..."
+              :rows="6"
+              class="w-full"
+              :disabled="saving"
+            />
+          </div>
+
+          <div>
             <label for="track-template" class="block text-sm font-medium text-default mb-1">
               Workflow Template
             </label>
@@ -87,7 +101,6 @@
                 id="track-tempo"
                 v-model.number="formData.tempo"
                 type="number"
-                placeholder="120"
                 :disabled="saving"
               />
             </div>
@@ -113,7 +126,6 @@
                 id="track-minutes"
                 v-model.number="formData.minutes"
                 type="number"
-                placeholder="3"
                 :disabled="saving"
               />
             </div>
@@ -125,7 +137,6 @@
                 id="track-seconds"
                 v-model.number="formData.seconds"
                 type="number"
-                placeholder="45"
                 :disabled="saving"
               />
             </div>
@@ -201,6 +212,7 @@ const formData = ref<TrackUpdate>({
   seconds: null,
   samples: '',
   isrc_code: null,
+  description: null,
 })
 
 // Load track and templates
@@ -225,6 +237,7 @@ const loadTrack = async () => {
         seconds: track.value.seconds,
         samples: track.value.samples,
         isrc_code: track.value.isrc_code,
+        description: track.value.description,
       }
     }
   } catch (err: any) {
@@ -259,7 +272,14 @@ const handleUpdate = async () => {
       return
     }
 
-    await updateTrack(track.value.id, formData.value)
+    // If template is set to None, clear status and step as well
+    const updateData = { ...formData.value }
+    if (updateData.template_id === null) {
+      updateData.track_status_id = null
+      updateData.step_id = null
+    }
+
+    await updateTrack(track.value.id, updateData)
     navigateTo(`/tracks/${track.value.id}`)
   } catch (err: any) {
     saveError.value = err.message || 'Failed to update track'

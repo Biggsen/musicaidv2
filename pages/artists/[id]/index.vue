@@ -135,6 +135,20 @@
               />
             </div>
 
+            <div>
+              <label for="track-description" class="block text-sm font-medium text-default mb-1">
+                Description
+              </label>
+              <UTextarea
+                id="track-description"
+                v-model="newTrack.description"
+                placeholder="Enter track description..."
+                :rows="6"
+                class="w-full"
+                :disabled="creatingTrack"
+              />
+            </div>
+
             <div class="grid grid-cols-2 gap-4">
               <div>
                 <label for="track-tempo" class="block text-sm font-medium text-default mb-1">
@@ -144,7 +158,6 @@
                   id="track-tempo"
                   v-model.number="newTrack.tempo"
                   type="number"
-                  placeholder="120"
                   :disabled="creatingTrack"
                 />
               </div>
@@ -216,6 +229,7 @@ const newTrack = ref<TrackInsert>({
   artist_id: '',
   samples: 'Soundation',
   tempo: null,
+  description: null,
 })
 
 // Load artist and tracks
@@ -267,6 +281,7 @@ const handleCreateTrack = async () => {
       artist_id: artist.value.id,
       samples: 'Soundation',
       tempo: null,
+      description: null,
     }
     await loadTracks()
   } catch (err: any) {

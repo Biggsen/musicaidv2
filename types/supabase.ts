@@ -73,6 +73,7 @@ export interface Database {
           date_created: string | null
           isrc_code: string | null
           live_ready: boolean
+          description: string | null
           created_at: string
           updated_at: string
           created_by: string | null
@@ -95,6 +96,7 @@ export interface Database {
           date_created?: string | null
           isrc_code?: string | null
           live_ready?: boolean
+          description?: string | null
           created_at?: string
           updated_at?: string
           created_by?: string | null
@@ -117,6 +119,7 @@ export interface Database {
           date_created?: string | null
           isrc_code?: string | null
           live_ready?: boolean
+          description?: string | null
           created_at?: string
           updated_at?: string
           created_by?: string | null

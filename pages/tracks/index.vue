@@ -124,6 +124,9 @@
             @click="() => router.push(`/tracks/${track.id}`)"
           >
             <h3 class="text-lg font-semibold text-default">{{ track.name }}</h3>
+            <p v-if="track.description" class="text-sm text-muted mt-1 line-clamp-2">
+              {{ track.description }}
+            </p>
           </div>
           <UDropdownMenu 
             :items="getTrackMenuItemsForCard(track)" 
@@ -311,6 +314,19 @@
             />
           </div>
 
+          <div>
+            <label for="track-description" class="block text-sm font-medium text-default mb-1">
+              Description
+            </label>
+            <UTextarea
+              id="track-description"
+              v-model="newTrack.description"
+              placeholder="Enter track description..."
+              :rows="6"
+              class="w-full"
+              :disabled="creating"
+            />
+          </div>
 
           <div>
             <label for="track-template" class="block text-sm font-medium text-default mb-1">
@@ -337,7 +353,6 @@
                 id="track-tempo"
                 v-model.number="newTrack.tempo"
                 type="number"
-                placeholder="120"
                 :disabled="creating"
               />
             </div>
@@ -413,6 +428,20 @@
           </div>
 
           <div>
+            <label for="edit-track-description" class="block text-sm font-medium text-default mb-1">
+              Description
+            </label>
+            <UTextarea
+              id="edit-track-description"
+              v-model="editTrack.description"
+              placeholder="Enter track description..."
+              :rows="6"
+              class="w-full"
+              :disabled="editing"
+            />
+          </div>
+
+          <div>
             <label for="edit-track-template" class="block text-sm font-medium text-default mb-1">
               Workflow Template
             </label>
@@ -437,7 +466,6 @@
                 id="edit-track-tempo"
                 v-model.number="editTrack.tempo"
                 type="number"
-                placeholder="120"
                 :disabled="editing"
               />
             </div>
@@ -463,7 +491,6 @@
                 id="edit-track-minutes"
                 v-model.number="editTrack.minutes"
                 type="number"
-                placeholder="3"
                 :disabled="editing"
               />
             </div>
@@ -475,7 +502,6 @@
                 id="edit-track-seconds"
                 v-model.number="editTrack.seconds"
                 type="number"
-                placeholder="45"
                 :disabled="editing"
               />
             </div>
@@ -565,6 +591,7 @@ const newTrack = ref<TrackInsert>({
   template_id: null,
   samples: 'Soundation',
   tempo: null,
+  description: null,
 })
 
 const editTrack = ref<TrackUpdate>({
@@ -576,6 +603,7 @@ const editTrack = ref<TrackUpdate>({
   seconds: null,
   samples: '',
   isrc_code: null,
+  description: null,
 })
 
 const artistOptions = computed(() => [
@@ -838,6 +866,7 @@ const handleCreateTrack = async () => {
       template_id: null,
       samples: 'Soundation',
       tempo: null,
+      description: null,
     }
     await loadTracks()
     await loadTrackProgress()
@@ -910,6 +939,7 @@ const openEditModal = async (trackId: string) => {
         seconds: track.seconds,
         samples: track.samples,
         isrc_code: track.isrc_code,
+        description: track.description,
       }
       showEditModal.value = true
     }

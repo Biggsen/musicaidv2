@@ -30,6 +30,8 @@
         <UPageHeader
           :headline="artist?.name"
           :title="track.name"
+          :description="track.description || undefined"
+          :ui="{ description: 'max-w-[60ch]' }"
         >
           <template #links>
             <div class="flex items-center gap-3">
