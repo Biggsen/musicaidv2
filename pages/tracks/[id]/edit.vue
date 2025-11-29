@@ -86,9 +86,26 @@
               :items="templateOptions"
               placeholder="Select a template (optional)"
               :disabled="saving || loadingTemplates"
+              @update:model-value="handleTemplateChange"
             />
             <p class="mt-1 text-xs text-muted">
               Select a workflow template to track production progress.
+            </p>
+          </div>
+
+          <div v-if="formData.template_id && availableStatuses.length > 0">
+            <label for="track-status" class="block text-sm font-medium text-default mb-1">
+              Current Stage
+            </label>
+            <USelect
+              id="track-status"
+              v-model="selectedStatusId"
+              :items="statusOptions"
+              placeholder="Select stage"
+              :disabled="saving || loadingTemplates"
+            />
+            <p class="mt-1 text-xs text-muted">
+              Set the current workflow stage for this track.
             </p>
           </div>
 
@@ -181,14 +198,16 @@ definePageMeta({
 })
 
 import type { Track, TrackUpdate } from '~/composables/useTracks'
-import type { Template } from '~/composables/useWorkflow'
+import type { Template, TrackStatus } from '~/composables/useWorkflow'
 
 const route = useRoute()
 const { getTrack, updateTrack } = useTracks()
-const { getTemplates } = useWorkflow()
+const { getTemplates, getTemplateWithStatuses, getTrackStatusWithSteps, completeStep } = useWorkflow()
 
 const track = ref<Track | null>(null)
 const templates = ref<Template[]>([])
+const templateStatuses = ref<TrackStatus[]>([])
+const selectedStatusId = ref<string | undefined>(undefined)
 const loading = ref(true)
 const loadingTemplates = ref(false)
 const saving = ref(false)
@@ -202,6 +221,15 @@ const templateOptions = computed(() => [
     value: template.id,
   })),
 ])
+
+const statusOptions = computed(() => {
+  return templateStatuses.value.map(status => ({
+    label: status.name,
+    value: status.id,
+  }))
+})
+
+const availableStatuses = computed(() => templateStatuses.value)
 
 const formData = ref<TrackUpdate>({
   name: '',
@@ -220,8 +248,27 @@ onMounted(async () => {
   await Promise.all([loadTrack(), loadTemplates()])
 })
 
+const handleTemplateChange = async (templateId: string | null) => {
+  selectedStatusId.value = undefined
+  templateStatuses.value = []
+
+  if (templateId) {
+    try {
+      const template = await getTemplateWithStatuses(templateId)
+      if (template && template.statuses) {
+        templateStatuses.value = template.statuses
+      }
+    } catch (err: any) {
+      console.error('Failed to load template statuses:', err)
+    }
+  }
+}
+
 const loadTrack = async () => {
   loading.value = true
+  templateStatuses.value = []
+  selectedStatusId.value = undefined
+  
   try {
     const trackId = route.params.id as string
     track.value = await getTrack(trackId)
@@ -238,6 +285,22 @@ const loadTrack = async () => {
         samples: track.value.samples,
         isrc_code: track.value.isrc_code,
         description: track.value.description,
+      }
+      
+      // Load template statuses if track has a template
+      if (track.value.template_id) {
+        try {
+          const template = await getTemplateWithStatuses(track.value.template_id)
+          if (template && template.statuses) {
+            templateStatuses.value = template.statuses
+            // Set current status if track has one
+            if (track.value.track_status_id) {
+              selectedStatusId.value = track.value.track_status_id
+            }
+          }
+        } catch (err: any) {
+          console.error('Failed to load template statuses:', err)
+        }
       }
     }
   } catch (err: any) {
@@ -269,14 +332,59 @@ const handleUpdate = async () => {
     // Validate key format
     if (!/^[a-z0-9-]+$/.test(formData.value.key || '')) {
       saveError.value = 'Key must contain only lowercase letters, numbers, and hyphens'
+      saving.value = false
       return
     }
 
     // If template is set to None, clear status and step as well
     const updateData = { ...formData.value }
+    const newStatusId = selectedStatusId.value !== undefined ? selectedStatusId.value || null : null
+    const oldStatusId = track.value.track_status_id
+
     if (updateData.template_id === null) {
       updateData.track_status_id = null
       updateData.step_id = null
+    } else if (newStatusId !== null && newStatusId !== oldStatusId) {
+      // Status is being set or changed - complete all steps in previous statuses
+      updateData.track_status_id = newStatusId
+      
+      // Get the template with statuses to find previous statuses
+      if (updateData.template_id) {
+        try {
+          const template = await getTemplateWithStatuses(updateData.template_id)
+          if (template && template.statuses) {
+            // Find the index of the new status
+            const newStatusIndex = template.statuses.findIndex(status => status.id === newStatusId)
+            
+            if (newStatusIndex > 0) {
+              // Get all previous statuses (statuses before the new one)
+              const previousStatuses = template.statuses.slice(0, newStatusIndex)
+              
+              // For each previous status, get its steps and mark them as completed
+              for (const previousStatus of previousStatuses) {
+                try {
+                  const statusWithSteps = await getTrackStatusWithSteps(previousStatus.id)
+                  if (statusWithSteps && statusWithSteps.steps) {
+                    // Mark all steps in this status as completed
+                    await Promise.all(
+                      statusWithSteps.steps.map(step => completeStep(track.value!.id, step.id))
+                    )
+                  }
+                } catch (err: any) {
+                  console.error(`Failed to complete steps for status ${previousStatus.id}:`, err)
+                  // Continue with other statuses even if one fails
+                }
+              }
+            }
+          }
+        } catch (err: any) {
+          console.error('Failed to load template statuses for step completion:', err)
+          // Continue with the update even if step completion fails
+        }
+      }
+    } else if (selectedStatusId.value !== undefined) {
+      // Use the selected status if one was chosen
+      updateData.track_status_id = selectedStatusId.value || null
     }
 
     await updateTrack(track.value.id, updateData)

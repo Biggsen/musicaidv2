@@ -357,9 +357,26 @@
               :items="templateOptions"
               placeholder="Select a template (optional)"
               :disabled="creating"
+              @update:model-value="handleTemplateChange"
             />
             <p class="mt-1 text-xs text-muted">
               Select a workflow template to track production progress.
+            </p>
+          </div>
+
+          <div v-if="newTrack.template_id && availableStatuses.length > 0">
+            <label for="track-status" class="block text-sm font-medium text-default mb-1">
+              Initial Stage (optional)
+            </label>
+            <USelect
+              id="track-status"
+              v-model="selectedStatusId"
+              :items="statusOptions"
+              placeholder="Select initial stage (optional)"
+              :disabled="creating"
+            />
+            <p class="mt-1 text-xs text-muted">
+              Set the initial workflow stage. If not selected, the first stage of the template will be used.
             </p>
           </div>
 
@@ -470,9 +487,26 @@
               :items="templateOptions"
               placeholder="Select a template (optional)"
               :disabled="editing || loadingTemplates"
+              @update:model-value="handleEditTemplateChange"
             />
             <p class="mt-1 text-xs text-muted">
               Select a workflow template to track production progress.
+            </p>
+          </div>
+
+          <div v-if="editTrack.template_id && editAvailableStatuses.length > 0">
+            <label for="edit-track-status" class="block text-sm font-medium text-default mb-1">
+              Current Stage
+            </label>
+            <USelect
+              id="edit-track-status"
+              v-model="editSelectedStatusId"
+              :items="editStatusOptions"
+              placeholder="Select stage"
+              :disabled="editing || loadingTemplates"
+            />
+            <p class="mt-1 text-xs text-muted">
+              Set the current workflow stage for this track.
             </p>
           </div>
 
@@ -572,7 +606,7 @@ definePageMeta({
 
 import type { Artist } from '~/composables/useArtists'
 import type { Track, TrackInsert, TrackUpdate } from '~/composables/useTracks'
-import type { Template, TrackStatusWithSteps, Step } from '~/composables/useWorkflow'
+import type { Template, TrackStatusWithSteps, Step, TrackStatus } from '~/composables/useWorkflow'
 
 const router = useRouter()
 const { getArtists } = useArtists()
@@ -582,6 +616,8 @@ const { getTemplates, getTemplateWithStatuses, getTrackStatusWithSteps, getCompl
 const artists = ref<Artist[]>([])
 const allTracks = ref<Track[]>([])
 const templates = ref<Template[]>([])
+const templateStatuses = ref<TrackStatus[]>([])
+const editTemplateStatuses = ref<TrackStatus[]>([])
 const loading = ref(true)
 const loadingTemplates = ref(false)
 const creating = ref(false)
@@ -591,6 +627,8 @@ const showEditModal = ref(false)
 const error = ref('')
 const editError = ref('')
 const selectedArtistId = ref('all')
+const selectedStatusId = ref<string | undefined>(undefined)
+const editSelectedStatusId = ref<string | undefined>(undefined)
 const searchQuery = ref('')
 const viewMode = ref<'grid' | 'list'>('grid')
 const editingTrackId = ref<string | null>(null)
@@ -648,6 +686,23 @@ const templateOptions = computed(() => [
     value: template.id,
   })),
 ])
+
+const statusOptions = computed(() => {
+  return templateStatuses.value.map(status => ({
+    label: status.name,
+    value: status.id,
+  }))
+})
+
+const editStatusOptions = computed(() => {
+  return editTemplateStatuses.value.map(status => ({
+    label: status.name,
+    value: status.id,
+  }))
+})
+
+const availableStatuses = computed(() => templateStatuses.value)
+const editAvailableStatuses = computed(() => editTemplateStatuses.value)
 
 const sortOptions = [
   { label: 'Last Updated', value: 'updated_at' },
@@ -934,6 +989,22 @@ const getArtistName = (artistId: string): string => {
   return artist?.name || 'Unknown'
 }
 
+const handleTemplateChange = async (templateId: string | null) => {
+  selectedStatusId.value = undefined
+  templateStatuses.value = []
+
+  if (templateId) {
+    try {
+      const template = await getTemplateWithStatuses(templateId)
+      if (template && template.statuses) {
+        templateStatuses.value = template.statuses
+      }
+    } catch (err: any) {
+      console.error('Failed to load template statuses:', err)
+    }
+  }
+}
+
 const handleCreateTrack = async () => {
   error.value = ''
   creating.value = true
@@ -944,7 +1015,25 @@ const handleCreateTrack = async () => {
       return
     }
 
-    await createTrack(newTrack.value)
+    // Prepare track data
+    const trackData: TrackInsert = { ...newTrack.value }
+
+    // Determine initial status
+    let initialStatusId: string | null = selectedStatusId.value || null
+
+    // If template is selected but no status chosen, get first status from template
+    if (trackData.template_id && !initialStatusId && templateStatuses.value.length > 0) {
+      const firstStatus = templateStatuses.value[0]
+      if (firstStatus) {
+        initialStatusId = firstStatus.id
+      }
+    }
+
+    if (initialStatusId) {
+      trackData.track_status_id = initialStatusId
+    }
+
+    await createTrack(trackData)
     showCreateModal.value = false
     newTrack.value = {
       name: '',
@@ -954,6 +1043,8 @@ const handleCreateTrack = async () => {
       tempo: null,
       description: null,
     }
+    selectedStatusId.value = undefined
+    templateStatuses.value = []
     await loadTracks()
     await loadTrackProgress()
   } catch (err: any) {
@@ -1008,10 +1099,28 @@ const getTrackMenuItemsForCard = (track: Track) => {
   ]
 }
 
+const handleEditTemplateChange = async (templateId: string | null) => {
+  editSelectedStatusId.value = undefined
+  editTemplateStatuses.value = []
+
+  if (templateId) {
+    try {
+      const template = await getTemplateWithStatuses(templateId)
+      if (template && template.statuses) {
+        editTemplateStatuses.value = template.statuses
+      }
+    } catch (err: any) {
+      console.error('Failed to load template statuses:', err)
+    }
+  }
+}
+
 const openEditModal = async (trackId: string) => {
   editingTrackId.value = trackId
   editError.value = ''
   editing.value = true
+  editTemplateStatuses.value = []
+  editSelectedStatusId.value = undefined
   
   try {
     const track = await getTrack(trackId)
@@ -1027,6 +1136,23 @@ const openEditModal = async (trackId: string) => {
         isrc_code: track.isrc_code,
         description: track.description,
       }
+      
+      // Load template statuses if track has a template
+      if (track.template_id) {
+        try {
+          const template = await getTemplateWithStatuses(track.template_id)
+          if (template && template.statuses) {
+            editTemplateStatuses.value = template.statuses
+            // Set current status if track has one
+            if (track.track_status_id) {
+              editSelectedStatusId.value = track.track_status_id
+            }
+          }
+        } catch (err: any) {
+          console.error('Failed to load template statuses:', err)
+        }
+      }
+      
       showEditModal.value = true
     }
   } catch (err: any) {
@@ -1053,6 +1179,9 @@ const handleUpdateTrack = async () => {
     if (updateData.template_id === null) {
       updateData.track_status_id = null
       updateData.step_id = null
+    } else if (editSelectedStatusId.value !== undefined) {
+      // Use the selected status if one was chosen
+      updateData.track_status_id = editSelectedStatusId.value || null
     }
 
     await updateTrack(editingTrackId.value, updateData)
