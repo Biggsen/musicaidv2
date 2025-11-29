@@ -190,7 +190,6 @@ model Step {
   id          String      @id @default(cuid())
   name        String
   key         String      @unique
-  title       String?
   description String?
   type        StepType    @default(NORMAL)
   artist      Artist?     @relation(fields: [artistId], references: [id])
@@ -225,7 +224,6 @@ model TrackStatus {
   id          String     @id @default(cuid())
   name        String
   key         String     @unique
-  title       String?
   description String?
   steps       Step[]     @relation("StepTrackStatuses")
   artist      Artist?    @relation(fields: [artistId], references: [id])

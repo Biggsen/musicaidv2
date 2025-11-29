@@ -169,7 +169,6 @@ export interface TrackStatus {
   id: string
   name: string
   key: string
-  title: string | null
   description: string | null
   artist_id: string | null
   non_linear: boolean
@@ -182,7 +181,6 @@ export interface Step {
   id: string
   name: string
   key: string
-  title: string | null
   description: string | null
   type: 'NORMAL' | 'TEXT' | 'LIST' | 'RECORD'
   tags: string[]

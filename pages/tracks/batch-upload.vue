@@ -285,7 +285,7 @@ const availableStatuses = computed(() => templateStatuses.value)
 
 const statusOptions = computed(() => {
   return availableStatuses.value.map(status => ({
-    label: status.title || status.name,
+    label: status.name,
     value: status.id,
   }))
 })

@@ -5,7 +5,6 @@ export interface TrackStatus {
   id: string
   name: string
   key: string
-  title: string | null
   description: string | null
   artist_id: string | null
   non_linear: boolean
@@ -17,7 +16,6 @@ export interface TrackStatus {
 export interface TrackStatusInsert {
   name: string
   key?: string
-  title?: string | null
   description?: string | null
   artist_id?: string | null
   non_linear?: boolean
@@ -27,7 +25,6 @@ export interface TrackStatusInsert {
 export interface TrackStatusUpdate {
   name?: string
   key?: string
-  title?: string | null
   description?: string | null
   artist_id?: string | null
   non_linear?: boolean
@@ -38,7 +35,6 @@ export interface Step {
   id: string
   name: string
   key: string
-  title: string | null
   description: string | null
   type: 'NORMAL' | 'TEXT' | 'LIST' | 'RECORD'
   tags: string[]
@@ -51,7 +47,6 @@ export interface Step {
 export interface StepInsert {
   name: string
   key?: string
-  title?: string | null
   description?: string | null
   type?: 'NORMAL' | 'TEXT' | 'LIST' | 'RECORD'
   tags?: string[]
@@ -62,7 +57,6 @@ export interface StepInsert {
 export interface StepUpdate {
   name?: string
   key?: string
-  title?: string | null
   description?: string | null
   type?: 'NORMAL' | 'TEXT' | 'LIST' | 'RECORD'
   tags?: string[]

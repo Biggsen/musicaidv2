@@ -2,39 +2,39 @@
 -- This creates a basic "Standard Production" workflow template
 
 -- Insert Track Statuses (global - artist_id is NULL)
-INSERT INTO public.track_statuses (id, name, key, title, description, artist_id, non_linear, published)
+INSERT INTO public.track_statuses (id, name, key, description, artist_id, non_linear, published)
 VALUES
-  ('00000000-0000-0000-0000-000000000001', 'Writing', 'writing', 'Writing Phase', 'Initial songwriting and composition phase', NULL, false, true),
-  ('00000000-0000-0000-0000-000000000002', 'Recording', 'recording', 'Recording Phase', 'Recording instruments and vocals', NULL, false, true),
-  ('00000000-0000-0000-0000-000000000003', 'Mixing', 'mixing', 'Mixing Phase', 'Mixing and balancing tracks', NULL, false, true),
-  ('00000000-0000-0000-0000-000000000004', 'Mastering', 'mastering', 'Mastering Phase', 'Final mastering and preparation', NULL, false, true)
+  ('00000000-0000-0000-0000-000000000001', 'Writing', 'writing', 'Initial songwriting and composition phase', NULL, false, true),
+  ('00000000-0000-0000-0000-000000000002', 'Recording', 'recording', 'Recording instruments and vocals', NULL, false, true),
+  ('00000000-0000-0000-0000-000000000003', 'Mixing', 'mixing', 'Mixing and balancing tracks', NULL, false, true),
+  ('00000000-0000-0000-0000-000000000004', 'Mastering', 'mastering', 'Final mastering and preparation', NULL, false, true)
 ON CONFLICT (id) DO NOTHING;
 
 -- Insert Steps (global - artist_id is NULL)
-INSERT INTO public.steps (id, name, key, title, description, type, artist_id, published)
+INSERT INTO public.steps (id, name, key, description, type, artist_id, published)
 VALUES
   -- Writing phase steps
-  ('10000000-0000-0000-0000-000000000001', 'Write Lyrics', 'write-lyrics', 'Write Lyrics', 'Create and refine song lyrics', 'TEXT', NULL, true),
-  ('10000000-0000-0000-0000-000000000002', 'Write Melody', 'write-melody', 'Write Melody', 'Develop the main melody', 'NORMAL', NULL, true),
-  ('10000000-0000-0000-0000-000000000003', 'Create Chord Progression', 'create-chords', 'Create Chord Progression', 'Establish chord structure', 'NORMAL', NULL, true),
+  ('10000000-0000-0000-0000-000000000001', 'Write Lyrics', 'write-lyrics', 'Create and refine song lyrics', 'TEXT', NULL, true),
+  ('10000000-0000-0000-0000-000000000002', 'Write Melody', 'write-melody', 'Develop the main melody', 'NORMAL', NULL, true),
+  ('10000000-0000-0000-0000-000000000003', 'Create Chord Progression', 'create-chords', 'Establish chord structure', 'NORMAL', NULL, true),
   
   -- Recording phase steps
-  ('20000000-0000-0000-0000-000000000001', 'Record Vocals', 'record-vocals', 'Record Vocals', 'Record main vocal tracks', 'RECORD', NULL, true),
-  ('20000000-0000-0000-0000-000000000002', 'Record Drums', 'record-drums', 'Record Drums', 'Record drum tracks', 'RECORD', NULL, true),
-  ('20000000-0000-0000-0000-000000000003', 'Record Bass', 'record-bass', 'Record Bass', 'Record bass tracks', 'RECORD', NULL, true),
-  ('20000000-0000-0000-0000-000000000004', 'Record Instruments', 'record-instruments', 'Record Instruments', 'Record additional instruments', 'RECORD', NULL, true),
+  ('20000000-0000-0000-0000-000000000001', 'Record Vocals', 'record-vocals', 'Record main vocal tracks', 'RECORD', NULL, true),
+  ('20000000-0000-0000-0000-000000000002', 'Record Drums', 'record-drums', 'Record drum tracks', 'RECORD', NULL, true),
+  ('20000000-0000-0000-0000-000000000003', 'Record Bass', 'record-bass', 'Record bass tracks', 'RECORD', NULL, true),
+  ('20000000-0000-0000-0000-000000000004', 'Record Instruments', 'record-instruments', 'Record additional instruments', 'RECORD', NULL, true),
   
   -- Mixing phase steps
-  ('30000000-0000-0000-0000-000000000001', 'Balance Levels', 'balance-levels', 'Balance Levels', 'Balance volume levels of all tracks', 'NORMAL', NULL, true),
-  ('30000000-0000-0000-0000-000000000002', 'Apply EQ', 'apply-eq', 'Apply EQ', 'Equalize frequency ranges', 'NORMAL', NULL, true),
-  ('30000000-0000-0000-0000-000000000003', 'Add Effects', 'add-effects', 'Add Effects', 'Add reverb, delay, and other effects', 'NORMAL', NULL, true),
-  ('30000000-0000-0000-0000-000000000004', 'Final Mix Review', 'final-mix-review', 'Final Mix Review', 'Review and approve final mix', 'NORMAL', NULL, true),
+  ('30000000-0000-0000-0000-000000000001', 'Balance Levels', 'balance-levels', 'Balance volume levels of all tracks', 'NORMAL', NULL, true),
+  ('30000000-0000-0000-0000-000000000002', 'Apply EQ', 'apply-eq', 'Equalize frequency ranges', 'NORMAL', NULL, true),
+  ('30000000-0000-0000-0000-000000000003', 'Add Effects', 'add-effects', 'Add reverb, delay, and other effects', 'NORMAL', NULL, true),
+  ('30000000-0000-0000-0000-000000000004', 'Final Mix Review', 'final-mix-review', 'Review and approve final mix', 'NORMAL', NULL, true),
   
   -- Mastering phase steps
-  ('40000000-0000-0000-0000-000000000001', 'Master EQ', 'master-eq', 'Master EQ', 'Final EQ adjustments', 'NORMAL', NULL, true),
-  ('40000000-0000-0000-0000-000000000002', 'Compression', 'compression', 'Compression', 'Apply mastering compression', 'NORMAL', NULL, true),
-  ('40000000-0000-0000-0000-000000000003', 'Loudness', 'loudness', 'Loudness', 'Set final loudness levels', 'NORMAL', NULL, true),
-  ('40000000-0000-0000-0000-000000000004', 'Export Final', 'export-final', 'Export Final', 'Export final mastered version', 'NORMAL', NULL, true)
+  ('40000000-0000-0000-0000-000000000001', 'Master EQ', 'master-eq', 'Final EQ adjustments', 'NORMAL', NULL, true),
+  ('40000000-0000-0000-0000-000000000002', 'Compression', 'compression', 'Apply mastering compression', 'NORMAL', NULL, true),
+  ('40000000-0000-0000-0000-000000000003', 'Loudness', 'loudness', 'Set final loudness levels', 'NORMAL', NULL, true),
+  ('40000000-0000-0000-0000-000000000004', 'Export Final', 'export-final', 'Export final mastered version', 'NORMAL', NULL, true)
 ON CONFLICT (id) DO NOTHING;
 
 -- Insert Template
