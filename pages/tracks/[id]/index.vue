@@ -82,6 +82,20 @@
             </div>
           </UCard>
 
+          <!-- Workflow Status Section -->
+          <UCard v-if="workflowStatuses.length > 0 && track">
+            <WorkflowStatus
+              :statuses="workflowStatuses"
+              :current-status-id="track?.track_status_id"
+              :current-step-id="track?.step_id"
+              :track-id="track?.id"
+              :completed-step-ids="Array.from(completedStepIds)"
+              @status-selected="handleStatusSelected"
+              @step-completed="handleStepCompleted"
+              @step-uncompleted="handleStepUncompleted"
+            />
+          </UCard>
+
           <!-- Audio Files Section -->
           <UCard>
             <template #header>
@@ -174,20 +188,6 @@
                 </div>
               </div>
             </div>
-          </UCard>
-
-          <!-- Workflow Status Section -->
-          <UCard v-if="workflowStatuses.length > 0 && track">
-            <WorkflowStatus
-              :statuses="workflowStatuses"
-              :current-status-id="track?.track_status_id"
-              :current-step-id="track?.step_id"
-              :track-id="track?.id"
-              :completed-step-ids="Array.from(completedStepIds)"
-              @status-selected="handleStatusSelected"
-              @step-completed="handleStepCompleted"
-              @step-uncompleted="handleStepUncompleted"
-            />
           </UCard>
 
           <!-- Notes Section -->
