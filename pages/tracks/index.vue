@@ -31,7 +31,7 @@
 
     <!-- Filters -->
     <UCard class="mb-6">
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div>
           <label class="block text-sm font-medium text-default mb-1">Filter by Artist</label>
           <USelect
@@ -49,6 +49,24 @@
             icon="i-ph-magnifying-glass"
             @input="filterTracks"
           />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-default mb-1">Sort By</label>
+          <div class="flex items-center gap-2">
+            <USelect
+              v-model="sortField"
+              :items="sortOptions"
+              @update:model-value="applySorting"
+            />
+            <UButton
+              :icon="sortDirection === 'asc' ? 'i-ph-sort-ascending' : 'i-ph-sort-descending'"
+              color="neutral"
+              variant="outline"
+              size="sm"
+              @click="toggleSortDirection"
+              :aria-label="`Sort ${sortDirection === 'asc' ? 'ascending' : 'descending'}`"
+            />
+          </div>
         </div>
         <div>
           <label class="block text-sm font-medium text-default mb-1">View</label>
@@ -155,6 +173,12 @@
               <span class="font-medium text-default">{{ getTrackProgress(track.id).progress }}%</span>
             </div>
             <UProgress :model-value="getTrackProgress(track.id).progress" :max="100" size="xs" />
+            <p
+              v-if="getTrackProgress(track.id).currentStatusName"
+              class="text-sm text-muted"
+            >
+              Status: {{ getTrackProgress(track.id).currentStatusName }}
+            </p>
             <p v-if="getTrackProgress(track.id).nextStep" class="text-sm text-muted">
               Next: {{ getTrackProgress(track.id).nextStep?.name }}
             </p>
@@ -176,48 +200,38 @@
           <div class="flex items-center gap-2 cursor-pointer" @click="handleSort('name')">
             <span>Track Name</span>
             <UIcon 
-              v-if="sortColumn === 'name'" 
-              :name="sortDirection === 'asc' ? 'i-ph-caret-up' : 'i-ph-caret-down'" 
+              v-if="sortField === 'name'" 
+              :name="sortDirection === 'asc' ? 'i-ph-sort-ascending' : 'i-ph-sort-descending'" 
               class="w-4 h-4"
             />
           </div>
         </template>
         <template #artist-header>
-          <div class="flex items-center gap-2 cursor-pointer" @click="handleSort('artist')">
+          <div class="flex items-center gap-2">
             <span>Artist</span>
-            <UIcon 
-              v-if="sortColumn === 'artist'" 
-              :name="sortDirection === 'asc' ? 'i-ph-caret-up' : 'i-ph-caret-down'" 
-              class="w-4 h-4"
-            />
           </div>
         </template>
         <template #tempo-header>
           <div class="flex items-center gap-2 cursor-pointer" @click="handleSort('tempo')">
             <span>Tempo</span>
             <UIcon 
-              v-if="sortColumn === 'tempo'" 
-              :name="sortDirection === 'asc' ? 'i-ph-caret-up' : 'i-ph-caret-down'" 
+              v-if="sortField === 'tempo'" 
+              :name="sortDirection === 'asc' ? 'i-ph-sort-ascending' : 'i-ph-sort-descending'" 
               class="w-4 h-4"
             />
           </div>
         </template>
         <template #samples-header>
-          <div class="flex items-center gap-2 cursor-pointer" @click="handleSort('samples')">
+          <div class="flex items-center gap-2">
             <span>Samples</span>
-            <UIcon 
-              v-if="sortColumn === 'samples'" 
-              :name="sortDirection === 'asc' ? 'i-ph-caret-up' : 'i-ph-caret-down'" 
-              class="w-4 h-4"
-            />
           </div>
         </template>
         <template #duration-header>
           <div class="flex items-center gap-2 cursor-pointer" @click="handleSort('duration')">
             <span>Duration</span>
             <UIcon 
-              v-if="sortColumn === 'duration'" 
-              :name="sortDirection === 'asc' ? 'i-ph-caret-up' : 'i-ph-caret-down'" 
+              v-if="sortField === 'duration'" 
+              :name="sortDirection === 'asc' ? 'i-ph-sort-ascending' : 'i-ph-sort-descending'" 
               class="w-4 h-4"
             />
           </div>
@@ -226,11 +240,16 @@
           <div class="flex items-center gap-2 cursor-pointer" @click="handleSort('progress')">
             <span>Progress</span>
             <UIcon 
-              v-if="sortColumn === 'progress'" 
-              :name="sortDirection === 'asc' ? 'i-ph-caret-up' : 'i-ph-caret-down'" 
+              v-if="sortField === 'progress'" 
+              :name="sortDirection === 'asc' ? 'i-ph-sort-ascending' : 'i-ph-sort-descending'" 
               class="w-4 h-4"
             />
           </div>
+        </template>
+        <template #status-cell="{ row }">
+          <span class="text-sm text-muted">
+            {{ getTrackProgress(row.original.id).currentStatusName || '—' }}
+          </span>
         </template>
         <template #name-cell="{ row }">
           <NuxtLink
@@ -575,12 +594,13 @@ const selectedArtistId = ref('all')
 const searchQuery = ref('')
 const viewMode = ref<'grid' | 'list'>('grid')
 const editingTrackId = ref<string | null>(null)
-const sortColumn = ref<string | null>(null)
-const sortDirection = ref<'asc' | 'desc'>('asc')
+const sortField = ref('updated_at')
+const sortDirection = ref<'asc' | 'desc'>('desc')
 
 interface TrackProgress {
   progress: number
   nextStep: Step | null
+  currentStatusName: string | null
 }
 
 const trackProgressMap = ref<Map<string, TrackProgress>>(new Map())
@@ -629,6 +649,19 @@ const templateOptions = computed(() => [
   })),
 ])
 
+const sortOptions = [
+  { label: 'Last Updated', value: 'updated_at' },
+  { label: 'Created Date', value: 'created_at' },
+  { label: 'Name', value: 'name' },
+  { label: 'Tempo', value: 'tempo' },
+  { label: 'Duration', value: 'duration' },
+  { label: 'Progress', value: 'progress' },
+]
+
+const toggleSortDirection = () => {
+  sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc'
+}
+
 const filteredTracks = computed(() => {
   let filtered = allTracks.value
 
@@ -645,8 +678,59 @@ const filteredTracks = computed(() => {
     )
   }
 
+  // Apply sorting
+  if (sortField.value) {
+    const isAscending = sortDirection.value === 'asc'
+    
+    filtered = [...filtered].sort((a, b) => {
+      let aVal: any
+      let bVal: any
+
+      switch (sortField.value) {
+        case 'updated_at':
+          aVal = a.updated_at ? new Date(a.updated_at).getTime() : 0
+          bVal = b.updated_at ? new Date(b.updated_at).getTime() : 0
+          break
+        case 'created_at':
+          aVal = a.created_at ? new Date(a.created_at).getTime() : 0
+          bVal = b.created_at ? new Date(b.created_at).getTime() : 0
+          break
+        case 'name':
+          aVal = a.name.toLowerCase()
+          bVal = b.name.toLowerCase()
+          break
+        case 'tempo':
+          aVal = a.tempo ?? 0
+          bVal = b.tempo ?? 0
+          break
+        case 'duration':
+          aVal = (a.minutes ?? 0) * 60 + (a.seconds ?? 0)
+          bVal = (b.minutes ?? 0) * 60 + (b.seconds ?? 0)
+          break
+        case 'progress':
+          aVal = getTrackProgress(a.id).progress
+          bVal = getTrackProgress(b.id).progress
+          break
+        default:
+          return 0
+      }
+
+      if (typeof aVal === 'string' && typeof bVal === 'string') {
+        const comparison = aVal.localeCompare(bVal)
+        return isAscending ? comparison : -comparison
+      } else {
+        const comparison = aVal < bVal ? -1 : aVal > bVal ? 1 : 0
+        return isAscending ? comparison : -comparison
+      }
+    })
+  }
+
   return filtered
 })
+
+const applySorting = () => {
+  // Sorting is handled reactively by the computed property
+}
 
 interface TableRow {
   id: string
@@ -666,13 +750,14 @@ const tableColumns = [
   { id: 'tempo', accessorKey: 'tempo', header: 'Tempo', sortable: true },
   { id: 'samples', accessorKey: 'samples', header: 'Samples', sortable: true },
   { id: 'duration', accessorKey: 'duration', header: 'Duration', sortable: true },
+  { id: 'status', accessorKey: 'status', header: 'Status', sortable: false },
   { id: 'progress', accessorKey: 'progress', header: 'Progress', sortable: true },
   { id: 'nextStep', accessorKey: 'nextStep', header: 'Next Step', sortable: false },
   { id: 'actions', accessorKey: 'actions', header: '', sortable: false },
 ]
 
 const tableRows = computed<TableRow[]>(() => {
-  let rows = filteredTracks.value.map(track => ({
+  return filteredTracks.value.map(track => ({
     id: track.id,
     name: track.name,
     artist_id: track.artist_id,
@@ -683,41 +768,6 @@ const tableRows = computed<TableRow[]>(() => {
     artist: getArtistName(track.artist_id),
     template_id: track.template_id,
   }))
-
-  // Apply sorting
-  if (sortColumn.value) {
-    rows = [...rows].sort((a, b) => {
-      let aVal: any = a[sortColumn.value as keyof TableRow]
-      let bVal: any = b[sortColumn.value as keyof TableRow]
-
-      // Handle null/undefined values
-      if (aVal === null || aVal === undefined) aVal = ''
-      if (bVal === null || bVal === undefined) bVal = ''
-
-      // Handle duration (calculate total seconds)
-      if (sortColumn.value === 'duration') {
-        aVal = (a.minutes || 0) * 60 + (a.seconds || 0)
-        bVal = (b.minutes || 0) * 60 + (b.seconds || 0)
-      }
-
-      // Handle progress (get from progress map)
-      if (sortColumn.value === 'progress') {
-        aVal = getTrackProgress(a.id).progress
-        bVal = getTrackProgress(b.id).progress
-      }
-
-      // Compare values
-      if (typeof aVal === 'string' && typeof bVal === 'string') {
-        const comparison = aVal.localeCompare(bVal)
-        return sortDirection.value === 'asc' ? comparison : -comparison
-      } else {
-        const comparison = aVal < bVal ? -1 : aVal > bVal ? 1 : 0
-        return sortDirection.value === 'asc' ? comparison : -comparison
-      }
-    })
-  }
-
-  return rows
 })
 
 // Load data
@@ -765,67 +815,93 @@ const loadTracks = async () => {
 const loadTrackProgress = async () => {
   trackProgressMap.value.clear()
   
-  // Process tracks in parallel batches to avoid overwhelming the API
   const tracksWithTemplates = allTracks.value.filter(t => t.template_id)
+  if (tracksWithTemplates.length === 0) return
   
-  for (const track of tracksWithTemplates) {
+  // Optimization 2: Cache templates - get unique template IDs and load each once
+  const uniqueTemplateIds = [...new Set(tracksWithTemplates.map(t => t.template_id).filter(Boolean) as string[])]
+  
+  // Load all templates in parallel
+  const templatePromises = uniqueTemplateIds.map(id => 
+    getTemplateWithStatuses(id).catch(() => null)
+  )
+  const templates = await Promise.all(templatePromises)
+  const templateMap = new Map(uniqueTemplateIds.map((id, i) => [id, templates[i]]))
+  
+  // Get all unique status IDs from all templates
+  const allStatusIds = new Set<string>()
+  templateMap.forEach(template => {
+    template?.statuses?.forEach(status => allStatusIds.add(status.id))
+  })
+  
+  // Optimization 2: Cache statuses - load each unique status with steps once
+  const statusPromises = Array.from(allStatusIds).map(id =>
+    getTrackStatusWithSteps(id).catch(() => null)
+  )
+  const statuses = await Promise.all(statusPromises)
+  const statusMap = new Map(Array.from(allStatusIds).map((id, i) => [id, statuses[i]]))
+  
+  // Optimization 3: Batch fetch all completed steps for all tracks in parallel
+  const trackIds = tracksWithTemplates.map(t => t.id)
+  const completedStepsPromises = trackIds.map(id => 
+    getCompletedSteps(id).catch(() => [])
+  )
+  const allCompletedSteps = await Promise.all(completedStepsPromises)
+  const completedStepsMap = new Map(trackIds.map((id, i) => [id, new Set(allCompletedSteps[i])]))
+  
+  // Optimization 1: Calculate progress for all tracks in parallel
+  const progressPromises = tracksWithTemplates.map(async (track) => {
     try {
-      const progress = await calculateTrackProgress(track)
-      trackProgressMap.value.set(track.id, progress)
-    } catch (err: any) {
-      // Silently fail for individual tracks
-      trackProgressMap.value.set(track.id, { progress: 0, nextStep: null })
-    }
-  }
-}
-
-const calculateTrackProgress = async (track: Track): Promise<TrackProgress> => {
-  if (!track.template_id) {
-    return { progress: 0, nextStep: null }
-  }
-
-  try {
-    // Get template with statuses
-    const template = await getTemplateWithStatuses(track.template_id)
-    if (!template || !template.statuses || template.statuses.length === 0) {
-      return { progress: 0, nextStep: null }
-    }
-
-    // Get completed steps for this track
-    const completedStepIds = new Set(await getCompletedSteps(track.id))
-
-    // Load steps for each status
-    const allSteps: Step[] = []
-    for (const status of template.statuses) {
-      try {
-        const statusWithSteps = await getTrackStatusWithSteps(status.id)
-        if (statusWithSteps && statusWithSteps.steps) {
+      const template = templateMap.get(track.template_id!)
+      if (!template?.statuses?.length) {
+        return { trackId: track.id, progress: { progress: 0, nextStep: null, currentStatusName: null } }
+      }
+      
+      const completedStepIds = completedStepsMap.get(track.id) || new Set()
+      
+      // Collect all steps from all statuses using cached data
+      const allSteps: Step[] = []
+      template.statuses.forEach(status => {
+        const statusWithSteps = statusMap.get(status.id)
+        if (statusWithSteps?.steps) {
           allSteps.push(...statusWithSteps.steps)
         }
-      } catch (err) {
-        // Continue with other statuses if one fails
+      })
+      
+      if (allSteps.length === 0) {
+        return { trackId: track.id, progress: { progress: 0, nextStep: null, currentStatusName: null } }
       }
+      
+      // Calculate progress
+      const completedCount = allSteps.filter(step => completedStepIds.has(step.id)).length
+      const progress = Math.round((completedCount / allSteps.length) * 100)
+      
+      // Find next incomplete step
+      const nextStep = allSteps.find(step => !completedStepIds.has(step.id)) || null
+      
+      let currentStatusName: string | null = null
+      if (track.track_status_id && template.statuses) {
+        const currentStatus = template.statuses.find(status => status.id === track.track_status_id)
+        currentStatusName = currentStatus ? currentStatus.name : null
+      }
+      
+      return {
+        trackId: track.id,
+        progress: { progress, nextStep, currentStatusName }
+      }
+    } catch (err: any) {
+      return { trackId: track.id, progress: { progress: 0, nextStep: null, currentStatusName: null } }
     }
-
-    if (allSteps.length === 0) {
-      return { progress: 0, nextStep: null }
-    }
-
-    // Calculate progress
-    const completedCount = allSteps.filter(step => completedStepIds.has(step.id)).length
-    const progress = Math.round((completedCount / allSteps.length) * 100)
-
-    // Find next incomplete step
-    const nextStep = allSteps.find(step => !completedStepIds.has(step.id)) || null
-
-    return { progress, nextStep }
-  } catch (err: any) {
-    return { progress: 0, nextStep: null }
-  }
+  })
+  
+  const results = await Promise.all(progressPromises)
+  results.forEach(({ trackId, progress }) => {
+    trackProgressMap.value.set(trackId, progress)
+  })
 }
 
 const getTrackProgress = (trackId: string): TrackProgress => {
-  return trackProgressMap.value.get(trackId) || { progress: 0, nextStep: null }
+  return trackProgressMap.value.get(trackId) || { progress: 0, nextStep: null, currentStatusName: null }
 }
 
 const filterTracks = () => {
@@ -833,13 +909,23 @@ const filterTracks = () => {
 }
 
 const handleSort = (column: string) => {
-  if (sortColumn.value === column) {
-    // Toggle direction if same column
-    sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc'
-  } else {
-    // New column, default to ascending
-    sortColumn.value = column
-    sortDirection.value = 'asc'
+  // Map column clicks to sort fields
+  const sortMap: Record<string, string> = {
+    name: 'name',
+    tempo: 'tempo',
+    duration: 'duration',
+    progress: 'progress',
+  }
+
+  if (sortMap[column]) {
+    // If clicking the same column, toggle direction; otherwise set new column with default direction
+    if (sortField.value === sortMap[column]) {
+      toggleSortDirection()
+    } else {
+      sortField.value = sortMap[column]
+      // Set default direction based on column type
+      sortDirection.value = column === 'name' ? 'asc' : 'desc'
+    }
   }
 }
 
@@ -962,7 +1048,14 @@ const handleUpdateTrack = async () => {
       return
     }
 
-    await updateTrack(editingTrackId.value, editTrack.value)
+    // If template is set to None, clear status and step as well
+    const updateData = { ...editTrack.value }
+    if (updateData.template_id === null) {
+      updateData.track_status_id = null
+      updateData.step_id = null
+    }
+
+    await updateTrack(editingTrackId.value, updateData)
     showEditModal.value = false
     editingTrackId.value = null
     await loadTracks()
