@@ -41,8 +41,11 @@
         <div
           v-for="step in displayedSteps"
           :key="step.id"
-          class="flex items-center gap-3 p-3 border border-gray-200 rounded-lg"
-          :class="{ 'bg-blue-50 border-blue-300': currentStepId === step.id }"
+          class="flex items-center gap-3 p-3 border border-gray-200 dark:border-gray-700 rounded-lg transition-colors"
+          :class="{
+            'bg-blue-50 border-blue-300 dark:bg-blue-500/10 dark:border-blue-500':
+              currentStepId === step.id
+          }"
         >
           <UIcon
             :name="step.done ? 'i-ph-check-circle' : 'i-ph-circle-dashed'"

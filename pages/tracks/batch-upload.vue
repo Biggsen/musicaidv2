@@ -154,11 +154,14 @@
         <div
           v-for="(result, index) in uploadResults"
           :key="index"
-          class="p-3 rounded-lg"
+          class="p-3 rounded-lg border transition-colors"
           :class="{
-            'bg-green-50': result.status === 'success',
-            'bg-red-50': result.status === 'error',
-            'bg-blue-50': result.status === 'processing',
+            'bg-green-50 border-green-200 dark:bg-green-500/10 dark:border-green-500/60':
+              result.status === 'success',
+            'bg-red-50 border-red-200 dark:bg-red-500/10 dark:border-red-500/60':
+              result.status === 'error',
+            'bg-blue-50 border-blue-200 dark:bg-blue-500/10 dark:border-blue-500/60':
+              result.status === 'processing',
           }"
         >
           <div class="flex items-center justify-between">

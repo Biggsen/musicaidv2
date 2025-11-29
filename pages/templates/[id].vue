@@ -80,7 +80,7 @@
           <div
             v-for="(status, index) in statuses"
             :key="status.id"
-            class="p-4 border border-gray-200 rounded-lg"
+            class="p-4 border border-default rounded-lg"
           >
             <div class="flex items-start justify-between mb-3">
               <div class="flex-1">
@@ -112,13 +112,13 @@
             </div>
 
             <!-- Steps for this status -->
-            <div v-if="getStepsForStatus(status.id).length > 0" class="mt-3 pl-4 border-l-2 border-gray-200">
+            <div v-if="getStepsForStatus(status.id).length > 0" class="mt-3 pl-4 border-l-2 border-default">
               <h4 class="text-sm font-medium text-default mb-2">Steps</h4>
               <div class="space-y-2">
                 <div
                   v-for="(step, stepIndex) in getStepsForStatus(status.id)"
                   :key="step.id"
-                  class="flex items-center gap-2 p-2 bg-gray-50 rounded"
+                  class="flex items-center gap-2 p-2 bg-muted rounded"
                 >
                   <span class="text-xs font-medium text-muted">#{{ stepIndex + 1 }}</span>
                   <div class="flex items-center gap-2 flex-1 flex-wrap">
@@ -137,7 +137,7 @@
                 </div>
               </div>
             </div>
-            <div v-else class="mt-3 pl-4 border-l-2 border-gray-200">
+            <div v-else class="mt-3 pl-4 border-l-2 border-default">
               <p class="text-sm text-muted">No steps yet</p>
             </div>
           </div>
@@ -196,7 +196,7 @@
               <div
                 v-for="status in filteredAvailableStatuses"
                 :key="status.id"
-                class="p-2 border border-gray-200 rounded text-sm flex items-start justify-between"
+                class="p-2 border border-default rounded text-sm flex items-start justify-between"
               >
                 <div class="flex-1">
                   <NuxtLink
