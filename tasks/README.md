@@ -47,12 +47,20 @@ This folder contains the task breakdown for building MusicAid v2 using a simplif
 - **No vendor lock-in** - can deploy anywhere
 - **Cost effective** - starts free, scales affordably
 
+## Folder Structure
+
+- **`done/`** - Completed tasks (moved here as they're finished)
+- **`enhancements/`** - Future enhancements that improve UX but aren't essential
+- **`ideas/`** - Feature ideas that need more exploration and planning
+- Task files numbered sequentially in root (e.g., `06-polish-and-optimization.md`)
+
 ## Getting Started
 
 1. Complete tasks in order
 2. Each task has clear acceptance criteria
 3. Deploy early and often (after Task 3)
 4. Test thoroughly at each phase
+5. Check `ideas/` folder for new feature concepts to explore
 
 ## Architecture Decisions
 
