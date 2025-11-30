@@ -32,7 +32,7 @@ export default defineEventHandler(async (event) => {
 
     for (const part of formData) {
       if (part.name === 'file' && part.filename) {
-        file = new File([part.data], part.filename, { type: part.type || 'audio/mpeg' })
+        file = new File([new Uint8Array(part.data)], part.filename, { type: part.type || 'audio/mpeg' })
       } else if (part.name === 'track_id') {
         trackId = part.data.toString('utf-8')
       } else if (part.name === 'name') {
