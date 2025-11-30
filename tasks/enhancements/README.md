@@ -22,3 +22,4 @@ When identifying a feature that's "nice-to-have" but not essential:
 3. Document the feature, use cases, and implementation approach
 4. Reference it from the main task file if it was originally planned there
 
+

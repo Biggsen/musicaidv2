@@ -79,3 +79,4 @@ const channel = supabase
 - Real-time is a "nice-to-have" enhancement, not essential
 - Can be implemented when/if real-time coordination becomes important
 
+

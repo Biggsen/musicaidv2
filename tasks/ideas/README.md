@@ -23,3 +23,4 @@ When a new feature idea comes up:
 3. Document the idea, use cases, and initial implementation thoughts
 4. Keep it flexible - these can evolve before implementation
 
+

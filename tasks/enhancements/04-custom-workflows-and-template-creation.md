@@ -106,3 +106,4 @@ CREATE TABLE track_custom_statuses (
 - More complex than basic template management
 - Can start with fixed templates and add this flexibility later
 
+

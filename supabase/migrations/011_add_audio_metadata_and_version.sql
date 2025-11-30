@@ -11,3 +11,4 @@ ALTER TABLE public.audios
 CREATE INDEX IF NOT EXISTS idx_audios_version ON public.audios(version);
 CREATE INDEX IF NOT EXISTS idx_audios_track_id_version ON public.audios(track_id, version);
 
+

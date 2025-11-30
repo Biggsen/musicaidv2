@@ -5,3 +5,4 @@ ALTER TABLE public.track_statuses DROP COLUMN IF EXISTS title;
 ALTER TABLE public.steps DROP COLUMN IF EXISTS title;
 
 
+

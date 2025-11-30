@@ -98,3 +98,4 @@ CREATE TABLE artist_invitations (
 - Can be implemented when collaboration becomes needed
 - May want to start with simple shareable links before full email system
 
+
