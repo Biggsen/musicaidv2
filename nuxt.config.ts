@@ -24,7 +24,7 @@ export default defineNuxtConfig({
   // TypeScript configuration
   typescript: {
     strict: true,
-    typeCheck: true,
+    typeCheck: 'build',
   },
 
   // Enable SSR for full-stack capabilities
