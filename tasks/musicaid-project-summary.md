@@ -1,10 +1,42 @@
-# MusicAid v2 Project Summary
+<!-- PROJECT-MANIFEST:START -->
+```json
+{
+  "schemaVersion": 1,
+  "projectId": "musicaid-v2",
+  "name": "MusicAid v2",
+  "repo": "Biggsen/musicaidv2",
+  "visibility": "staging",
+  "status": "active",
+  "domain": "music",
+  "type": "webapp",
+  "lastUpdated": "2025-11-30",
+  "links": {
+    "prod": null,
+    "staging": "https://musicaidv2.netlify.app/"
+  },
+  "tags": ["webapp", "typescript", "nuxt", "vue", "supabase", "music-production"]
+}
+```
+<!-- PROJECT-MANIFEST:END -->
 
-## Overview
+# MusicAid v2 - Project Summary
+
+## Project Overview
 
 **MusicAid v2** is a comprehensive music production and recording management system built with modern web technologies. It helps artists, producers, and studios track and manage various aspects of music creation and recording workflows.
 
-## Technology Stack
+### Key Features
+
+- Multi-user collaboration on artist projects with role-based access control
+- Complete track management with metadata, workflow status tracking, and album associations
+- Custom workflow templates with status management and step tracking
+- Audio file management with Cloudflare R2 storage integration
+- Notes system for track-specific comments and completion tracking
+- Album management for organizing tracks
+
+---
+
+## Tech Stack
 
 - **Frontend/Backend**: Nuxt 3 (full-stack Vue framework with SSR)
 - **Database & Auth**: Supabase (PostgreSQL, authentication, real-time capabilities)
@@ -13,52 +45,198 @@
 - **UI Framework**: Nuxt UI v4 (TailwindCSS-based component library)
 - **Language**: TypeScript (strict mode enabled)
 
-## Core Features Implemented
+---
 
-### User Management
-- User authentication (login, registration, session management)
+## Current Focus
+
+Currently focused on security implementation. RLS (Row Level Security) policies need to be properly implemented and enabled before production use. This involves resolving policy recursion issues, testing all CRUD operations, and enabling RLS on all tables.
+
+---
+
+## Features (Done)
+
+- [x] User authentication (login, registration, session management)
+- [x] Multi-user collaboration on artist projects with role-based access control
+- [x] Artist management (full CRUD operations)
+- [x] Track management with metadata (name, tempo, key, duration, description)
+- [x] Track status tracking through workflow stages
+- [x] Track-album associations
+- [x] Custom workflow templates
+- [x] Status management (production stages)
+- [x] Step tracking within statuses with visual progress indicators
+- [x] Notes system (track-specific notes and comments with completion tracking)
+- [x] Audio file upload to Cloudflare R2
+- [x] Audio file display and playback
+- [x] Audio metadata tracking
+- [x] Album management (create, organize tracks, manage metadata)
+
+### Detailed Completed Features
+
+#### User Management
+- User authentication with login, registration, and session management
 - Multi-user collaboration on artist projects
 - Role-based access control (owners vs collaborators)
 
-### Artist Management
+#### Artist Management
 - Create, edit, and view artist profiles
 - Multi-user collaboration on artists
 - Artist-specific workflow templates
 
-### Track Management
+#### Track Management
 - Full CRUD operations for tracks
 - Track metadata (name, tempo, key, duration, description)
 - Track status tracking through workflow stages
 - Track-album associations
 
-### Workflow System
+#### Workflow System
 - Custom workflow templates
 - Status management (production stages)
 - Step tracking within statuses
 - Visual progress indicators
 
-### Notes System
-- Track-specific notes and comments
-- Note completion tracking
-- Full CRUD operations
-
-### Audio File Management
+#### Audio File Management
 - Audio file upload to Cloudflare R2
 - Audio file display and playback
 - Audio metadata tracking
 - Full CRUD operations for audio files
 
-### Album Management
-- Create and manage albums
-- Track organization within albums
-- Album metadata management
+#### Project Setup & Deployment
+- Nuxt 3 project with TypeScript
+- Development environment configured
+- Database schema implemented with 15 migrations
+- Supabase integration with authentication
+- Netlify deployment configured and working
+- Production deployment operational
 
-### Status Tracking
-- Visual progress tracking through production stages
-- Workflow step completion tracking
-- Status progression management
+---
 
-## Project Structure
+## Outstanding Tasks
+
+### High Priority
+
+- [ ] Task 07: Row Level Security (RLS) Implementation (6-8 hours)
+  - Analyze current RLS policies in migrations
+  - Identify specific issues that caused RLS to be disabled
+  - Document problematic policy patterns (infinite recursion, circular dependencies)
+  - Resolve infinite recursion in `user_artists` table policies
+  - Fix circular dependency issues between tables
+  - Implement proper RLS policies for all tables (Users, Artists, Tracks, User_Artists)
+  - Enable RLS on all tables
+  - Test all CRUD operations with RLS enabled
+  - Create comprehensive migration file to enable RLS
+  - Apply migration to production database
+
+### Medium Priority
+
+- [ ] Remove `dark:` utility classes and use Nuxt UI theming instead
+
+### Low Priority / Future
+
+- [ ] Task 06: Polish & Optimization (6-10 hours)
+  - UI/UX enhancements (loading skeletons, animations, keyboard shortcuts, onboarding)
+  - Performance optimizations (virtual scrolling, service worker, caching)
+  - Developer experience improvements (error logging, debugging tools, documentation)
+  - User experience features (bulk operations, advanced search, export functionality)
+  - Analytics & monitoring (error tracking, performance monitoring, usage statistics)
+
+---
+
+## Enhancements
+
+### High Priority Enhancements
+
+- Real-time Collaboration: Real-time updates and live collaboration features (currently deferred because manual refresh is sufficient for the workflow)
+
+### Medium Priority Enhancements
+
+- Mobile-responsive improvements
+- Accessibility (a11y) enhancements
+- Advanced search and filtering
+- Bulk operations (select multiple tracks)
+
+### Low Priority Enhancements
+
+- Export functionality for data
+- User analytics (privacy-focused)
+- Usage statistics dashboard
+- Performance optimization improvements
+
+---
+
+## Known Issues
+
+### Active Bugs
+
+- [ ] Avoid `dark:` utility classes (Medium Priority)
+  - **Description**: Should not use any `dark:` classes anywhere in the app
+  - **Affected Areas**: All components and pages
+  - **Workaround**: Rely on Nuxt UI components and their built-in styling/theming for dark mode support instead
+
+### RLS Implementation Issues
+
+The following issues need to be addressed when implementing RLS:
+
+1. **Infinite Recursion**: The `user_artists` table policies had recursion issues when checking ownership
+2. **Circular Dependencies**: Policies referencing `user_artists` while `user_artists` policies reference other tables
+3. **Authentication Context**: Ensuring `auth.uid()` is properly available in all policy contexts
+4. **Initial Data Access**: New users need to be able to create their first artist and relationship
+
+---
+
+## Project Status
+
+**Overall Status**: Active Development  
+**Completion**: ~85%  
+**Last Major Update**: November 2025
+
+### Metrics
+
+- **Database Migrations**: 15 completed
+- **Core Features**: 6 major feature areas implemented
+- **Open Tasks**: 2 (1 high priority, 1 low priority)
+- **Active Bugs**: 1
+- **Deployment Status**: ✅ Deployed to Netlify
+- **Security Status**: ⚠️ RLS needs to be enabled
+
+### Current Phase
+
+Post-Core Development - Core features are complete. Security implementation (RLS) is the primary remaining task before production readiness.
+
+---
+
+## Next Steps
+
+### Immediate (Next 1-2 weeks)
+
+1. Implement and enable RLS (Task 07) - Critical for production security
+2. Fix bug: Remove `dark:` utility classes and use Nuxt UI theming
+
+### Short-term (Next 1-3 months)
+
+1. Test RLS implementation thoroughly
+2. Address any issues discovered during RLS testing
+3. Begin polish and optimization work (Task 06) as time permits
+
+### Long-term (3+ months)
+
+1. Consider real-time collaboration features when workflow needs grow
+2. Implement advanced features from enhancements list
+3. Performance optimization and monitoring setup
+
+---
+
+## Notes
+
+### Architecture Decisions
+
+- **Nuxt 3**: Full-stack Vue framework with built-in API routes
+- **Supabase**: Handles complex backend concerns (database, auth, real-time, storage)
+- **TypeScript**: Type safety throughout the application
+- **Netlify**: Simple deployment with great developer experience
+- **Nuxt UI**: Utility-first styling with built-in component library
+- **Cloudflare R2**: Cost-effective S3-compatible storage for audio files
+
+### Project Structure
 
 ```
 musicaidv2/
@@ -88,146 +266,11 @@ musicaidv2/
 ├── server/api/          # Serverless API routes
 │   ├── upload/         # File upload endpoints
 │   └── r2/              # R2 storage endpoints
-├── supabase/migrations/ # Database migrations
+├── supabase/migrations/ # Database migrations (15 completed)
 └── spec/                # Project specifications
 ```
 
-## Completed Tasks
-
-### ✅ Task 01: Project Setup
-- Nuxt 3 project with TypeScript
-- Development environment configured
-- Basic project structure established
-
-### ✅ Task 02: Supabase Integration
-- Database schema implemented
-- Authentication configured
-- Supabase client integration
-- 15 database migrations completed
-
-### ✅ Task 03: Deployment Setup
-- Netlify deployment configured
-- Environment variables set up
-- Build configuration optimized
-- Production deployment working
-
-### ✅ Task 04: Core Features
-- Artist management (full CRUD)
-- Track management (full CRUD)
-- Audio file upload and management (R2 integration)
-- Workflow system (templates, statuses, steps)
-- Notes system (full CRUD with completion tracking)
-- Album management
-
-### ✅ Task 05: Advanced Features
-- Advanced workflow features
-- Enhanced collaboration capabilities
-- Template system improvements
-
-## Outstanding Tasks
-
-### Task 06: Polish & Optimization (Optional - Low Priority)
-**Estimated Time**: 6-10 hours
-
-#### UI/UX Enhancements
-- [ ] Add loading skeletons for better perceived performance
-- [ ] Implement smooth animations and transitions
-- [ ] Add keyboard shortcuts for power users
-- [ ] Create onboarding flow for new users
-- [ ] Add dark/light mode toggle (note: avoid `dark:` utility classes)
-
-#### Performance Optimizations
-- [ ] Implement virtual scrolling for large lists
-- [ ] Add service worker for offline functionality
-- [ ] Optimize images and assets
-- [ ] Implement aggressive caching strategies
-- [ ] Add bundle analysis and optimization
-
-#### Developer Experience
-- [ ] Add comprehensive error logging
-- [ ] Implement development debugging tools
-- [ ] Create component documentation
-- [ ] Add automated testing setup
-- [ ] Set up performance monitoring
-
-#### User Experience Features
-- [ ] Add bulk operations (select multiple tracks)
-- [ ] Implement advanced search and filtering
-- [ ] Add export functionality for data
-- [ ] Create mobile-responsive improvements
-- [ ] Add accessibility (a11y) enhancements
-
-#### Analytics & Monitoring
-- [ ] Add user analytics (privacy-focused)
-- [ ] Implement error tracking
-- [ ] Set up performance monitoring
-- [ ] Add usage statistics dashboard
-- [ ] Create health check endpoints
-
-### Task 07: Row Level Security (RLS) Implementation (High Priority)
-**Estimated Time**: 6-8 hours
-
-**Current Status**: RLS policies are defined in migrations but currently disabled due to implementation issues.
-
-#### Tasks
-- [ ] Analyze current RLS policies in migrations
-- [ ] Identify specific issues that caused RLS to be disabled
-- [ ] Document problematic policy patterns (infinite recursion, circular dependencies)
-- [ ] Test current policies in development environment
-
-#### Fix RLS Policy Issues
-- [ ] Resolve infinite recursion in `user_artists` table policies
-- [ ] Fix circular dependency issues between tables
-- [ ] Ensure policies work correctly for authenticated users
-- [ ] Verify policies handle edge cases (new users, orphaned records, etc.)
-
-#### Implement Proper RLS Policies
-- [ ] **Users table**: SELECT and UPDATE policies
-- [ ] **Artists table**: SELECT, INSERT, UPDATE, DELETE policies
-- [ ] **Tracks table**: SELECT, INSERT, UPDATE, DELETE policies
-- [ ] **User_Artists table**: SELECT, INSERT, UPDATE, DELETE policies
-
-#### Enable RLS
-- [ ] Enable RLS on `users` table
-- [ ] Enable RLS on `artists` table
-- [ ] Enable RLS on `tracks` table
-- [ ] Enable RLS on `user_artists` table
-
-#### Testing & Validation
-- [ ] Test user registration and profile creation with RLS enabled
-- [ ] Test artist creation and user-artist relationship creation
-- [ ] Test track creation for artists
-- [ ] Test data access restrictions (users can't see other users' data)
-- [ ] Test role-based access (owners vs collaborators)
-- [ ] Verify all CRUD operations work correctly with RLS enabled
-- [ ] Test edge cases (orphaned records, deleted users, etc.)
-
-#### Migration
-- [ ] Create comprehensive migration file to enable RLS and apply all policies
-- [ ] Test migration on development database
-- [ ] Document any breaking changes or required application updates
-- [ ] Apply migration to production database
-
-#### Known Issues to Address
-1. **Infinite Recursion**: The `user_artists` table policies had recursion issues when checking ownership
-2. **Circular Dependencies**: Policies referencing `user_artists` while `user_artists` policies reference other tables
-3. **Authentication Context**: Ensuring `auth.uid()` is properly available in all policy contexts
-4. **Initial Data Access**: New users need to be able to create their first artist and relationship
-
-## Buglist
-
-### Current Bugs
-1. **Avoid `dark:` utility classes**
-   - Should not use any `dark:` classes anywhere in the app
-   - Rely on Nuxt UI components and their built-in styling/theming for dark mode support instead
-
-## Future Enhancements (Deferred)
-
-These enhancements are documented for future implementation when core features are stable:
-
-- **Real-time Collaboration**: Real-time updates and live collaboration features (currently deferred because manual refresh is sufficient for the workflow)
-
-## Key Pages Implemented
+### Key Pages Implemented
 
 - `/` - Homepage with hero and features
 - `/login` - User authentication
@@ -248,14 +291,14 @@ These enhancements are documented for future implementation when core features a
 - `/statuses/[id]` - Status detail page
 - `/steps` - Step listing
 
-## Key Components
+### Key Components
 
 - `ArtistSelector.vue` - Reusable artist selection component
 - `AudioUpload.vue` - Audio file upload with drag & drop (R2 integrated)
 - `WorkflowStatus.vue` - Workflow status and step tracking component
 - `Logo.vue` - Application logo component
 
-## Key Composables
+### Key Composables
 
 - `useAlbums.ts` - Album CRUD operations
 - `useArtists.ts` - Artist CRUD operations
@@ -266,7 +309,7 @@ These enhancements are documented for future implementation when core features a
 - `useWorkflow.ts` - Workflow system CRUD operations
 - `useSupabase.ts` - Supabase client utilities
 
-## Database Migrations
+### Database Migrations
 
 15 migrations have been completed:
 - `001_initial_schema.sql` - Initial database schema
@@ -285,45 +328,11 @@ These enhancements are documented for future implementation when core features a
 - `014_add_description_to_tracks.sql` - Track descriptions
 - `015_remove_title_from_statuses_and_steps.sql` - Schema cleanup
 
-## Recommendations
-
-### Priority 1: Security
-- **Complete Task 07 (RLS Implementation)** - Critical for production security and data protection
-
-### Priority 2: Code Quality
-- **Address buglist items** - Remove `dark:` utility classes and use Nuxt UI theming
-
-### Priority 3: Polish
-- **Task 06 (Polish & Optimization)** - Enhance user experience and performance as time permits
-
-## Project Status
-
-**Current Phase**: Post-Core Development  
-**Deployment Status**: ✅ Deployed to Netlify  
-**Core Features**: ✅ Complete  
-**Security**: ⚠️ RLS needs to be enabled  
-**Production Ready**: ⚠️ Pending RLS implementation
-
-## Architecture Decisions
-
-- **Nuxt 3**: Full-stack Vue framework with built-in API routes
-- **Supabase**: Handles complex backend concerns (database, auth, real-time, storage)
-- **TypeScript**: Type safety throughout the application
-- **Netlify**: Simple deployment with great developer experience
-- **Nuxt UI**: Utility-first styling with built-in component library
-- **Cloudflare R2**: Cost-effective S3-compatible storage for audio files
-
-## Cost Estimate
+### Cost Estimate
 
 Starting at **$0-20/month**:
 - Netlify: Free tier (sufficient for initial deployment)
 - Supabase: Free tier (up to 500MB database, 1GB file storage)
 - Cloudflare R2: Pay-as-you-go (very affordable for audio storage)
 
-## Next Steps
-
-1. **Immediate**: Implement and enable RLS (Task 07)
-2. **Short-term**: Fix buglist items (remove `dark:` classes)
-3. **Medium-term**: Polish and optimization (Task 06)
-4. **Long-term**: Consider real-time collaboration features when needed
-
+---
