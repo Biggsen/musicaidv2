@@ -5,7 +5,11 @@ export default defineEventHandler(async (event) => {
   // #region agent log
   console.log('[UPLOAD_DEBUG] Function entry', JSON.stringify({location:'audio.post.ts:4',message:'Function entry',data:{hasEvent:!!event},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'}));
   // #endregion
-  const config = useRuntimeConfig()
+  try {
+    const config = useRuntimeConfig()
+    // #region agent log
+    console.log('[UPLOAD_DEBUG] Runtime config loaded', JSON.stringify({location:'audio.post.ts:9',message:'Runtime config loaded',data:{hasConfig:!!config,hasR2AccountId:!!config?.r2AccountId,hasR2AccessKeyId:!!config?.r2AccessKeyId,hasR2SecretAccessKey:!!config?.r2SecretAccessKey},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'}));
+    // #endregion
 
   // Check if credentials are available
   if (!config.r2AccountId || !config.r2AccessKeyId || !config.r2SecretAccessKey) {
@@ -210,11 +214,20 @@ export default defineEventHandler(async (event) => {
     return responseObj
   } catch (error: any) {
     // #region agent log
-    console.log('[UPLOAD_DEBUG] Error caught', JSON.stringify({location:'audio.post.ts:175',message:'Error caught',data:{errorMessage:error?.message||'unknown',errorName:error?.name||'unknown',statusCode:error?.statusCode||500,stack:error?.stack?.substring(0,200)||''},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'}));
+    console.log('[UPLOAD_DEBUG] Error caught', JSON.stringify({location:'audio.post.ts:175',message:'Error caught',data:{errorMessage:error?.message||'unknown',errorName:error?.name||'unknown',statusCode:error?.statusCode||500,stack:error?.stack?.substring(0,500)||''},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'}));
     // #endregion
     throw createError({
       statusCode: error.statusCode || 500,
       message: error.message || 'Upload failed',
+    })
+  }
+  } catch (outerError: any) {
+    // #region agent log
+    console.log('[UPLOAD_DEBUG] Outer error caught (before inner try)', JSON.stringify({location:'audio.post.ts:222',message:'Outer error caught',data:{errorMessage:outerError?.message||'unknown',errorName:outerError?.name||'unknown',stack:outerError?.stack?.substring(0,500)||''},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'}));
+    // #endregion
+    throw createError({
+      statusCode: 500,
+      message: outerError.message || 'Internal server error',
     })
   }
 })
