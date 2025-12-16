@@ -134,12 +134,25 @@
         <!-- Tracks List -->
         <div v-else class="space-y-2">
           <div
-            v-for="track in tracks"
+            v-for="(track, index) in tracks"
             :key="track.id"
-            class="p-4 border border-gray-200 rounded-lg hover:bg-gray-50"
+            :draggable="true"
+            :class="[
+              'p-4 border border-default rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-move',
+              {
+                'opacity-50': draggedTrackId === track.id,
+                'border-primary bg-primary/10': dragOverIndex === index && draggedTrackId !== track.id
+              }
+            ]"
+            @dragstart="handleDragStart($event, track.id, index)"
+            @dragover.prevent="handleDragOver($event, index)"
+            @dragleave="handleDragLeave"
+            @drop.prevent="handleDrop($event, index)"
+            @dragend="handleDragEnd"
           >
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-4 flex-1">
+                <UIcon name="i-ph-dots-six-vertical" class="w-5 h-5 text-muted" />
                 <span class="text-sm font-medium text-muted w-8">
                   {{ track.album_order || '-' }}
                 </span>
@@ -151,22 +164,6 @@
                 </div>
               </div>
               <div class="flex items-center gap-2">
-                <UButton
-                  color="neutral"
-                  variant="ghost"
-                  size="sm"
-                  icon="i-ph-arrow-up"
-                  :disabled="track.album_order === 1"
-                  @click="moveTrackUp(track.id, track.album_order)"
-                />
-                <UButton
-                  color="neutral"
-                  variant="ghost"
-                  size="sm"
-                  icon="i-ph-arrow-down"
-                  :disabled="track.album_order === tracks.length"
-                  @click="moveTrackDown(track.id, track.album_order)"
-                />
                 <UButton
                   color="error"
                   variant="ghost"
@@ -186,18 +183,23 @@
           <form id="add-track-form" @submit.prevent="handleAddTrack" class="space-y-4">
             <div>
               <label for="track-select" class="block text-sm font-medium text-default mb-1">
-                Select Track
+                Select Tracks
               </label>
-              <USelect
+              <USelectMenu
                 id="track-select"
-                v-model="selectedTrackId"
+                v-model="selectedTrackIds"
                 :items="availableTracksOptions"
-                placeholder="Select a track"
+                placeholder="Select tracks"
+                multiple
                 required
                 :disabled="addingTrack"
+                class="w-full"
               />
               <p class="mt-1 text-xs text-muted">
                 Only tracks from the same artist are available
+              </p>
+              <p v-if="selectedTrackIds.length > 0" class="mt-1 text-xs text-primary">
+                {{ selectedTrackIds.length }} track{{ selectedTrackIds.length === 1 ? '' : 's' }} selected
               </p>
             </div>
 
@@ -238,7 +240,7 @@
               color="primary"
               :loading="addingTrack"
             >
-              Add Track
+              Add Track{{ selectedTrackIds.length !== 1 ? 's' : '' }}
             </UButton>
           </div>
         </template>
@@ -269,8 +271,11 @@ const addingTrack = ref(false)
 const showAddTrackModal = ref(false)
 const error = ref('')
 const trackError = ref('')
-const selectedTrackId = ref<string>('')
+const selectedTrackIds = ref<string[]>([])
 const trackOrder = ref<number | null>(null)
+const draggedTrackId = ref<string | null>(null)
+const dragOverIndex = ref<number | null>(null)
+const draggedIndex = ref<number | null>(null)
 
 // Load album data
 onMounted(async () => {
@@ -289,7 +294,13 @@ const loadAlbum = async () => {
       error.value = 'Album not found'
     } else {
       album.value = albumData as Album
-      tracks.value = (albumData as any).tracks || []
+      const albumTracks = (albumData as any).tracks || []
+      // Sort tracks by album_order
+      tracks.value = albumTracks.sort((a: any, b: any) => {
+        const orderA = a.album_order || 0
+        const orderB = b.album_order || 0
+        return orderA - orderB
+      })
     }
   } catch (err: any) {
     error.value = err.message || 'Failed to load album'
@@ -323,36 +334,55 @@ const availableTracksOptions = computed(() => {
 })
 
 const handleAddTrack = async () => {
-  if (!album.value || !selectedTrackId.value) return
+  if (!album.value || !selectedTrackIds.value || selectedTrackIds.value.length === 0) return
 
   trackError.value = ''
   addingTrack.value = true
 
   try {
-    const order = trackOrder.value || tracks.value.length + 1
+    // Extract actual track IDs from selected items (handle both string IDs and objects)
+    const trackIds = selectedTrackIds.value.map((item: any) => {
+      if (typeof item === 'string') {
+        return item
+      }
+      return item?.value || item?.id || item
+    }).filter(Boolean)
+
+    if (trackIds.length === 0) {
+      trackError.value = 'No valid tracks selected'
+      return
+    }
+
+    const startOrder = trackOrder.value || tracks.value.length + 1
 
     // Update track order for existing tracks if needed
-    if (order <= tracks.value.length) {
+    if (startOrder <= tracks.value.length) {
+      const shiftAmount = trackIds.length
       for (const track of tracks.value) {
-        if (track.album_order >= order) {
+        if (track.album_order >= startOrder) {
           await updateTrack(track.id, {
-            album_order: (track.album_order || 0) + 1,
+            album_order: (track.album_order || 0) + shiftAmount,
           })
         }
       }
     }
 
-    await updateTrack(selectedTrackId.value, {
-      album_id: album.value.id,
-      album_order: order,
-    })
+    // Add all selected tracks
+    for (let i = 0; i < trackIds.length; i++) {
+      const trackId = trackIds[i]
+      const order = startOrder + i
+      await updateTrack(trackId, {
+        album_id: album.value.id,
+        album_order: order,
+      })
+    }
 
     showAddTrackModal.value = false
-    selectedTrackId.value = ''
+    selectedTrackIds.value = []
     trackOrder.value = null
     await loadAlbum()
   } catch (err: any) {
-    trackError.value = err.message || 'Failed to add track'
+    trackError.value = err.message || 'Failed to add tracks'
   } finally {
     addingTrack.value = false
   }
@@ -375,34 +405,62 @@ const removeTrackFromAlbum = async (trackId: string) => {
   }
 }
 
-const moveTrackUp = async (trackId: string, currentOrder: number | null) => {
-  if (!currentOrder || currentOrder <= 1) return
-
-  const previousTrack = tracks.value.find(t => t.album_order === currentOrder - 1)
-  if (!previousTrack) return
-
-  try {
-    await updateTrack(trackId, { album_order: currentOrder - 1 })
-    await updateTrack(previousTrack.id, { album_order: currentOrder })
-    await loadAlbum()
-  } catch (err: any) {
-    error.value = err.message || 'Failed to reorder tracks'
+const handleDragStart = (event: DragEvent, trackId: string, index: number) => {
+  draggedTrackId.value = trackId
+  draggedIndex.value = index
+  if (event.dataTransfer) {
+    event.dataTransfer.effectAllowed = 'move'
+    event.dataTransfer.setData('text/plain', trackId)
   }
 }
 
-const moveTrackDown = async (trackId: string, currentOrder: number | null) => {
-  if (!currentOrder) return
+const handleDragOver = (event: DragEvent, index: number) => {
+  if (draggedIndex.value === null || draggedIndex.value === index) {
+    dragOverIndex.value = null
+    return
+  }
+  dragOverIndex.value = index
+  if (event.dataTransfer) {
+    event.dataTransfer.dropEffect = 'move'
+  }
+}
 
-  const nextTrack = tracks.value.find(t => t.album_order === currentOrder + 1)
-  if (!nextTrack) return
+const handleDragLeave = () => {
+  dragOverIndex.value = null
+}
 
+const handleDrop = async (event: DragEvent, dropIndex: number) => {
+  if (draggedIndex.value === null || draggedTrackId.value === null) return
+  if (draggedIndex.value === dropIndex) {
+    dragOverIndex.value = null
+    return
+  }
+
+  const newTracks = [...tracks.value]
+  const [draggedTrack] = newTracks.splice(draggedIndex.value, 1)
+  newTracks.splice(dropIndex, 0, draggedTrack)
+
+  // Update all track orders
   try {
-    await updateTrack(trackId, { album_order: currentOrder + 1 })
-    await updateTrack(nextTrack.id, { album_order: currentOrder })
+    for (let i = 0; i < newTracks.length; i++) {
+      const track = newTracks[i]
+      const newOrder = i + 1
+      if (track.album_order !== newOrder) {
+        await updateTrack(track.id, { album_order: newOrder })
+      }
+    }
     await loadAlbum()
   } catch (err: any) {
     error.value = err.message || 'Failed to reorder tracks'
+  } finally {
+    dragOverIndex.value = null
   }
+}
+
+const handleDragEnd = () => {
+  draggedTrackId.value = null
+  draggedIndex.value = null
+  dragOverIndex.value = null
 }
 
 const handleDeleteAlbum = async () => {
