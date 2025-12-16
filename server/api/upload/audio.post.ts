@@ -2,6 +2,9 @@
 export const runtime = 'node'
 
 export default defineEventHandler(async (event) => {
+  // Immediate log at function entry - before any try-catch
+  console.log('[UPLOAD_DEBUG] Function entry - TOP LEVEL', JSON.stringify({location:'audio.post.ts:4',message:'Function entry',data:{hasEvent:!!event,path:event.path,method:event.method},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'}));
+  
   // #region agent log
   console.log('[UPLOAD_DEBUG] Function entry', JSON.stringify({location:'audio.post.ts:4',message:'Function entry',data:{hasEvent:!!event},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'}));
   // #endregion
@@ -226,7 +229,8 @@ export default defineEventHandler(async (event) => {
     console.log('[UPLOAD_DEBUG] Error details for response', JSON.stringify(errorDetails))
     throw createError({
       statusCode: error.statusCode || 500,
-      message: JSON.stringify(errorDetails),
+      message: errorDetails.message,
+      data: errorDetails,
     })
   }
   } catch (outerError: any) {
@@ -242,7 +246,8 @@ export default defineEventHandler(async (event) => {
     console.log('[UPLOAD_DEBUG] Outer error details for response', JSON.stringify(errorDetails))
     throw createError({
       statusCode: 500,
-      message: JSON.stringify(errorDetails),
+      message: errorDetails.message,
+      data: errorDetails,
     })
   }
 })
