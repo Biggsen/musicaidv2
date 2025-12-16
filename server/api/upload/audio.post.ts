@@ -216,18 +216,33 @@ export default defineEventHandler(async (event) => {
     // #region agent log
     console.log('[UPLOAD_DEBUG] Error caught', JSON.stringify({location:'audio.post.ts:175',message:'Error caught',data:{errorMessage:error?.message||'unknown',errorName:error?.name||'unknown',statusCode:error?.statusCode||500,stack:error?.stack?.substring(0,500)||''},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'}));
     // #endregion
+    const errorDetails = {
+      message: error.message || 'Upload failed',
+      name: error.name || 'Error',
+      code: error.code,
+      statusCode: error.statusCode || 500,
+      stack: error.stack?.substring(0, 300) || '',
+    }
+    console.log('[UPLOAD_DEBUG] Error details for response', JSON.stringify(errorDetails))
     throw createError({
       statusCode: error.statusCode || 500,
-      message: error.message || 'Upload failed',
+      message: JSON.stringify(errorDetails),
     })
   }
   } catch (outerError: any) {
     // #region agent log
     console.log('[UPLOAD_DEBUG] Outer error caught (before inner try)', JSON.stringify({location:'audio.post.ts:222',message:'Outer error caught',data:{errorMessage:outerError?.message||'unknown',errorName:outerError?.name||'unknown',stack:outerError?.stack?.substring(0,500)||''},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'}));
     // #endregion
+    const errorDetails = {
+      message: outerError.message || 'Internal server error',
+      name: outerError.name || 'Error',
+      code: outerError.code,
+      stack: outerError.stack?.substring(0, 300) || '',
+    }
+    console.log('[UPLOAD_DEBUG] Outer error details for response', JSON.stringify(errorDetails))
     throw createError({
       statusCode: 500,
-      message: outerError.message || 'Internal server error',
+      message: JSON.stringify(errorDetails),
     })
   }
 })
