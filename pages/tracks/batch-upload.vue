@@ -475,25 +475,59 @@ const handleBatchUpload = async () => {
 
       const track = await createTrack(trackData)
 
-      // 2. Upload audio file
-      const formData = new FormData()
-      formData.append('file', file)
-      formData.append('track_id', track.id)
-      if (file.duration !== null && file.duration !== undefined) {
-        formData.append('duration_seconds', file.duration.toString())
-      }
-
-      const response = await fetch('/api/upload/audio', {
+      // 2. Upload audio file using presigned URL
+      // Step 1: Initialize upload
+      const initResponse = await fetch('/api/uploads/init', {
         method: 'POST',
-        body: formData,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fileName: file.name,
+          fileSize: file.size,
+          contentType: file.type || 'audio/mpeg',
+          trackId: track.id,
+          durationSeconds: file.duration || null,
+        }),
       })
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ message: 'Upload failed' }))
-        throw new Error(errorData.message || `Upload failed: ${response.statusText}`)
+      if (!initResponse.ok) {
+        const errorData = await initResponse.json().catch(() => ({ message: 'Failed to initialize upload' }))
+        throw new Error(errorData.message || 'Failed to initialize upload')
       }
 
-      const uploadResult = await response.json()
+      const initData = await initResponse.json()
+
+      // Step 2: Upload directly to R2
+      const uploadResponse = await fetch(initData.uploadUrl, {
+        method: 'PUT',
+        body: file,
+        headers: {
+          'Content-Type': file.type || 'audio/mpeg',
+        },
+      })
+
+      if (!uploadResponse.ok) {
+        throw new Error('Failed to upload file to R2')
+      }
+
+      // Step 3: Complete upload
+      const completeResponse = await fetch('/api/uploads/complete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fileKey: initData.fileKey,
+          fileUrl: initData.fileUrl,
+          fileName: initData.fileName,
+          trackId: track.id,
+          metadata: initData.metadata,
+        }),
+      })
+
+      if (!completeResponse.ok) {
+        const errorData = await completeResponse.json().catch(() => ({ message: 'Failed to complete upload' }))
+        throw new Error(errorData.message || 'Failed to complete upload')
+      }
+
+      const uploadResult = await completeResponse.json()
 
       if (!uploadResult.success) {
         throw new Error(uploadResult.error || 'Upload failed')

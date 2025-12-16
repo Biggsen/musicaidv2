@@ -217,94 +217,68 @@ const upload = async (name?: string, description?: string, version?: string) => 
   error.value = ''
   success.value = ''
 
-  // Check file size - Netlify functions have a 6MB request body limit
-  const MAX_FILE_SIZE = 6 * 1024 * 1024 // 6MB
-  if (selectedFile.value && selectedFile.value.size > MAX_FILE_SIZE) {
-    uploading.value = false
-    error.value = `File size (${(selectedFile.value.size / 1024 / 1024).toFixed(2)}MB) exceeds the 6MB limit. Please use a smaller file.`
-    return
-  }
-
   try {
-    // Create FormData
-    const formData = new FormData()
-    formData.append('file', selectedFile.value)
-    formData.append('track_id', props.trackId)
-    if (name) {
-      formData.append('name', name)
-    }
-    if (description) {
-      formData.append('description', description)
-    }
-    if (version) {
-      formData.append('version', version)
-    }
-    if (extractedDuration.value !== null) {
-      formData.append('duration_seconds', extractedDuration.value.toString())
-    }
-
-    // Simulate progress (we can't track actual upload progress easily with fetch)
-    const progressInterval = setInterval(() => {
-      if (uploadProgress.value < 90) {
-        uploadProgress.value += 10
-      }
-    }, 200)
-
-    // Upload to API
-    // #region agent log
-    console.log('[UPLOAD_DEBUG] Before fetch request', JSON.stringify({location:'AudioUpload.vue:246',message:'Before fetch request',data:{fileSize:selectedFile.value?.size||0,fileName:selectedFile.value?.name||'',trackId:props.trackId},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'F'}));
-    // #endregion
-    const response = await fetch('/api/upload/audio', {
+    // Step 1: Initialize upload and get presigned URL
+    uploadProgress.value = 5
+    const initResponse = await fetch('/api/uploads/init', {
       method: 'POST',
-      body: formData,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        fileName: selectedFile.value.name,
+        fileSize: selectedFile.value.size,
+        contentType: selectedFile.value.type || 'audio/mpeg',
+        trackId: props.trackId,
+        name: name,
+        description: description,
+        version: version,
+        durationSeconds: extractedDuration.value,
+      }),
     })
-    // #region agent log
-    console.log('[UPLOAD_DEBUG] Fetch response received', JSON.stringify({location:'AudioUpload.vue:251',message:'Fetch response received',data:{status:response.status,statusText:response.statusText,ok:response.ok,headers:Object.fromEntries(response.headers.entries())},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'F'}));
-    // #endregion
 
-    clearInterval(progressInterval)
+    if (!initResponse.ok) {
+      const errorData = await initResponse.json().catch(() => ({ message: 'Failed to initialize upload' }))
+      throw new Error(errorData.message || 'Failed to initialize upload')
+    }
+
+    const initData = await initResponse.json()
+    uploadProgress.value = 10
+
+    // Step 2: Upload directly to R2 using presigned URL
+    const uploadResponse = await fetch(initData.uploadUrl, {
+      method: 'PUT',
+      body: selectedFile.value,
+      headers: {
+        'Content-Type': selectedFile.value.type || 'audio/mpeg',
+      },
+    })
+
+    if (!uploadResponse.ok) {
+      throw new Error('Failed to upload file to R2')
+    }
+
+    uploadProgress.value = 90
+
+    // Step 3: Complete upload and get final metadata
+    const completeResponse = await fetch('/api/uploads/complete', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        fileKey: initData.fileKey,
+        fileUrl: initData.fileUrl,
+        fileName: initData.fileName,
+        trackId: props.trackId,
+        metadata: initData.metadata,
+      }),
+    })
+
+    if (!completeResponse.ok) {
+      const errorData = await completeResponse.json().catch(() => ({ message: 'Failed to complete upload' }))
+      throw new Error(errorData.message || 'Failed to complete upload')
+    }
+
+    const result = await completeResponse.json()
     uploadProgress.value = 100
 
-    if (!response.ok) {
-      // #region agent log
-      console.log('[UPLOAD_DEBUG] Response not OK', JSON.stringify({location:'AudioUpload.vue:257',message:'Response not OK',data:{status:response.status,statusText:response.statusText},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'F'}));
-      // #endregion
-      let errorData;
-      try {
-        const text = await response.text();
-        // #region agent log
-        console.log('[UPLOAD_DEBUG] Error response text', JSON.stringify({location:'AudioUpload.vue:261',message:'Error response text',data:{textLength:text.length,textPreview:text.substring(0,200)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'F'}));
-        // #endregion
-        errorData = JSON.parse(text);
-      } catch (e) {
-        errorData = { message: 'Upload failed' };
-        // #region agent log
-        console.log('[UPLOAD_DEBUG] Failed to parse error response', JSON.stringify({location:'AudioUpload.vue:265',message:'Failed to parse error response',data:{error:String(e)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'F'}));
-        // #endregion
-      }
-      throw new Error(errorData.message || `Upload failed: ${response.statusText}`)
-    }
-
-    // #region agent log
-    console.log('[UPLOAD_DEBUG] Before parsing success response', JSON.stringify({location:'AudioUpload.vue:270',message:'Before parsing success response',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'F'}));
-    // #endregion
-    let result;
-    try {
-      const text = await response.text();
-      // #region agent log
-      console.log('[UPLOAD_DEBUG] Success response text received', JSON.stringify({location:'AudioUpload.vue:274',message:'Success response text received',data:{textLength:text.length,textPreview:text.substring(0,200)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'F'}));
-      // #endregion
-      result = JSON.parse(text);
-      // #region agent log
-      console.log('[UPLOAD_DEBUG] Success response parsed', JSON.stringify({location:'AudioUpload.vue:277',message:'Success response parsed',data:{hasSuccess:!!result.success,resultKeys:Object.keys(result||{})},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'F'}));
-      // #endregion
-    } catch (e) {
-      // #region agent log
-      console.log('[UPLOAD_DEBUG] Failed to parse success response', JSON.stringify({location:'AudioUpload.vue:280',message:'Failed to parse success response',data:{error:String(e)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'F'}));
-      // #endregion
-      throw new Error('Failed to parse response: ' + String(e));
-    }
-    
     if (result.success) {
       success.value = 'File uploaded successfully!'
       emit('uploaded', {

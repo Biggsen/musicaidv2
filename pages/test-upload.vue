@@ -187,39 +187,64 @@ const handleUpload = async () => {
   uploadResult.value = null
 
   try {
-    // Create FormData
-    const formData = new FormData()
-    formData.append('file', selectedFile.value)
-    formData.append('track_id', trackId.value)
-    if (fileName.value) {
-      formData.append('name', fileName.value)
-    }
-    if (description.value) {
-      formData.append('description', description.value)
-    }
-
-    // Simulate progress (we can't track actual upload progress easily with fetch)
-    const progressInterval = setInterval(() => {
-      if (uploadProgress.value < 90) {
-        uploadProgress.value += 10
-      }
-    }, 200)
-
-    // Upload to API
-    const response = await fetch('/api/upload/audio', {
+    // Step 1: Initialize upload and get presigned URL
+    uploadProgress.value = 5
+    const initResponse = await fetch('/api/uploads/init', {
       method: 'POST',
-      body: formData,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        fileName: selectedFile.value.name,
+        fileSize: selectedFile.value.size,
+        contentType: selectedFile.value.type || 'audio/mpeg',
+        trackId: trackId.value,
+        name: fileName.value,
+        description: description.value,
+      }),
     })
 
-    clearInterval(progressInterval)
-    uploadProgress.value = 100
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ message: 'Upload failed' }))
-      throw new Error(errorData.message || `Upload failed: ${response.statusText}`)
+    if (!initResponse.ok) {
+      const errorData = await initResponse.json().catch(() => ({ message: 'Failed to initialize upload' }))
+      throw new Error(errorData.message || 'Failed to initialize upload')
     }
 
-    const result = await response.json()
+    const initData = await initResponse.json()
+    uploadProgress.value = 10
+
+    // Step 2: Upload directly to R2 using presigned URL
+    const uploadResponse = await fetch(initData.uploadUrl, {
+      method: 'PUT',
+      body: selectedFile.value,
+      headers: {
+        'Content-Type': selectedFile.value.type || 'audio/mpeg',
+      },
+    })
+
+    if (!uploadResponse.ok) {
+      throw new Error('Failed to upload file to R2')
+    }
+
+    uploadProgress.value = 90
+
+    // Step 3: Complete upload and get final metadata
+    const completeResponse = await fetch('/api/uploads/complete', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        fileKey: initData.fileKey,
+        fileUrl: initData.fileUrl,
+        fileName: initData.fileName,
+        trackId: trackId.value,
+        metadata: initData.metadata,
+      }),
+    })
+
+    if (!completeResponse.ok) {
+      const errorData = await completeResponse.json().catch(() => ({ message: 'Failed to complete upload' }))
+      throw new Error(errorData.message || 'Failed to complete upload')
+    }
+
+    const result = await completeResponse.json()
+    uploadProgress.value = 100
     uploadResult.value = result
   } catch (err: any) {
     error.value = err.message || 'Upload failed'
