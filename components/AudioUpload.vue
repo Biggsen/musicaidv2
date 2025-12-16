@@ -243,20 +243,59 @@ const upload = async (name?: string, description?: string, version?: string) => 
     }, 200)
 
     // Upload to API
+    // #region agent log
+    console.log('[UPLOAD_DEBUG] Before fetch request', JSON.stringify({location:'AudioUpload.vue:246',message:'Before fetch request',data:{fileSize:selectedFile.value?.size||0,fileName:selectedFile.value?.name||'',trackId:props.trackId},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'F'}));
+    // #endregion
     const response = await fetch('/api/upload/audio', {
       method: 'POST',
       body: formData,
     })
+    // #region agent log
+    console.log('[UPLOAD_DEBUG] Fetch response received', JSON.stringify({location:'AudioUpload.vue:251',message:'Fetch response received',data:{status:response.status,statusText:response.statusText,ok:response.ok,headers:Object.fromEntries(response.headers.entries())},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'F'}));
+    // #endregion
 
     clearInterval(progressInterval)
     uploadProgress.value = 100
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ message: 'Upload failed' }))
+      // #region agent log
+      console.log('[UPLOAD_DEBUG] Response not OK', JSON.stringify({location:'AudioUpload.vue:257',message:'Response not OK',data:{status:response.status,statusText:response.statusText},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'F'}));
+      // #endregion
+      let errorData;
+      try {
+        const text = await response.text();
+        // #region agent log
+        console.log('[UPLOAD_DEBUG] Error response text', JSON.stringify({location:'AudioUpload.vue:261',message:'Error response text',data:{textLength:text.length,textPreview:text.substring(0,200)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'F'}));
+        // #endregion
+        errorData = JSON.parse(text);
+      } catch (e) {
+        errorData = { message: 'Upload failed' };
+        // #region agent log
+        console.log('[UPLOAD_DEBUG] Failed to parse error response', JSON.stringify({location:'AudioUpload.vue:265',message:'Failed to parse error response',data:{error:String(e)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'F'}));
+        // #endregion
+      }
       throw new Error(errorData.message || `Upload failed: ${response.statusText}`)
     }
 
-    const result = await response.json()
+    // #region agent log
+    console.log('[UPLOAD_DEBUG] Before parsing success response', JSON.stringify({location:'AudioUpload.vue:270',message:'Before parsing success response',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'F'}));
+    // #endregion
+    let result;
+    try {
+      const text = await response.text();
+      // #region agent log
+      console.log('[UPLOAD_DEBUG] Success response text received', JSON.stringify({location:'AudioUpload.vue:274',message:'Success response text received',data:{textLength:text.length,textPreview:text.substring(0,200)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'F'}));
+      // #endregion
+      result = JSON.parse(text);
+      // #region agent log
+      console.log('[UPLOAD_DEBUG] Success response parsed', JSON.stringify({location:'AudioUpload.vue:277',message:'Success response parsed',data:{hasSuccess:!!result.success,resultKeys:Object.keys(result||{})},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'F'}));
+      // #endregion
+    } catch (e) {
+      // #region agent log
+      console.log('[UPLOAD_DEBUG] Failed to parse success response', JSON.stringify({location:'AudioUpload.vue:280',message:'Failed to parse success response',data:{error:String(e)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'F'}));
+      // #endregion
+      throw new Error('Failed to parse response: ' + String(e));
+    }
     
     if (result.success) {
       success.value = 'File uploaded successfully!'
@@ -283,6 +322,9 @@ const upload = async (name?: string, description?: string, version?: string) => 
       throw new Error(result.error || 'Upload failed')
     }
   } catch (err: any) {
+    // #region agent log
+    console.log('[UPLOAD_DEBUG] Client error caught', JSON.stringify({location:'AudioUpload.vue:290',message:'Client error caught',data:{errorMessage:err?.message||'unknown',errorName:err?.name||'unknown',stack:err?.stack?.substring(0,200)||''},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'F'}));
+    // #endregion
     error.value = err.message || 'Upload failed'
     uploading.value = false
     emit('error', error.value)
