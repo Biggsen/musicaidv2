@@ -95,6 +95,26 @@ export default defineEventHandler(async (event) => {
       })
     }
 
+    // Check file size - Netlify functions have a 6MB request body limit (free tier)
+    // #region agent log
+    console.log('[UPLOAD_DEBUG] File size check', JSON.stringify({location:'audio.post.ts:84',message:'File size check',data:{fileSize:file.size,fileSizeMB:(file.size/1024/1024).toFixed(2)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'G'}));
+    // #endregion
+    const MAX_FILE_SIZE = 6 * 1024 * 1024 // 6MB - Netlify free tier limit
+    if (file.size > MAX_FILE_SIZE) {
+      // #region agent log
+      console.log('[UPLOAD_DEBUG] File too large', JSON.stringify({location:'audio.post.ts:88',message:'File too large',data:{fileSize:file.size,fileSizeMB:(file.size/1024/1024).toFixed(2),maxSizeMB:6},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'G'}));
+      // #endregion
+      throw createError({
+        statusCode: 413,
+        message: `File size (${(file.size / 1024 / 1024).toFixed(2)}MB) exceeds the 6MB limit for Netlify functions. Please use a smaller file or upgrade your Netlify plan.`,
+        data: {
+          fileSize: file.size,
+          fileSizeMB: (file.size / 1024 / 1024).toFixed(2),
+          maxSizeMB: 6,
+        },
+      })
+    }
+
     // Generate unique filename
     const fileExtension = file.name.split('.').pop() || 'mp3'
     const timestamp = Date.now()

@@ -217,6 +217,14 @@ const upload = async (name?: string, description?: string, version?: string) => 
   error.value = ''
   success.value = ''
 
+  // Check file size - Netlify functions have a 6MB request body limit
+  const MAX_FILE_SIZE = 6 * 1024 * 1024 // 6MB
+  if (selectedFile.value && selectedFile.value.size > MAX_FILE_SIZE) {
+    uploading.value = false
+    error.value = `File size (${(selectedFile.value.size / 1024 / 1024).toFixed(2)}MB) exceeds the 6MB limit. Please use a smaller file.`
+    return
+  }
+
   try {
     // Create FormData
     const formData = new FormData()
