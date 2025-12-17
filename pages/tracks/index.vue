@@ -86,6 +86,12 @@
           </div>
         </div>
       </div>
+      <div class="mt-4 pt-4 border-t border-default">
+        <UCheckbox
+          v-model="showCompleted"
+          label="Show completed"
+        />
+      </div>
     </UCard>
 
     <!-- Loading State -->
@@ -634,6 +640,7 @@ const viewMode = ref<'grid' | 'list'>('grid')
 const editingTrackId = ref<string | null>(null)
 const sortField = ref('updated_at')
 const sortDirection = ref<'asc' | 'desc'>('desc')
+const showCompleted = ref(false)
 
 interface TrackProgress {
   progress: number
@@ -731,6 +738,13 @@ const filteredTracks = computed(() => {
         t.name.toLowerCase().includes(query) ||
         getArtistName(t.artist_id).toLowerCase().includes(query)
     )
+  }
+
+  if (!showCompleted.value) {
+    filtered = filtered.filter(t => {
+      const progress = getTrackProgress(t.id).progress
+      return progress < 100
+    })
   }
 
   // Apply sorting
