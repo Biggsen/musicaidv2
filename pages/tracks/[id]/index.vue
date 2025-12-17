@@ -820,13 +820,18 @@ const handleStepCompleted = async (stepId: string) => {
         status => status.id === currentStatus.id
       )
       
-      // If there's a previous status, complete its last step
+      // Complete ALL steps in ALL previous statuses
       if (currentStatusIndex > 0) {
-        const previousStatus = workflowStatuses.value[currentStatusIndex - 1]
-        if (previousStatus && previousStatus.steps && previousStatus.steps.length > 0) {
-          const lastStepOfPreviousStatus = previousStatus.steps[previousStatus.steps.length - 1]
-          if (lastStepOfPreviousStatus && !completedStepIds.value.has(lastStepOfPreviousStatus.id)) {
-            stepsToComplete.push(lastStepOfPreviousStatus.id)
+        // Iterate through all previous statuses (from index 0 to currentStatusIndex - 1)
+        for (let statusIdx = 0; statusIdx < currentStatusIndex; statusIdx++) {
+          const previousStatus = workflowStatuses.value[statusIdx]
+          if (previousStatus && previousStatus.steps && previousStatus.steps.length > 0) {
+            // Complete all steps in this previous status
+            for (const step of previousStatus.steps) {
+              if (step && !completedStepIds.value.has(step.id)) {
+                stepsToComplete.push(step.id)
+              }
+            }
           }
         }
       }
@@ -888,8 +893,75 @@ const handleStepUncompleted = async (stepId: string) => {
   if (!track.value) return
 
   try {
-    // Mark step as incomplete (remove from track_steps table)
-    await uncompleteStep(track.value.id, stepId)
+    // Find which status contains the step being uncompleted
+    let stepStatus: TrackStatusWithSteps | null = null
+    let stepIndex = -1
+    
+    for (const status of workflowStatuses.value) {
+      if (status.steps) {
+        const index = status.steps.findIndex(step => step.id === stepId)
+        if (index !== -1) {
+          stepStatus = status
+          stepIndex = index
+          break
+        }
+      }
+    }
+    
+    if (!stepStatus || stepIndex === -1) {
+      // Step not found in any status, fallback to original behavior
+      await uncompleteStep(track.value.id, stepId)
+      await loadWorkflow()
+      return
+    }
+
+    // Check if status is linear (non_linear is false or undefined by default)
+    const isLinear = stepStatus.non_linear !== true
+
+    // Steps to uncomplete: the clicked step + all subsequent steps if linear
+    const stepsToUncomplete: string[] = []
+    
+    if (isLinear) {
+      // Find the status index in the workflowStatuses array
+      const statusIndex = workflowStatuses.value.findIndex(
+        status => status.id === stepStatus!.id
+      )
+      
+      // Uncomplete all subsequent steps in current status (from stepIndex to end)
+      if (stepStatus.steps) {
+        for (let i = stepIndex; i < stepStatus.steps.length; i++) {
+          const step = stepStatus.steps[i]
+          if (step && completedStepIds.value.has(step.id)) {
+            stepsToUncomplete.push(step.id)
+          }
+        }
+      }
+      
+      // Uncomplete ALL steps in ALL subsequent statuses
+      if (statusIndex >= 0 && statusIndex < workflowStatuses.value.length - 1) {
+        // Iterate through all subsequent statuses (from statusIndex + 1 to end)
+        for (let statusIdx = statusIndex + 1; statusIdx < workflowStatuses.value.length; statusIdx++) {
+          const subsequentStatus = workflowStatuses.value[statusIdx]
+          if (subsequentStatus && subsequentStatus.steps && subsequentStatus.steps.length > 0) {
+            // Uncomplete all steps in this subsequent status
+            for (const step of subsequentStatus.steps) {
+              if (step && completedStepIds.value.has(step.id)) {
+                stepsToUncomplete.push(step.id)
+              }
+            }
+          }
+        }
+      }
+    } else {
+      // Non-linear: only uncomplete the clicked step
+      stepsToUncomplete.push(stepId)
+    }
+
+    // Uncomplete all steps in parallel
+    await Promise.all(
+      stepsToUncomplete.map(stepIdToUncomplete => uncompleteStep(track.value!.id, stepIdToUncomplete))
+    )
+    
     await loadWorkflow()
   } catch (err: any) {
     console.error('Failed to uncomplete step:', err)
