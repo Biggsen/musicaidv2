@@ -38,7 +38,7 @@
             v-model="selectedArtistId"
             :items="artistOptions"
             placeholder="All artists"
-            @update:model-value="loadTracks"
+            @update:model-value="() => { loadTracks(); saveFilterSettings(); }"
           />
         </div>
         <div>
@@ -48,6 +48,7 @@
             placeholder="Search tracks..."
             icon="i-ph-magnifying-glass"
             @input="filterTracks"
+            @update:model-value="saveFilterSettings"
           />
         </div>
         <div>
@@ -75,22 +76,32 @@
               :color="viewMode === 'grid' ? 'primary' : 'neutral'"
               variant="ghost"
               icon="i-ph-grid-four"
-              @click="viewMode = 'grid'"
+              @click="viewMode = 'grid'; saveFilterSettings()"
             />
             <UButton
               :color="viewMode === 'list' ? 'primary' : 'neutral'"
               variant="ghost"
               icon="i-ph-table"
-              @click="viewMode = 'list'"
+              @click="viewMode = 'list'; saveFilterSettings()"
             />
           </div>
         </div>
       </div>
-      <div class="mt-4 pt-4 border-t border-default">
+      <div class="mt-4 pt-4 border-t border-default flex items-center justify-between">
         <UCheckbox
           v-model="showCompleted"
           label="Show completed"
+          @update:model-value="saveFilterSettings"
         />
+        <UButton
+          color="neutral"
+          variant="ghost"
+          icon="i-ph-x"
+          size="sm"
+          @click="clearFilters"
+        >
+          Clear Filters
+        </UButton>
       </div>
     </UCard>
 
@@ -632,15 +643,91 @@ const showCreateModal = ref(false)
 const showEditModal = ref(false)
 const error = ref('')
 const editError = ref('')
-const selectedArtistId = ref('all')
+const STORAGE_KEY = 'tracks-filter-settings'
+
+const loadFilterSettings = () => {
+  if (process.client) {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY)
+      if (saved) {
+        const settings = JSON.parse(saved)
+        return {
+          selectedArtistId: settings.selectedArtistId ?? 'all',
+          searchQuery: settings.searchQuery ?? '',
+          viewMode: settings.viewMode ?? 'grid',
+          sortField: settings.sortField ?? 'updated_at',
+          sortDirection: settings.sortDirection ?? 'desc',
+          showCompleted: settings.showCompleted ?? false,
+        }
+      }
+    } catch (err) {
+      console.error('Failed to load filter settings:', err)
+    }
+  }
+  return {
+    selectedArtistId: 'all',
+    searchQuery: '',
+    viewMode: 'grid' as const,
+    sortField: 'updated_at',
+    sortDirection: 'desc' as const,
+    showCompleted: false,
+  }
+}
+
+const saveFilterSettings = () => {
+  if (process.client) {
+    try {
+      const settings = {
+        selectedArtistId: selectedArtistId.value,
+        searchQuery: searchQuery.value,
+        viewMode: viewMode.value,
+        sortField: sortField.value,
+        sortDirection: sortDirection.value,
+        showCompleted: showCompleted.value,
+      }
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(settings))
+    } catch (err) {
+      console.error('Failed to save filter settings:', err)
+    }
+  }
+}
+
+const clearFilters = () => {
+  const currentViewMode = viewMode.value
+  selectedArtistId.value = 'all'
+  searchQuery.value = ''
+  sortField.value = 'updated_at'
+  sortDirection.value = 'desc'
+  showCompleted.value = false
+  
+  if (process.client) {
+    try {
+      const settings = {
+        selectedArtistId: 'all',
+        searchQuery: '',
+        viewMode: currentViewMode,
+        sortField: 'updated_at',
+        sortDirection: 'desc',
+        showCompleted: false,
+      }
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(settings))
+    } catch (err) {
+      console.error('Failed to clear filter settings:', err)
+    }
+  }
+}
+
+const initialSettings = loadFilterSettings()
+
+const selectedArtistId = ref(initialSettings.selectedArtistId)
 const selectedStatusId = ref<string | undefined>(undefined)
 const editSelectedStatusId = ref<string | undefined>(undefined)
-const searchQuery = ref('')
-const viewMode = ref<'grid' | 'list'>('grid')
+const searchQuery = ref(initialSettings.searchQuery)
+const viewMode = ref<'grid' | 'list'>(initialSettings.viewMode)
 const editingTrackId = ref<string | null>(null)
-const sortField = ref('updated_at')
-const sortDirection = ref<'asc' | 'desc'>('desc')
-const showCompleted = ref(false)
+const sortField = ref(initialSettings.sortField)
+const sortDirection = ref<'asc' | 'desc'>(initialSettings.sortDirection)
+const showCompleted = ref(initialSettings.showCompleted)
 
 interface TrackProgress {
   progress: number
@@ -722,6 +809,7 @@ const sortOptions = [
 
 const toggleSortDirection = () => {
   sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc'
+  saveFilterSettings()
 }
 
 const filteredTracks = computed(() => {
@@ -799,6 +887,7 @@ const filteredTracks = computed(() => {
 
 const applySorting = () => {
   // Sorting is handled reactively by the computed property
+  saveFilterSettings()
 }
 
 interface TableRow {
@@ -838,6 +927,11 @@ const tableRows = computed<TableRow[]>(() => {
     template_id: track.template_id,
   }))
 })
+
+// Watch for changes to persist settings
+watch([selectedArtistId, searchQuery, viewMode, sortField, sortDirection, showCompleted], () => {
+  saveFilterSettings()
+}, { deep: true })
 
 // Load data
 onMounted(async () => {
