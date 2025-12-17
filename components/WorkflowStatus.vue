@@ -61,6 +61,7 @@
             color="primary"
             size="sm"
             variant="ghost"
+            class="cursor-pointer"
             @click="completeStep(step)"
           >
             Complete
@@ -71,6 +72,7 @@
             size="sm"
             variant="ghost"
             icon="i-ph-x"
+            class="cursor-pointer"
             @click="uncompleteStep(step)"
           >
             Undo
