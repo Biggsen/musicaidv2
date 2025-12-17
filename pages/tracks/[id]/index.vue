@@ -65,14 +65,25 @@
                   </label>
                   <p class="text-default">{{ track.tempo }} BPM</p>
                 </div>
-                <div v-if="track.minutes !== null && track.seconds !== null">
+                <div>
                   <label class="flex items-center gap-2 text-sm font-medium text-default mb-1">
                     <UIcon name="i-ph-timer" class="w-4 h-4" />
                     Duration
                   </label>
-                  <p class="text-default">
+                  <p v-if="track.minutes !== null && track.seconds !== null" class="text-default">
                     {{ track.minutes }}:{{ String(track.seconds).padStart(2, '0') }}
                   </p>
+                  <UButton
+                    v-else
+                    size="xs"
+                    color="primary"
+                    variant="soft"
+                    :loading="fetchingDuration"
+                    class="cursor-pointer"
+                    @click="getDurationFromLatestAudio"
+                  >
+                    Get from latest audio
+                  </UButton>
                 </div>
                 <div>
                   <label class="block text-sm font-medium text-default mb-1">Samples</label>
@@ -83,8 +94,15 @@
           </UCard>
 
           <!-- Workflow Status Section -->
-          <UCard v-if="workflowStatuses.length > 0 && track">
+          <UCard v-if="track" :style="loadingWorkflow ? { height: '290px' } : {}">
+            <div v-if="loadingWorkflow" class="h-full flex flex-col">
+              <h3 class="text-lg font-semibold text-default mb-4">Workflow Status</h3>
+              <div class="flex justify-center items-center flex-1">
+                <UIcon name="i-ph-arrow-clockwise" class="w-6 h-6 text-dimmed animate-spin" />
+              </div>
+            </div>
             <WorkflowStatus
+              v-else-if="workflowStatuses.length > 0"
               :statuses="workflowStatuses"
               :current-status-id="track?.track_status_id"
               :current-step-id="track?.step_id"
@@ -601,6 +619,7 @@ const notes = ref<Note[]>([])
 const workflowStatuses = ref<TrackStatusWithSteps[]>([])
 const completedStepIds = ref<Set<string>>(new Set())
 const loading = ref(true)
+const loadingWorkflow = ref(true)
 const error = ref('')
 const showUploadModal = ref(false)
 const showNoteModal = ref(false)
@@ -620,6 +639,7 @@ const newAudioName = ref('')
 const newAudioDescription = ref('')
 const newAudioVersion = ref('')
 const newAudioMixdownDate = ref('')
+const fetchingDuration = ref(false)
 const currentlyPlayingId = ref<string | null>(null)
 const audioPlayers = ref<Map<string, HTMLAudioElement>>(new Map())
 const editAudio = ref<{
@@ -701,6 +721,7 @@ const loadNotes = async () => {
 const loadWorkflow = async () => {
   if (!track.value) return
 
+  loadingWorkflow.value = true
   try {
     // Load completed steps for this track (gracefully handles missing table)
     try {
@@ -759,6 +780,8 @@ const loadWorkflow = async () => {
   } catch (err: any) {
     console.error('Failed to load workflow:', err)
     workflowStatuses.value = []
+  } finally {
+    loadingWorkflow.value = false
   }
 }
 
@@ -1067,6 +1090,45 @@ const handleDeleteTrack = async () => {
     router.push('/tracks')
   } catch (err: any) {
     console.error('Failed to delete track:', err)
+  }
+}
+
+const getDurationFromLatestAudio = async () => {
+  if (!track.value) return
+
+  fetchingDuration.value = true
+  try {
+    // Get the latest audio file (first in array since they're ordered by created_at desc)
+    const latestAudio = audioFiles.value[0]
+    
+    if (!latestAudio) {
+      alert('No audio files found for this track.')
+      return
+    }
+
+    if (latestAudio.duration_seconds === null || latestAudio.duration_seconds === undefined) {
+      alert('The latest audio file does not have duration information.')
+      return
+    }
+
+    // Convert duration_seconds to minutes and seconds
+    const totalSeconds = Math.floor(latestAudio.duration_seconds)
+    const minutes = Math.floor(totalSeconds / 60)
+    const seconds = totalSeconds % 60
+
+    // Update the track
+    await updateTrack(track.value.id, {
+      minutes,
+      seconds,
+    })
+
+    // Reload the track to show updated duration
+    await loadTrack()
+  } catch (err: any) {
+    console.error('Failed to get duration from latest audio:', err)
+    alert('Failed to get duration from latest audio. Please try again.')
+  } finally {
+    fetchingDuration.value = false
   }
 }
 
