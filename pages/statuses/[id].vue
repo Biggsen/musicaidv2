@@ -81,7 +81,7 @@
               <div
                 v-for="(step, index) in steps"
                 :key="step.id"
-                class="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50"
+                class="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:shadow-md transition-shadow"
               >
                 <div class="flex items-center gap-3 flex-1">
                   <span class="text-sm font-medium text-muted">#{{ index + 1 }}</span>
