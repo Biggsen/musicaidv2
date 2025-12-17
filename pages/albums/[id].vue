@@ -271,7 +271,7 @@ const addingTrack = ref(false)
 const showAddTrackModal = ref(false)
 const error = ref('')
 const trackError = ref('')
-const selectedTrackIds = ref<string[]>([])
+const selectedTrackIds = ref<Array<{ label: string; value: string }>>([])
 const trackOrder = ref<number | null>(null)
 const draggedTrackId = ref<string | null>(null)
 const dragOverIndex = ref<number | null>(null)
@@ -340,13 +340,13 @@ const handleAddTrack = async () => {
   addingTrack.value = true
 
   try {
-    // Extract actual track IDs from selected items (handle both string IDs and objects)
-    const trackIds = selectedTrackIds.value.map((item: any) => {
-      if (typeof item === 'string') {
-        return item
+    // Extract actual track IDs from selected items
+    const trackIds: string[] = []
+    for (const item of selectedTrackIds.value) {
+      if (item.value) {
+        trackIds.push(item.value)
       }
-      return item?.value || item?.id || item
-    }).filter(Boolean)
+    }
 
     if (trackIds.length === 0) {
       trackError.value = 'No valid tracks selected'
@@ -368,13 +368,14 @@ const handleAddTrack = async () => {
     }
 
     // Add all selected tracks
-    for (let i = 0; i < trackIds.length; i++) {
-      const trackId = trackIds[i]
-      const order = startOrder + i
+    let orderIndex = 0
+    for (const trackId of trackIds) {
+      const order = startOrder + orderIndex
       await updateTrack(trackId, {
         album_id: album.value.id,
         album_order: order,
       })
+      orderIndex++
     }
 
     showAddTrackModal.value = false
