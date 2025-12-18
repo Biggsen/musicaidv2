@@ -667,6 +667,7 @@ const newAudioMixdownDate = ref('')
 const fetchingDuration = ref(false)
 const currentlyPlayingId = ref<string | null>(null)
 const audioPlayers = ref<Map<string, HTMLAudioElement>>(new Map())
+const playingAudioId = ref<string | null>(null)
 const editingTitle = ref(false)
 const editingTitleValue = ref('')
 const savingTitle = ref(false)
@@ -1058,9 +1059,11 @@ const toggleAudio = (audio: AudioFile) => {
         player.play().catch((err) => {
           console.error('Failed to play audio:', err)
         })
+        playingAudioId.value = audio.id
       } else {
         // If playing, pause
         player.pause()
+        playingAudioId.value = null
       }
     }
   } else {
@@ -1071,6 +1074,7 @@ const toggleAudio = (audio: AudioFile) => {
         currentPlayer.pause()
       }
     }
+    playingAudioId.value = null
     // Show player for this audio
     currentlyPlayingId.value = audio.id
     // Wait for next tick to ensure audio element is rendered
@@ -1080,6 +1084,7 @@ const toggleAudio = (audio: AudioFile) => {
         player.play().catch((err) => {
           console.error('Failed to play audio:', err)
         })
+        playingAudioId.value = audio.id
       }
     })
   }
@@ -1087,12 +1092,11 @@ const toggleAudio = (audio: AudioFile) => {
 
 const handleAudioEnded = () => {
   currentlyPlayingId.value = null
+  playingAudioId.value = null
 }
 
 const isAudioPlaying = (audioId: string): boolean => {
-  if (currentlyPlayingId.value !== audioId) return false
-  const player = audioPlayers.value.get(audioId)
-  return player ? !player.paused && !player.ended : false
+  return playingAudioId.value === audioId
 }
 
 const handleAudioPlay = (audioId: string) => {
@@ -1100,11 +1104,13 @@ const handleAudioPlay = (audioId: string) => {
   if (currentlyPlayingId.value !== audioId) {
     currentlyPlayingId.value = audioId
   }
+  playingAudioId.value = audioId
 }
 
 const handleAudioPause = (audioId: string) => {
   // Don't hide the player on pause - keep it visible so user can resume
   // The player will only close when track ends or user explicitly closes it
+  playingAudioId.value = null
 }
 
 const handleDeleteTrack = async () => {
