@@ -469,7 +469,7 @@ const handleBatchUpload = async () => {
         artist_id: selectedArtistId.value,
         template_id: selectedTemplateId.value || null,
         track_status_id: initialStatusId,
-        samples: 'Soundation',
+        samples: null,
         created_by: user.value?.id || null,
       }
 

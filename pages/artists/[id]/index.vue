@@ -227,7 +227,7 @@ const trackError = ref('')
 const newTrack = ref<TrackInsert>({
   name: '',
   artist_id: '',
-  samples: 'Soundation',
+  samples: null,
   tempo: null,
   description: null,
 })
@@ -279,7 +279,7 @@ const handleCreateTrack = async () => {
     newTrack.value = {
       name: '',
       artist_id: artist.value.id,
-      samples: 'Soundation',
+      samples: null,
       tempo: null,
       description: null,
     }
