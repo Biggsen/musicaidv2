@@ -29,10 +29,35 @@
         </div>
         <UPageHeader
           :headline="artist?.name"
-          :title="track.name"
           :description="track.description || undefined"
           :ui="{ description: 'max-w-[60ch]' }"
         >
+          <template #title>
+            <div class="flex items-center gap-2">
+              <UInput
+                v-if="editingTitle"
+                v-model="editingTitleValue"
+                class="text-2xl font-bold"
+                :ui="{ 
+                  base: 'text-2xl font-bold', 
+                  wrapper: '!p-0', 
+                  input: '!p-0 border-b-2 border-primary focus:ring-0 bg-transparent text-default' 
+                }"
+                :loading="savingTitle"
+                autofocus
+                @blur="saveTitle"
+                @keydown.enter="saveTitle"
+                @keydown.escape="cancelTitleEdit"
+              />
+              <h1
+                v-else
+                class="text-2xl font-bold text-default cursor-pointer hover:text-primary transition-colors"
+                @click="startTitleEdit"
+              >
+                {{ track.name }}
+              </h1>
+            </div>
+          </template>
           <template #links>
             <div class="flex items-center gap-3">
               <UDropdownMenu :items="getTemplateMenuItems()" :content="{ align: 'end' }">
@@ -642,6 +667,9 @@ const newAudioMixdownDate = ref('')
 const fetchingDuration = ref(false)
 const currentlyPlayingId = ref<string | null>(null)
 const audioPlayers = ref<Map<string, HTMLAudioElement>>(new Map())
+const editingTitle = ref(false)
+const editingTitleValue = ref('')
+const savingTitle = ref(false)
 const editAudio = ref<{
   name: string
   description: string
@@ -1402,6 +1430,41 @@ const handleEditAudio = async () => {
   } finally {
     editingAudio.value = false
   }
+}
+
+const startTitleEdit = () => {
+  if (!track.value) return
+  editingTitleValue.value = track.value.name
+  editingTitle.value = true
+}
+
+const saveTitle = async () => {
+  if (!track.value || !editingTitleValue.value.trim()) {
+    editingTitle.value = false
+    return
+  }
+
+  if (editingTitleValue.value === track.value.name) {
+    editingTitle.value = false
+    return
+  }
+
+  savingTitle.value = true
+  try {
+    await updateTrack(track.value.id, { name: editingTitleValue.value.trim() })
+    track.value.name = editingTitleValue.value.trim()
+    editingTitle.value = false
+  } catch (err: any) {
+    console.error('Failed to update track name:', err)
+    alert(err.message || 'Failed to update track name')
+  } finally {
+    savingTitle.value = false
+  }
+}
+
+const cancelTitleEdit = () => {
+  editingTitle.value = false
+  editingTitleValue.value = ''
 }
 
 useSeoMeta({
