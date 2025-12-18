@@ -110,7 +110,7 @@
                     Get from latest audio
                   </UButton>
                 </div>
-                <div>
+                <div v-if="track.samples">
                   <label class="block text-sm font-medium text-default mb-1">Samples</label>
                   <p class="text-default">{{ track.samples }}</p>
                 </div>

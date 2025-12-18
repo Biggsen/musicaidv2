@@ -151,13 +151,10 @@
         v-for="track in filteredTracks"
         :key="track.id"
         class="hover:shadow-lg transition-shadow overflow-visible cursor-pointer"
-        @click.self="() => router.push(`/tracks/${track.id}`)"
+        @click="() => router.push(`/tracks/${track.id}`)"
       >
         <div class="flex items-start justify-between mb-3">
-          <div
-            class="flex-1"
-            @click="() => router.push(`/tracks/${track.id}`)"
-          >
+          <div class="flex-1">
             <h3 class="text-lg font-semibold text-default">{{ track.name }}</h3>
             <p v-if="track.description" class="text-sm text-muted mt-1 line-clamp-2">
               {{ track.description }}
@@ -175,10 +172,7 @@
             />
           </UDropdownMenu>
         </div>
-        <div
-          class="space-y-2 text-sm text-muted"
-          @click="() => router.push(`/tracks/${track.id}`)"
-        >
+        <div class="space-y-2 text-sm text-muted">
           <p v-if="track.tempo">Tempo: {{ track.tempo }} BPM</p>
           <p v-if="track.minutes !== null && track.seconds !== null">
             Duration: {{ track.minutes }}:{{ String(track.seconds).padStart(2, '0') }}
