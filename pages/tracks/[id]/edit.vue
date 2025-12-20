@@ -127,11 +127,12 @@
               </label>
               <USelect
                 id="track-time-signature"
-                v-model="currentTimeSignature"
+                :model-value="currentTimeSignature ?? undefined"
                 :items="timeSignatureOptions"
                 placeholder="Select time signature"
                 :disabled="saving"
                 style="width: 180px;"
+                @update:model-value="(val) => currentTimeSignature = val ?? null"
               />
               <div v-if="showCustomTimeSignature" class="mt-2 flex items-center gap-2">
                 <UInput

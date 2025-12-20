@@ -409,11 +409,12 @@
               </label>
               <USelect
                 id="track-time-signature"
-                v-model="createCurrentTimeSignature"
+                :model-value="createCurrentTimeSignature ?? undefined"
                 :items="timeSignatureOptions"
                 placeholder="Select time signature"
                 :disabled="creating"
                 style="width: 180px;"
+                @update:model-value="(val) => createCurrentTimeSignature = val ?? null"
               />
               <div v-if="createShowCustomTimeSignature" class="mt-2 flex items-center gap-2">
                 <UInput
@@ -572,11 +573,12 @@
               </label>
               <USelect
                 id="edit-track-time-signature"
-                v-model="editCurrentTimeSignature"
+                :model-value="editCurrentTimeSignature ?? undefined"
                 :items="timeSignatureOptions"
                 placeholder="Select time signature"
                 :disabled="editing"
                 style="width: 180px;"
+                @update:model-value="(val) => editCurrentTimeSignature = val ?? null"
               />
               <div v-if="editShowCustomTimeSignature" class="mt-2 flex items-center gap-2">
                 <UInput

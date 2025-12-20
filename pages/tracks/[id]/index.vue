@@ -126,13 +126,13 @@
                   </label>
                   <div v-if="editingTimeSignature" class="space-y-2">
                     <USelect
-                      v-model="editingTimeSignatureValue"
+                      :model-value="editingTimeSignatureValue ?? undefined"
                       :items="timeSignatureOptions"
                       placeholder="Select time signature"
                       style="width: 180px;"
                       autofocus
                       :loading="savingTimeSignature"
-                      @update:model-value="handleTimeSignatureSelect"
+                      @update:model-value="(val) => { editingTimeSignatureValue = val ?? null; handleTimeSignatureSelect(val); }"
                     />
                     <div v-if="showCustomTimeSignatureInputs" class="flex items-center gap-2">
                       <UInput
