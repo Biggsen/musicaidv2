@@ -403,17 +403,50 @@
                 :disabled="creating"
               />
             </div>
-            <div>
-              <label for="track-samples" class="block text-sm font-medium text-default mb-1">
-                Samples
+            <div class="w-full">
+              <label for="track-time-signature" class="block text-sm font-medium text-default mb-1">
+                Time Signature
               </label>
-              <UInput
-                id="track-samples"
-                v-model="newTrack.samples"
-                placeholder="Soundation"
+              <USelect
+                id="track-time-signature"
+                v-model="createCurrentTimeSignature"
+                :items="timeSignatureOptions"
+                placeholder="Select time signature"
                 :disabled="creating"
+                style="width: 180px;"
               />
+              <div v-if="createShowCustomTimeSignature" class="mt-2 flex items-center gap-2">
+                <UInput
+                  id="track-time-signature-numerator"
+                  v-model.number="newTrack.time_signature_numerator"
+                  type="number"
+                  placeholder="4"
+                  class="w-20"
+                  :disabled="creating"
+                />
+                <span class="text-muted">/</span>
+                <UInput
+                  id="track-time-signature-denominator"
+                  v-model.number="newTrack.time_signature_denominator"
+                  type="number"
+                  placeholder="4"
+                  class="w-20"
+                  :disabled="creating"
+                />
+              </div>
             </div>
+          </div>
+
+          <div>
+            <label for="track-samples" class="block text-sm font-medium text-default mb-1">
+              Samples
+            </label>
+            <UInput
+              id="track-samples"
+              v-model="newTrack.samples"
+              placeholder="Soundation"
+              :disabled="creating"
+            />
           </div>
 
           <UAlert v-if="error" color="error" variant="soft" :title="error" />
@@ -533,17 +566,50 @@
                 :disabled="editing"
               />
             </div>
-            <div>
-              <label for="edit-track-samples" class="block text-sm font-medium text-default mb-1">
-                Samples
+            <div class="w-full">
+              <label for="edit-track-time-signature" class="block text-sm font-medium text-default mb-1">
+                Time Signature
               </label>
-              <UInput
-                id="edit-track-samples"
-                v-model="editTrack.samples"
-                placeholder="Soundation"
+              <USelect
+                id="edit-track-time-signature"
+                v-model="editCurrentTimeSignature"
+                :items="timeSignatureOptions"
+                placeholder="Select time signature"
                 :disabled="editing"
+                style="width: 180px;"
               />
+              <div v-if="editShowCustomTimeSignature" class="mt-2 flex items-center gap-2">
+                <UInput
+                  id="edit-track-time-signature-numerator"
+                  v-model.number="editTrack.time_signature_numerator"
+                  type="number"
+                  placeholder="4"
+                  class="w-20"
+                  :disabled="editing"
+                />
+                <span class="text-muted">/</span>
+                <UInput
+                  id="edit-track-time-signature-denominator"
+                  v-model.number="editTrack.time_signature_denominator"
+                  type="number"
+                  placeholder="4"
+                  class="w-20"
+                  :disabled="editing"
+                />
+              </div>
             </div>
+          </div>
+
+          <div>
+            <label for="edit-track-samples" class="block text-sm font-medium text-default mb-1">
+              Samples
+            </label>
+            <UInput
+              id="edit-track-samples"
+              v-model="editTrack.samples"
+              placeholder="Soundation"
+              :disabled="editing"
+            />
           </div>
 
           <div class="grid grid-cols-2 gap-4">
@@ -737,6 +803,9 @@ const newTrack = ref<TrackInsert>({
   template_id: null,
   samples: undefined,
   tempo: null,
+  time_signature_numerator: null,
+  time_signature_denominator: null,
+  time_signature_varied: false,
   description: null,
 })
 
@@ -745,11 +814,147 @@ const editTrack = ref<TrackUpdate>({
   key: '',
   template_id: null,
   tempo: null,
+  time_signature_numerator: null,
+  time_signature_denominator: null,
+  time_signature_varied: false,
   minutes: null,
   seconds: null,
   samples: '',
   isrc_code: null,
   description: null,
+})
+
+// Define time signature options
+const timeSignatureOptions = [
+  { label: '4/4', value: '4/4', numerator: 4, denominator: 4 },
+  { label: '3/4', value: '3/4', numerator: 3, denominator: 4 },
+  { label: '6/8', value: '6/8', numerator: 6, denominator: 8 },
+  { label: 'Varied', value: 'varied' },
+  { label: 'Custom', value: 'custom' },
+]
+
+// Track explicitly selected custom option for edit modal
+const editExplicitCustomSelected = ref(false)
+
+// Computed property to determine current selection for edit modal
+const editCurrentTimeSignature = computed({
+  get: () => {
+    if (editTrack.value.time_signature_varied) {
+      editExplicitCustomSelected.value = false
+      return 'varied'
+    }
+    // If custom was explicitly selected, return 'custom' regardless of values
+    if (editExplicitCustomSelected.value) {
+      return 'custom'
+    }
+    const num = editTrack.value.time_signature_numerator
+    const den = editTrack.value.time_signature_denominator
+    if (num && den) {
+      // Check if it matches a common option
+      const match = timeSignatureOptions.find(
+        opt => opt.numerator === num && opt.denominator === den
+      )
+      if (match) {
+        return match.value
+      }
+      return 'custom'
+    }
+    return null
+  },
+  set: (value: string | null) => {
+    if (value === 'varied') {
+      editExplicitCustomSelected.value = false
+      editTrack.value.time_signature_varied = true
+      editTrack.value.time_signature_numerator = null
+      editTrack.value.time_signature_denominator = null
+    } else if (value === 'custom') {
+      editExplicitCustomSelected.value = true
+      editTrack.value.time_signature_varied = false
+      // Don't set default values - keep existing or leave null
+    } else if (value) {
+      editExplicitCustomSelected.value = false
+      // Common option selected
+      editTrack.value.time_signature_varied = false
+      const option = timeSignatureOptions.find(opt => opt.value === value)
+      if (option && option.numerator && option.denominator) {
+        editTrack.value.time_signature_numerator = option.numerator
+        editTrack.value.time_signature_denominator = option.denominator
+      }
+    } else {
+      // Clear all
+      editExplicitCustomSelected.value = false
+      editTrack.value.time_signature_varied = false
+      editTrack.value.time_signature_numerator = null
+      editTrack.value.time_signature_denominator = null
+    }
+  }
+})
+
+// Show custom inputs when custom is selected
+const editShowCustomTimeSignature = computed(() => {
+  return editCurrentTimeSignature.value === 'custom'
+})
+
+// Track explicitly selected custom option for create modal
+const createExplicitCustomSelected = ref(false)
+
+// Computed property to determine current selection for create modal
+const createCurrentTimeSignature = computed({
+  get: () => {
+    if (newTrack.value.time_signature_varied) {
+      createExplicitCustomSelected.value = false
+      return 'varied'
+    }
+    // If custom was explicitly selected, return 'custom' regardless of values
+    if (createExplicitCustomSelected.value) {
+      return 'custom'
+    }
+    const num = newTrack.value.time_signature_numerator
+    const den = newTrack.value.time_signature_denominator
+    if (num && den) {
+      // Check if it matches a common option
+      const match = timeSignatureOptions.find(
+        opt => opt.numerator === num && opt.denominator === den
+      )
+      if (match) {
+        return match.value
+      }
+      return 'custom'
+    }
+    return null
+  },
+  set: (value: string | null) => {
+    if (value === 'varied') {
+      createExplicitCustomSelected.value = false
+      newTrack.value.time_signature_varied = true
+      newTrack.value.time_signature_numerator = null
+      newTrack.value.time_signature_denominator = null
+    } else if (value === 'custom') {
+      createExplicitCustomSelected.value = true
+      newTrack.value.time_signature_varied = false
+      // Don't set default values - keep existing or leave null
+    } else if (value) {
+      createExplicitCustomSelected.value = false
+      // Common option selected
+      newTrack.value.time_signature_varied = false
+      const option = timeSignatureOptions.find(opt => opt.value === value)
+      if (option && option.numerator && option.denominator) {
+        newTrack.value.time_signature_numerator = option.numerator
+        newTrack.value.time_signature_denominator = option.denominator
+      }
+    } else {
+      // Clear all
+      createExplicitCustomSelected.value = false
+      newTrack.value.time_signature_varied = false
+      newTrack.value.time_signature_numerator = null
+      newTrack.value.time_signature_denominator = null
+    }
+  }
+})
+
+// Show custom inputs when custom is selected for create modal
+const createShowCustomTimeSignature = computed(() => {
+  return createCurrentTimeSignature.value === 'custom'
 })
 
 const artistOptions = computed(() => [
@@ -1143,6 +1348,9 @@ const handleCreateTrack = async () => {
       template_id: null,
       samples: undefined,
       tempo: null,
+      time_signature_numerator: null,
+      time_signature_denominator: null,
+      time_signature_varied: false,
       description: null,
     }
     selectedStatusId.value = undefined
@@ -1228,6 +1436,9 @@ const openEditModal = async (trackId: string) => {
     const track = await getTrack(trackId)
     if (track) {
       editTrack.value = {
+        time_signature_numerator: track.time_signature_numerator,
+        time_signature_denominator: track.time_signature_denominator,
+        time_signature_varied: track.time_signature_varied ?? false,
         name: track.name,
         key: track.key,
         template_id: track.template_id,

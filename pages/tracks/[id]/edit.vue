@@ -121,6 +121,41 @@
                 :disabled="saving"
               />
             </div>
+            <div class="w-full">
+              <label for="track-time-signature" class="block text-sm font-medium text-default mb-1">
+                Time Signature
+              </label>
+              <USelect
+                id="track-time-signature"
+                v-model="currentTimeSignature"
+                :items="timeSignatureOptions"
+                placeholder="Select time signature"
+                :disabled="saving"
+                style="width: 180px;"
+              />
+              <div v-if="showCustomTimeSignature" class="mt-2 flex items-center gap-2">
+                <UInput
+                  id="track-time-signature-numerator"
+                  v-model.number="formData.time_signature_numerator"
+                  type="number"
+                  placeholder="4"
+                  class="w-20"
+                  :disabled="saving"
+                />
+                <span class="text-muted">/</span>
+                <UInput
+                  id="track-time-signature-denominator"
+                  v-model.number="formData.time_signature_denominator"
+                  type="number"
+                  placeholder="4"
+                  class="w-20"
+                  :disabled="saving"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
             <div>
               <label for="track-samples" class="block text-sm font-medium text-default mb-1">
                 Samples
@@ -236,11 +271,85 @@ const formData = ref<TrackUpdate>({
   key: '',
   template_id: null,
   tempo: null,
+  time_signature_numerator: null,
+  time_signature_denominator: null,
+  time_signature_varied: false,
   minutes: null,
   seconds: null,
   samples: '',
   isrc_code: null,
   description: null,
+})
+
+// Define time signature options
+const timeSignatureOptions = [
+  { label: '4/4', value: '4/4', numerator: 4, denominator: 4 },
+  { label: '3/4', value: '3/4', numerator: 3, denominator: 4 },
+  { label: '6/8', value: '6/8', numerator: 6, denominator: 8 },
+  { label: 'Varied', value: 'varied' },
+  { label: 'Custom', value: 'custom' },
+]
+
+// Track explicitly selected custom option
+const explicitCustomSelected = ref(false)
+
+// Computed property to determine current selection
+const currentTimeSignature = computed({
+  get: () => {
+    if (formData.value.time_signature_varied) {
+      explicitCustomSelected.value = false
+      return 'varied'
+    }
+    // If custom was explicitly selected, return 'custom' regardless of values
+    if (explicitCustomSelected.value) {
+      return 'custom'
+    }
+    const num = formData.value.time_signature_numerator
+    const den = formData.value.time_signature_denominator
+    if (num && den) {
+      // Check if it matches a common option
+      const match = timeSignatureOptions.find(
+        opt => opt.numerator === num && opt.denominator === den
+      )
+      if (match) {
+        return match.value
+      }
+      return 'custom'
+    }
+    return null
+  },
+  set: (value: string | null) => {
+    if (value === 'varied') {
+      explicitCustomSelected.value = false
+      formData.value.time_signature_varied = true
+      formData.value.time_signature_numerator = null
+      formData.value.time_signature_denominator = null
+    } else if (value === 'custom') {
+      explicitCustomSelected.value = true
+      formData.value.time_signature_varied = false
+      // Don't set default values - keep existing or leave null
+    } else if (value) {
+      explicitCustomSelected.value = false
+      // Common option selected
+      formData.value.time_signature_varied = false
+      const option = timeSignatureOptions.find(opt => opt.value === value)
+      if (option && option.numerator && option.denominator) {
+        formData.value.time_signature_numerator = option.numerator
+        formData.value.time_signature_denominator = option.denominator
+      }
+    } else {
+      // Clear all
+      explicitCustomSelected.value = false
+      formData.value.time_signature_varied = false
+      formData.value.time_signature_numerator = null
+      formData.value.time_signature_denominator = null
+    }
+  }
+})
+
+// Show custom inputs when custom is selected
+const showCustomTimeSignature = computed(() => {
+  return currentTimeSignature.value === 'custom'
 })
 
 // Load track and templates
@@ -280,6 +389,9 @@ const loadTrack = async () => {
         key: track.value.key,
         template_id: track.value.template_id,
         tempo: track.value.tempo,
+        time_signature_numerator: track.value.time_signature_numerator,
+        time_signature_denominator: track.value.time_signature_denominator,
+        time_signature_varied: track.value.time_signature_varied ?? false,
         minutes: track.value.minutes,
         seconds: track.value.seconds,
         samples: track.value.samples,

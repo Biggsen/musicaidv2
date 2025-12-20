@@ -121,6 +121,71 @@
                 </div>
                 <div>
                   <label class="flex items-center gap-2 text-sm font-medium text-default mb-1">
+                    <UIcon name="i-ph-music-note" class="w-4 h-4" />
+                    Time Signature
+                  </label>
+                  <div v-if="editingTimeSignature" class="space-y-2">
+                    <USelect
+                      v-model="editingTimeSignatureValue"
+                      :items="timeSignatureOptions"
+                      placeholder="Select time signature"
+                      style="width: 180px;"
+                      autofocus
+                      :loading="savingTimeSignature"
+                      @update:model-value="handleTimeSignatureSelect"
+                    />
+                    <div v-if="showCustomTimeSignatureInputs" class="flex items-center gap-2">
+                      <UInput
+                        v-model.number="editingTimeSignatureNumerator"
+                        type="number"
+                        placeholder="4"
+                        class="w-20"
+                      />
+                      <span class="text-muted">/</span>
+                      <UInput
+                        v-model.number="editingTimeSignatureDenominator"
+                        type="number"
+                        placeholder="4"
+                        class="w-20"
+                      />
+                    </div>
+                    <div class="flex items-center gap-2">
+                      <UButton
+                        size="xs"
+                        color="primary"
+                        :loading="savingTimeSignature"
+                        @click="saveTimeSignature"
+                      >
+                        Save
+                      </UButton>
+                      <UButton
+                        size="xs"
+                        color="neutral"
+                        variant="ghost"
+                        @click="cancelTimeSignatureEdit"
+                      >
+                        Cancel
+                      </UButton>
+                    </div>
+                  </div>
+                  <div v-else-if="timeSignatureDisplay" class="flex items-center gap-2">
+                    <p class="text-default cursor-pointer hover:text-primary transition-colors" @click="startTimeSignatureEdit">
+                      {{ timeSignatureDisplay }}
+                    </p>
+                  </div>
+                  <UButton
+                    v-else
+                    size="xs"
+                    color="primary"
+                    variant="soft"
+                    class="cursor-pointer"
+                    @click="startTimeSignatureEdit"
+                  >
+                    Set time signature
+                  </UButton>
+                </div>
+                <div>
+                  <label class="flex items-center gap-2 text-sm font-medium text-default mb-1">
                     <UIcon name="i-ph-timer" class="w-4 h-4" />
                     Duration
                   </label>
@@ -703,6 +768,27 @@ const savingTitle = ref(false)
 const editingTempo = ref(false)
 const editingTempoValue = ref<number | null>(null)
 const savingTempo = ref(false)
+
+// Time signature editing
+const editingTimeSignature = ref(false)
+const editingTimeSignatureValue = ref<string | null>(null)
+const editingTimeSignatureNumerator = ref<number | null>(null)
+const editingTimeSignatureDenominator = ref<number | null>(null)
+const savingTimeSignature = ref(false)
+const explicitCustomSelected = ref(false)
+
+// Define time signature options
+const timeSignatureOptions = [
+  { label: '4/4', value: '4/4', numerator: 4, denominator: 4 },
+  { label: '3/4', value: '3/4', numerator: 3, denominator: 4 },
+  { label: '6/8', value: '6/8', numerator: 6, denominator: 8 },
+  { label: 'Varied', value: 'varied' },
+  { label: 'Custom', value: 'custom' },
+]
+
+const showCustomTimeSignatureInputs = computed(() => {
+  return editingTimeSignatureValue.value === 'custom'
+})
 const editAudio = ref<{
   name: string
   description: string
@@ -1541,6 +1627,123 @@ const cancelTempoEdit = () => {
   editingTempo.value = false
   editingTempoValue.value = null
 }
+
+const startTimeSignatureEdit = () => {
+  if (!track.value) return
+  
+  if (track.value.time_signature_varied) {
+    editingTimeSignatureValue.value = 'varied'
+    explicitCustomSelected.value = false
+  } else {
+    const num = track.value.time_signature_numerator
+    const den = track.value.time_signature_denominator
+    if (num && den) {
+      const match = timeSignatureOptions.find(
+        opt => opt.numerator === num && opt.denominator === den
+      )
+      if (match) {
+        editingTimeSignatureValue.value = match.value
+        explicitCustomSelected.value = false
+      } else {
+        editingTimeSignatureValue.value = 'custom'
+        explicitCustomSelected.value = true
+        editingTimeSignatureNumerator.value = num
+        editingTimeSignatureDenominator.value = den
+      }
+    } else {
+      editingTimeSignatureValue.value = null
+      explicitCustomSelected.value = false
+    }
+  }
+  
+  editingTimeSignature.value = true
+}
+
+const handleTimeSignatureSelect = (value: string | null) => {
+  if (value === 'varied') {
+    explicitCustomSelected.value = false
+    editingTimeSignatureNumerator.value = null
+    editingTimeSignatureDenominator.value = null
+  } else if (value === 'custom') {
+    explicitCustomSelected.value = true
+    if (!editingTimeSignatureNumerator.value) {
+      editingTimeSignatureNumerator.value = null
+    }
+    if (!editingTimeSignatureDenominator.value) {
+      editingTimeSignatureDenominator.value = null
+    }
+  } else if (value) {
+    explicitCustomSelected.value = false
+    const option = timeSignatureOptions.find(opt => opt.value === value)
+    if (option && option.numerator && option.denominator) {
+      editingTimeSignatureNumerator.value = option.numerator
+      editingTimeSignatureDenominator.value = option.denominator
+    }
+  }
+}
+
+const saveTimeSignature = async () => {
+  if (!track.value) {
+    editingTimeSignature.value = false
+    return
+  }
+
+  savingTimeSignature.value = true
+  try {
+    let updateData: any = {}
+    
+    if (editingTimeSignatureValue.value === 'varied') {
+      updateData.time_signature_varied = true
+      updateData.time_signature_numerator = null
+      updateData.time_signature_denominator = null
+    } else if (editingTimeSignatureValue.value === 'custom') {
+      updateData.time_signature_varied = false
+      updateData.time_signature_numerator = editingTimeSignatureNumerator.value
+      updateData.time_signature_denominator = editingTimeSignatureDenominator.value
+    } else if (editingTimeSignatureValue.value) {
+      updateData.time_signature_varied = false
+      const option = timeSignatureOptions.find(opt => opt.value === editingTimeSignatureValue.value)
+      if (option && option.numerator && option.denominator) {
+        updateData.time_signature_numerator = option.numerator
+        updateData.time_signature_denominator = option.denominator
+      }
+    } else {
+      updateData.time_signature_varied = false
+      updateData.time_signature_numerator = null
+      updateData.time_signature_denominator = null
+    }
+
+    await updateTrack(track.value.id, updateData)
+    track.value.time_signature_varied = updateData.time_signature_varied ?? false
+    track.value.time_signature_numerator = updateData.time_signature_numerator ?? null
+    track.value.time_signature_denominator = updateData.time_signature_denominator ?? null
+    editingTimeSignature.value = false
+  } catch (err: any) {
+    console.error('Failed to update time signature:', err)
+    alert(err.message || 'Failed to update time signature')
+  } finally {
+    savingTimeSignature.value = false
+  }
+}
+
+const cancelTimeSignatureEdit = () => {
+  editingTimeSignature.value = false
+  editingTimeSignatureValue.value = null
+  editingTimeSignatureNumerator.value = null
+  editingTimeSignatureDenominator.value = null
+  explicitCustomSelected.value = false
+}
+
+const timeSignatureDisplay = computed(() => {
+  if (!track.value) return null
+  if (track.value.time_signature_varied) {
+    return 'Varied'
+  }
+  if (track.value.time_signature_numerator && track.value.time_signature_denominator) {
+    return `${track.value.time_signature_numerator}/${track.value.time_signature_denominator}`
+  }
+  return null
+})
 
 useSeoMeta({
   title: () => (track.value ? `${track.value.name} - MusicAid` : 'Track - MusicAid'),

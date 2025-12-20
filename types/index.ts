@@ -41,6 +41,9 @@ export interface Track {
   track_status_id: string | null
   step_id: string | null
   tempo: number | null
+  time_signature_numerator: number | null
+  time_signature_denominator: number | null
+  time_signature_varied: boolean
   minutes: number | null
   seconds: number | null
   samples: string
@@ -64,6 +67,9 @@ export interface TrackInsert {
   track_status_id?: string | null
   step_id?: string | null
   tempo?: number | null
+  time_signature_numerator?: number | null
+  time_signature_denominator?: number | null
+  time_signature_varied?: boolean
   minutes?: number | null
   seconds?: number | null
   samples?: string
@@ -84,6 +90,9 @@ export interface TrackUpdate {
   track_status_id?: string | null
   step_id?: string | null
   tempo?: number | null
+  time_signature_numerator?: number | null
+  time_signature_denominator?: number | null
+  time_signature_varied?: boolean
   minutes?: number | null
   seconds?: number | null
   samples?: string
