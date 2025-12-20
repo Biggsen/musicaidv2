@@ -33,11 +33,12 @@
           :ui="{ description: 'max-w-[60ch]' }"
         >
           <template #title>
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-2 w-full">
               <UInput
                 v-if="editingTitle"
                 v-model="editingTitleValue"
-                class="flex-1 text-2xl font-bold"
+                class="text-2xl font-bold"
+                style="min-width: 600px; width: 100%; max-width: 1000px;"
                 :ui="{ 
                   base: 'text-2xl font-bold p-0 border-b-2 border-primary focus:border-0 focus:ring-0 bg-transparent text-default outline-none shadow-none',
                   root: 'w-full'
