@@ -82,12 +82,42 @@
 
             <div class="space-y-4">
               <div class="grid grid-cols-2 gap-4">
-                <div v-if="track.tempo">
+                <div>
                   <label class="flex items-center gap-2 text-sm font-medium text-default mb-1">
                     <UIcon name="i-ph-metronome" class="w-4 h-4" />
                     Tempo
                   </label>
-                  <p class="text-default">{{ track.tempo }} BPM</p>
+                  <div v-if="editingTempo" class="flex items-center gap-2">
+                    <UInput
+                      v-model.number="editingTempoValue"
+                      type="number"
+                      class="w-20"
+                      :ui="{ 
+                        base: 'text-default'
+                      }"
+                      :loading="savingTempo"
+                      autofocus
+                      @blur="saveTempo"
+                      @keydown.enter="saveTempo"
+                      @keydown.escape="cancelTempoEdit"
+                    />
+                    <span class="text-sm text-muted">BPM</span>
+                  </div>
+                  <div v-else-if="track.tempo" class="flex items-center gap-2">
+                    <p class="text-default cursor-pointer hover:text-primary transition-colors" @click="startTempoEdit">
+                      {{ track.tempo }} BPM
+                    </p>
+                  </div>
+                  <UButton
+                    v-else
+                    size="xs"
+                    color="primary"
+                    variant="soft"
+                    class="cursor-pointer"
+                    @click="startTempoEdit"
+                  >
+                    Set tempo
+                  </UButton>
                 </div>
                 <div>
                   <label class="flex items-center gap-2 text-sm font-medium text-default mb-1">
@@ -670,6 +700,9 @@ const playingAudioId = ref<string | null>(null)
 const editingTitle = ref(false)
 const editingTitleValue = ref('')
 const savingTitle = ref(false)
+const editingTempo = ref(false)
+const editingTempoValue = ref<number | null>(null)
+const savingTempo = ref(false)
 const editAudio = ref<{
   name: string
   description: string
@@ -1470,6 +1503,43 @@ const saveTitle = async () => {
 const cancelTitleEdit = () => {
   editingTitle.value = false
   editingTitleValue.value = ''
+}
+
+const startTempoEdit = () => {
+  if (!track.value) return
+  editingTempoValue.value = track.value.tempo
+  editingTempo.value = true
+}
+
+const saveTempo = async () => {
+  if (!track.value) {
+    editingTempo.value = false
+    return
+  }
+
+  const tempoValue = editingTempoValue.value
+
+  if (tempoValue === track.value.tempo) {
+    editingTempo.value = false
+    return
+  }
+
+  savingTempo.value = true
+  try {
+    await updateTrack(track.value.id, { tempo: tempoValue })
+    track.value.tempo = tempoValue
+    editingTempo.value = false
+  } catch (err: any) {
+    console.error('Failed to update tempo:', err)
+    alert(err.message || 'Failed to update tempo')
+  } finally {
+    savingTempo.value = false
+  }
+}
+
+const cancelTempoEdit = () => {
+  editingTempo.value = false
+  editingTempoValue.value = null
 }
 
 useSeoMeta({
