@@ -37,11 +37,10 @@
               <UInput
                 v-if="editingTitle"
                 v-model="editingTitleValue"
-                class="text-2xl font-bold"
+                class="flex-1 text-2xl font-bold"
                 :ui="{ 
-                  base: 'text-2xl font-bold', 
-                  wrapper: '!p-0', 
-                  input: '!p-0 border-b-2 border-primary focus:ring-0 bg-transparent text-default' 
+                  base: 'text-2xl font-bold p-0 border-b-2 border-primary focus:border-0 focus:ring-0 bg-transparent text-default outline-none shadow-none',
+                  root: 'w-full'
                 }"
                 :loading="savingTitle"
                 autofocus

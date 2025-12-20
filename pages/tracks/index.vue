@@ -735,7 +735,7 @@ const newTrack = ref<TrackInsert>({
   name: '',
   artist_id: '',
   template_id: null,
-  samples: null,
+  samples: undefined,
   tempo: null,
   description: null,
 })
@@ -1141,7 +1141,7 @@ const handleCreateTrack = async () => {
       name: '',
       artist_id: '',
       template_id: null,
-      samples: null,
+      samples: undefined,
       tempo: null,
       description: null,
     }
