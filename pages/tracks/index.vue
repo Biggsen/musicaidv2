@@ -207,6 +207,11 @@
     <!-- List View -->
     <UCard v-else>
       <UTable :data="tableRows" :columns="tableColumns as any">
+        <template #index-header>
+          <div class="flex items-center gap-2">
+            <span>#</span>
+          </div>
+        </template>
         <template #name-header>
           <div class="flex items-center gap-2 cursor-pointer" @click="handleSort('name')">
             <span>Track Name</span>
@@ -266,6 +271,9 @@
           <span class="text-sm text-muted">
             {{ getTrackProgress(row.original.id).currentStatusName || '—' }}
           </span>
+        </template>
+        <template #index-cell="{ row }">
+          <span class="text-sm text-muted">{{ row.original.index }}</span>
         </template>
         <template #name-cell="{ row }">
           <NuxtLink
@@ -1109,6 +1117,7 @@ const applySorting = () => {
 
 interface TableRow {
   id: string
+  index: number
   name: string
   artist_id: string
   tempo: number | null
@@ -1123,6 +1132,7 @@ interface TableRow {
 }
 
 const tableColumns = [
+  { id: 'index', accessorKey: 'index', header: '#', sortable: false },
   { id: 'name', accessorKey: 'name', header: 'Track Name', sortable: true },
   { id: 'artist', accessorKey: 'artist', header: 'Artist', sortable: true },
   { id: 'tempo', accessorKey: 'tempo', header: 'Tempo', sortable: true },
@@ -1136,8 +1146,9 @@ const tableColumns = [
 ]
 
 const tableRows = computed<TableRow[]>(() => {
-  return filteredTracks.value.map(track => ({
+  return filteredTracks.value.map((track, index) => ({
     id: track.id,
+    index: index + 1,
     name: track.name,
     artist_id: track.artist_id,
     tempo: track.tempo,
