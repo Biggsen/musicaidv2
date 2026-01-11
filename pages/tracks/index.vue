@@ -232,6 +232,11 @@
             />
           </div>
         </template>
+        <template #time-header>
+          <div class="flex items-center gap-2">
+            <span>Time</span>
+          </div>
+        </template>
         <template #samples-header>
           <div class="flex items-center gap-2">
             <span>Samples</span>
@@ -272,6 +277,17 @@
         </template>
         <template #artist-cell="{ row }">
           <UBadge color="neutral">{{ row.original.artist }}</UBadge>
+        </template>
+        <template #time-cell="{ row }">
+          <span class="text-sm text-muted">
+            {{
+              row.original.time_signature_varied
+                ? 'Varied'
+                : row.original.time_signature_numerator && row.original.time_signature_denominator
+                  ? `${row.original.time_signature_numerator}/${row.original.time_signature_denominator}`
+                  : '—'
+            }}
+          </span>
         </template>
         <template #duration-cell="{ row }">
           <span v-if="row.original.minutes !== null && row.original.seconds !== null" class="text-sm text-muted">
@@ -1096,6 +1112,9 @@ interface TableRow {
   name: string
   artist_id: string
   tempo: number | null
+  time_signature_numerator: number | null
+  time_signature_denominator: number | null
+  time_signature_varied: boolean
   samples: string
   minutes: number | null
   seconds: number | null
@@ -1107,6 +1126,7 @@ const tableColumns = [
   { id: 'name', accessorKey: 'name', header: 'Track Name', sortable: true },
   { id: 'artist', accessorKey: 'artist', header: 'Artist', sortable: true },
   { id: 'tempo', accessorKey: 'tempo', header: 'Tempo', sortable: true },
+  { id: 'time', accessorKey: 'time', header: 'Time', sortable: false },
   { id: 'samples', accessorKey: 'samples', header: 'Samples', sortable: true },
   { id: 'duration', accessorKey: 'duration', header: 'Duration', sortable: true },
   { id: 'status', accessorKey: 'status', header: 'Status', sortable: false },
@@ -1121,6 +1141,9 @@ const tableRows = computed<TableRow[]>(() => {
     name: track.name,
     artist_id: track.artist_id,
     tempo: track.tempo,
+    time_signature_numerator: track.time_signature_numerator,
+    time_signature_denominator: track.time_signature_denominator,
+    time_signature_varied: track.time_signature_varied,
     samples: track.samples,
     minutes: track.minutes,
     seconds: track.seconds,
