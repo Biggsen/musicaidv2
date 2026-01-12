@@ -138,7 +138,7 @@
             :key="track.id"
             :draggable="true"
             :class="[
-              'p-4 border border-default rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-move',
+              'p-4 border border-default rounded-lg hover:bg-default/50 transition-colors cursor-move',
               {
                 'opacity-50': draggedTrackId === track.id,
                 'border-primary bg-primary/10': dragOverIndex === index && draggedTrackId !== track.id

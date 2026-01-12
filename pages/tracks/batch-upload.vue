@@ -156,11 +156,11 @@
           :key="index"
           class="p-3 rounded-lg border transition-colors"
           :class="{
-            'bg-green-50 border-green-200 dark:bg-green-500/10 dark:border-green-500/60':
+            'bg-success/10 border-success/20':
               result.status === 'success',
-            'bg-red-50 border-red-200 dark:bg-red-500/10 dark:border-red-500/60':
+            'bg-error/10 border-error/20':
               result.status === 'error',
-            'bg-blue-50 border-blue-200 dark:bg-blue-500/10 dark:border-blue-500/60':
+            'bg-primary/10 border-primary/20':
               result.status === 'processing',
           }"
         >

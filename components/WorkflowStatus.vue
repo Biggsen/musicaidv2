@@ -41,9 +41,9 @@
         <div
           v-for="step in displayedSteps"
           :key="step.id"
-          class="flex items-center gap-3 p-3 border border-gray-200 dark:border-gray-700 rounded-lg transition-colors"
+          class="flex items-center gap-3 p-3 border border-default rounded-lg transition-colors"
           :class="{
-            'bg-blue-50 border-blue-300 dark:bg-blue-500/10 dark:border-blue-500':
+            'bg-primary/10 border-primary':
               currentStepId === step.id
           }"
         >
