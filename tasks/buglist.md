@@ -1,8 +1,9 @@
 ## Buglist
 
-1. **Avoid `dark:` utility classes**
-   - We should not use any `dark:` classes anywhere in the app.
-   - Rely on Nuxt UI components and their built-in styling/theming for dark mode support instead.
+1. **Avoid `dark:` utility classes** ✅ FIXED
+   - **Status**: Fixed
+   - **Description**: Removed all `dark:` utility classes from the app
+   - **Solution**: Replaced with Nuxt UI components and their built-in styling/theming for dark mode support
 
 2. **Audio upload failing on staging with "1 Internal Error"** ✅ FIXED & TESTED
    - **Status**: Fixed and verified working

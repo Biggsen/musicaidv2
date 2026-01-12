@@ -9,7 +9,7 @@
   "status": "active",
   "domain": "music",
   "type": "webapp",
-  "lastUpdated": "2025-11-30",
+  "lastUpdated": "2026-01-12",
   "links": {
     "prod": null,
     "staging": "https://musicaidv2.netlify.app/"
@@ -58,7 +58,7 @@ Currently focused on security implementation. RLS (Row Level Security) policies 
 - [x] User authentication (login, registration, session management)
 - [x] Multi-user collaboration on artist projects with role-based access control
 - [x] Artist management (full CRUD operations)
-- [x] Track management with metadata (name, tempo, key, duration, description)
+- [x] Track management with metadata (name, tempo, key, duration, description, time signature)
 - [x] Track status tracking through workflow stages
 - [x] Track-album associations
 - [x] Custom workflow templates
@@ -84,7 +84,7 @@ Currently focused on security implementation. RLS (Row Level Security) policies 
 
 #### Track Management
 - Full CRUD operations for tracks
-- Track metadata (name, tempo, key, duration, description)
+- Track metadata (name, tempo, key, duration, description, time signature)
 - Track status tracking through workflow stages
 - Track-album associations
 
@@ -128,7 +128,7 @@ Currently focused on security implementation. RLS (Row Level Security) policies 
 
 ### Medium Priority
 
-- [ ] Remove `dark:` utility classes and use Nuxt UI theming instead
+_No medium priority tasks at this time._
 
 ### Low Priority / Future
 
@@ -167,10 +167,20 @@ Currently focused on security implementation. RLS (Row Level Security) policies 
 
 ### Active Bugs
 
-- [ ] Avoid `dark:` utility classes (Medium Priority)
-  - **Description**: Should not use any `dark:` classes anywhere in the app
-  - **Affected Areas**: All components and pages
-  - **Workaround**: Rely on Nuxt UI components and their built-in styling/theming for dark mode support instead
+_No active bugs at this time._
+
+### Resolved Bugs
+
+- [x] Avoid `dark:` utility classes (Fixed January 2026)
+  - **Status**: Fixed
+  - **Description**: Removed all `dark:` utility classes from the app
+  - **Solution**: Replaced with Nuxt UI components and their built-in styling/theming for dark mode support
+
+- [x] Audio upload failing on staging with "1 Internal Error" (Fixed January 2026)
+  - **Status**: Fixed and verified working
+  - **Root Cause**: Netlify functions have a 6MB request body size limit (free tier)
+  - **Solution**: Implemented presigned URL flow for direct R2 uploads, bypassing Netlify's 6MB limit
+  - **Benefits**: Supports files of any size, faster uploads, no Netlify function timeouts
 
 ### RLS Implementation Issues
 
@@ -187,14 +197,15 @@ The following issues need to be addressed when implementing RLS:
 
 **Overall Status**: Active Development  
 **Completion**: ~85%  
-**Last Major Update**: November 2025
+**Last Major Update**: January 2026
 
 ### Metrics
 
-- **Database Migrations**: 15 completed
+- **Database Migrations**: 17 completed
 - **Core Features**: 6 major feature areas implemented
 - **Open Tasks**: 2 (1 high priority, 1 low priority)
-- **Active Bugs**: 1
+- **Active Bugs**: 0
+- **Resolved Bugs**: 2 (dark classes and audio upload issues fixed)
 - **Deployment Status**: ✅ Deployed to Netlify
 - **Security Status**: ⚠️ RLS needs to be enabled
 
@@ -209,7 +220,6 @@ Post-Core Development - Core features are complete. Security implementation (RLS
 ### Immediate (Next 1-2 weeks)
 
 1. Implement and enable RLS (Task 07) - Critical for production security
-2. Fix bug: Remove `dark:` utility classes and use Nuxt UI theming
 
 ### Short-term (Next 1-3 months)
 
@@ -266,7 +276,7 @@ musicaidv2/
 ├── server/api/          # Serverless API routes
 │   ├── upload/         # File upload endpoints
 │   └── r2/              # R2 storage endpoints
-├── supabase/migrations/ # Database migrations (15 completed)
+├── supabase/migrations/ # Database migrations (17 completed)
 └── spec/                # Project specifications
 ```
 
@@ -311,7 +321,7 @@ musicaidv2/
 
 ### Database Migrations
 
-15 migrations have been completed:
+17 migrations have been completed:
 - `001_initial_schema.sql` - Initial database schema
 - `002_fix_user_artists_rls.sql` - User-artists RLS fixes
 - `003_fix_artists_insert_policy.sql` - Artists INSERT policy fixes
@@ -327,6 +337,8 @@ musicaidv2/
 - `013_add_labels_to_steps.sql` - Step labels
 - `014_add_description_to_tracks.sql` - Track descriptions
 - `015_remove_title_from_statuses_and_steps.sql` - Schema cleanup
+- `016_remove_samples_default.sql` - Remove default value from samples column
+- `017_add_time_signature_to_tracks.sql` - Add time signature fields to tracks
 
 ### Cost Estimate
 
